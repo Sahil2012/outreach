@@ -84,6 +84,37 @@ const RecipientInfoPage: React.FC = () => {
       <Card className="p-6 mb-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <TextField
+            label="Name"
+            placeholder="e.g. John Doe"
+            fullWidth
+            value={recipientInfo.userName}
+            onChange={(e) =>
+              setRecipientInfo({
+                ...recipientInfo,
+                userName: e.target.value,
+              })
+            }
+            required
+          />
+
+          <TextField
+            label="Contact"
+            placeholder="e.g. +91 99999999"
+            fullWidth
+            value={recipientInfo.userContact}
+            type="number"
+            className="[&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+            onChange={(e) =>
+              setRecipientInfo({
+                ...recipientInfo,
+                userContact:  e.target.value,
+              })
+            }
+            required
+          />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <TextField
             label="Contact/HR Person Name"
             placeholder="e.g. John Smith"
             fullWidth

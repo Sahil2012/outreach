@@ -26,6 +26,8 @@ export const OutreachProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [customTemplate, setCustomTemplate] = useState('');
   const [useCustomTemplate, setUseCustomTemplate] = useState(false);
   const [recipientInfo, setRecipientInfo] = useState<RecipientInfo>({
+    userName : '',
+    userContact : '',
     contactName: '',
     companyName: '',
     jobIds: [],

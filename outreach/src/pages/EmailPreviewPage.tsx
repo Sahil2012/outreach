@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { ArrowLeft, ArrowRight, Copy, Check } from 'lucide-react';
-import { useOutreach } from '../context/OutreachContext';
-import ProgressBar from '../components/ui/ProgressBar';
-import Button from '../components/ui/Button';
-import Card from '../components/ui/Card';
-import TextField from '../components/ui/TextField';
+import React, { useEffect, useState } from "react";
+import { ArrowLeft, ArrowRight, Copy, Check } from "lucide-react";
+import { useOutreach } from "../context/OutreachContext";
+import ProgressBar from "../components/ui/ProgressBar";
+import Button from "../components/ui/Button";
+import Card from "../components/ui/Card";
+import TextField from "../components/ui/TextField";
 
 const EmailPreviewPage: React.FC = () => {
   const {
@@ -25,16 +25,26 @@ const EmailPreviewPage: React.FC = () => {
 
   useEffect(() => {
     // Generate email content by replacing placeholders
-    const templateContent = useCustomTemplate ? customTemplate : selectedTemplate?.content || '';
-    
+    const templateContent = useCustomTemplate
+      ? customTemplate
+      : selectedTemplate?.content || "";
+
     let content = templateContent
+      .replace(/{{userName}}/g, recipientInfo.userName)
+      .replace(/{{userContact}}/g, recipientInfo.userContact)
       .replace(/{{contactName}}/g, recipientInfo.contactName)
       .replace(/{{companyName}}/g, recipientInfo.companyName)
-      .replace(/{{jobIds}}/g, recipientInfo.jobIds.join(', '))
-      .replace(/{{jobLinks}}/g, recipientInfo.jobLinks.join('\n'));
-    
+      .replace(/{{jobIds}}/g, recipientInfo.jobIds.join(", "))
+      .replace(/{{jobLinks}}/g, recipientInfo.jobLinks.join("\n"));
+
     setGeneratedEmail(content);
-  }, [useCustomTemplate, customTemplate, selectedTemplate, recipientInfo, setGeneratedEmail]);
+  }, [
+    useCustomTemplate,
+    customTemplate,
+    selectedTemplate,
+    recipientInfo,
+    setGeneratedEmail,
+  ]);
 
   const handleCopyToClipboard = () => {
     navigator.clipboard.writeText(generatedEmail);
@@ -45,7 +55,7 @@ const EmailPreviewPage: React.FC = () => {
   const handleAddEmail = () => {
     setEmailDistribution({
       ...emailDistribution,
-      emailList: [...emailDistribution.emailList, ''],
+      emailList: [...emailDistribution.emailList, ""],
     });
   };
 
@@ -68,17 +78,17 @@ const EmailPreviewPage: React.FC = () => {
   const handleContinue = () => {
     if (showEmailList) {
       // Validate emails
-      if (emailDistribution.emailList.some(email => !email)) {
-        alert('Please fill in all email addresses or remove empty fields.');
+      if (emailDistribution.emailList.some((email) => !email)) {
+        alert("Please fill in all email addresses or remove empty fields.");
         return;
       }
-      
+
       if (!emailDistribution.subject) {
-        alert('Please enter an email subject.');
+        alert("Please enter an email subject.");
         return;
       }
     }
-    
+
     setStep(4);
   };
 
@@ -86,43 +96,53 @@ const EmailPreviewPage: React.FC = () => {
     <div className="animate-fadeIn">
       <ProgressBar currentStep={3} totalSteps={4} />
 
-      <h1 className="text-3xl font-semibold text-gray-900 mb-2">Preview Your Email</h1>
-      <p className="text-gray-600 mb-8">Review your email before sending or copying it.</p>
+      <h1 className="text-3xl font-semibold text-gray-900 mb-2">
+        Preview Your Email
+      </h1>
+      <p className="text-gray-600 mb-8">
+        Review your email before sending or copying it.
+      </p>
 
       <Card className="p-6 mb-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
           <h2 className="text-xl font-medium text-gray-800">Email Preview</h2>
           <div className="mt-2 md:mt-0">
             <Button
-              variant={copied ? 'primary' : 'outline'}
+              variant={copied ? "primary" : "outline"}
               size="sm"
-              icon={copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+              icon={
+                copied ? (
+                  <Check className="h-4 w-4" />
+                ) : (
+                  <Copy className="h-4 w-4" />
+                )
+              }
               onClick={handleCopyToClipboard}
             >
-              {copied ? 'Copied!' : 'Copy to Clipboard'}
+              {copied ? "Copied!" : "Copy to Clipboard"}
             </Button>
           </div>
         </div>
-        
+
         <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 font-mono text-sm whitespace-pre-wrap mb-6 text-wrap">
           {generatedEmail}
         </div>
 
         <div className="flex justify-between">
           <Button
-            variant={showEmailList ? 'primary' : 'outline'}
+            variant={showEmailList ? "primary" : "outline"}
             onClick={() => setShowEmailList(true)}
           >
             Send via Email
           </Button>
           <Button
-            variant={!showEmailList ? 'primary' : 'outline'}
+            variant={!showEmailList ? "primary" : "outline"}
             onClick={() => setShowEmailList(false)}
           >
             Copy Text
           </Button>
         </div>
-        
+
         {showEmailList && (
           <div className="mt-6 animate-fadeIn">
             <TextField
@@ -130,15 +150,20 @@ const EmailPreviewPage: React.FC = () => {
               placeholder="e.g. Application for [Position] at [Company]"
               fullWidth
               value={emailDistribution.subject}
-              onChange={(e) => setEmailDistribution({ ...emailDistribution, subject: e.target.value })}
+              onChange={(e) =>
+                setEmailDistribution({
+                  ...emailDistribution,
+                  subject: e.target.value,
+                })
+              }
               required
               className="mb-4"
             />
-            
+
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Recipient Email Addresses
             </label>
-            
+
             {emailDistribution.emailList.map((email, index) => (
               <div key={`email-${index}`} className="flex items-center mb-2">
                 <TextField
@@ -161,7 +186,7 @@ const EmailPreviewPage: React.FC = () => {
                 )}
               </div>
             ))}
-            
+
             <Button
               variant="text"
               size="sm"

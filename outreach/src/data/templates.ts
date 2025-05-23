@@ -6,7 +6,7 @@ export const templates: Template[] = [
     name: 'Job Application Referral',
     content: `Dear {{contactName}},
 
-I hope this email finds you well. My name is [Your Name], and I recently came across a [Job Title] role (Job ID: {{jobIds}}) at {{companyName}}. I've attached my resume and would appreciate it if you could refer me for this position.
+I hope this email finds you well. My name is {{userName}}, and I recently came across a [Job Title] role (Job ID: {{jobIds}}) at {{companyName}}. I've attached my resume and would appreciate it if you could refer me for this position.
 
 I've thoroughly researched {{companyName}} and am particularly impressed with [specific company achievement or value]. I believe my background in [relevant experience] makes me a strong fit for this role.
 
@@ -15,15 +15,15 @@ Here's the job posting for your reference: {{jobLinks}}
 I understand referrals are valuable, and I appreciate your time and consideration. I'd be happy to discuss my qualifications further if needed.
 
 Thank you,
-[Your Name]
-[Your Contact Information]`,
+{{userName}}
+{{userContact}}`,
   },
   {
     id: '2',
     name: 'Follow-up After Application',
     content: `Dear {{contactName}},
 
-I hope you're doing well. I'm reaching out to follow up on my application for the [Job Title] role (Job ID: {{jobIds}}) at {{companyName}}.
+I hope you're doing well. I'm reaching out to follow up on my application for the {{userName}} role (Job ID: {{jobIds}}) at {{companyName}}.
 
 I submitted my application on [date] and wanted to reiterate my interest in joining your team. Having researched {{companyName}} extensively, I'm particularly drawn to [specific aspect of company] and believe my experience in [relevant skill/experience] would allow me to contribute effectively.
 
@@ -34,8 +34,8 @@ I've attached my resume for your convenience. If there's any additional informat
 Thank you for your time and consideration.
 
 Best regards,
-[Your Name]
-[Your Contact Information]`,
+{{userName}}
+{{userContact}}`,
   },
   {
     id: '3',

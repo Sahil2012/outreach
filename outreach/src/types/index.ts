@@ -5,6 +5,8 @@ export interface Template {
 }
 
 export interface RecipientInfo {
+  userName : string,
+  userContact : string,
   contactName: string;
   companyName: string;
   jobIds: string[];
