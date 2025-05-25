@@ -1,12 +1,33 @@
+import { configDotenv } from "dotenv";
 import extractSkils from "./service/extractSkills.js";
 import generateEmail from "./service/generateEmail.js";
+import express from "express";
 
-const userSpecificDetails = await extractSkils("https://drive.google.com/file/d/1ySD__169oWjRQSN589h2e1-lq75K6uET/view");
+configDotenv();
 
-userSpecificDetails.jobId = [123,234,567];
-userSpecificDetails.hrName = 'Himanshu';
-userSpecificDetails.companyName = '';
+const PORT = process.env.PORT;
+const app = express();
 
-const email = await generateEmail(userSpecificDetails);
+app.use(express.json());
 
-console.log(email);
+app.post("/generateMail", async (req, res) => {
+  const body = req.body;
+  
+  
+  const userSpecificDetails = await extractSkils(body.resumeLink);
+  userSpecificDetails.jobId = body.jobId;
+  userSpecificDetails.hrName = body.hrName;
+  userSpecificDetails.companyName = body.companyName;
+
+  const email = await generateEmail(userSpecificDetails);
+
+  res.send(email);
+});
+
+app.listen(PORT, (error) => {
+  if (error) {
+    console.log("We ran into an error");
+  } else {
+    console.log(`Running on ${PORT}`);
+  }
+});
