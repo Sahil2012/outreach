@@ -1,7 +1,7 @@
 import { configDotenv } from "dotenv";
-import extractSkils from "./service/extractSkills.js";
-import generateEmail from "./service/generateEmail.js";
 import express from "express";
+import emailSender from "./controller/emailSender.js";
+import generateMail from "./controller/generateMail.js";
 
 configDotenv();
 
@@ -10,19 +10,17 @@ const app = express();
 
 app.use(express.json());
 
-app.post("/generateMail", async (req, res) => {
-  const body = req.body;
-  
-  
-  const userSpecificDetails = await extractSkils(body.resumeLink);
-  userSpecificDetails.jobId = body.jobId;
-  userSpecificDetails.hrName = body.hrName;
-  userSpecificDetails.companyName = body.companyName;
+app.post("/generateMail", generateMail);
 
-  const email = await generateEmail(userSpecificDetails);
+app.post("/sendEmail", emailSender);
 
-  res.send(email);
+
+// Global error handler
+app.use((err, req, res, next) => {    
+  console.error("Unhandled error:", err);
+  res.status(err.status || 500).json({ error: err.message});
 });
+
 
 app.listen(PORT, (error) => {
   if (error) {

@@ -1,6 +1,5 @@
 import { PromptTemplate } from "@langchain/core/prompts";
 import callLLM from "./geminichat.js";
-import { StringOutputParser } from "@langchain/core/output_parsers";
 import { emailSchema } from "../schema/schema.js";
 import { StructuredOutputParser } from "langchain/output_parsers";
 
@@ -31,16 +30,16 @@ async function generateEmail(userDetails) {
         `
   );
 
-    const parser = StructuredOutputParser.fromZodSchema(emailSchema);
-    
+  const parser = StructuredOutputParser.fromZodSchema(emailSchema);
 
-    const res = await callLLM(await referralPrompt.format({
-        ...userDetails,
-        emailSchema : parser.getFormatInstructions(),
-    }));
+  const res = await callLLM(
+    await referralPrompt.format({
+      ...userDetails,
+      emailSchema: parser.getFormatInstructions(),
+    })
+  );
 
-    return await parser.parse(res);
-
+  return await parser.parse(res);
 }
 
 export default generateEmail;
