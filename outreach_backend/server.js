@@ -2,11 +2,14 @@ import { configDotenv } from "dotenv";
 import express from "express";
 import emailSender from "./controller/emailSender.js";
 import generateMail from "./controller/generateMail.js";
+import cors from 'cors';
 
 configDotenv();
 
 const PORT = process.env.PORT;
 const app = express();
+
+app.use(cors());
 
 app.use(express.json());
 
