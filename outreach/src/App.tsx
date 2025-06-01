@@ -6,7 +6,6 @@ import RecipientInfoPage from './pages/RecipientInfoPage';
 import EmailPreviewPage from './pages/EmailPreviewPage';
 import SendEmailPage from './pages/SendEmailPage';
 
-// Add global animations to index.css
 import './index.css';
 
 const OutreachWizard: React.FC = () => {

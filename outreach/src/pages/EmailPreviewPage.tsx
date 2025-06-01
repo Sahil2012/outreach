@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { ArrowLeft, ArrowRight, Copy, Check } from "lucide-react";
 import { useOutreach } from "../context/OutreachContext";
 import ProgressBar from "../components/ui/ProgressBar";
@@ -7,86 +7,24 @@ import Card from "../components/ui/Card";
 import TextField from "../components/ui/TextField";
 
 const EmailPreviewPage: React.FC = () => {
-  const {
-    step,
-    setStep,
-    selectedTemplate,
-    customTemplate,
-    recipientInfo,
-    useCustomTemplate,
-    generatedEmail,
-    setGeneratedEmail,
-    emailDistribution,
-    setEmailDistribution,
-  } = useOutreach();
+  const { setStep, generatedEmail, emailDistribution, setEmailDistribution } =
+    useOutreach();
 
   const [copied, setCopied] = useState(false);
-  const [showEmailList, setShowEmailList] = useState(false);
-
-  useEffect(() => {
-    // Generate email content by replacing placeholders
-    const templateContent = useCustomTemplate
-      ? customTemplate
-      : selectedTemplate?.content || "";
-
-    let content = templateContent
-      .replace(/{{userName}}/g, recipientInfo.userName)
-      .replace(/{{userContact}}/g, recipientInfo.userContact)
-      .replace(/{{contactName}}/g, recipientInfo.contactName)
-      .replace(/{{companyName}}/g, recipientInfo.companyName)
-      .replace(/{{jobIds}}/g, recipientInfo.jobIds.join(", "))
-      .replace(/{{jobLinks}}/g, recipientInfo.jobLinks.join("\n"));
-
-    setGeneratedEmail(content);
-  }, [
-    useCustomTemplate,
-    customTemplate,
-    selectedTemplate,
-    recipientInfo,
-    setGeneratedEmail,
-  ]);
+  const [showEmail, setShowEmail] = useState(false);
 
   const handleCopyToClipboard = () => {
-    navigator.clipboard.writeText(generatedEmail);
+    navigator.clipboard.writeText(generatedEmail.email.body);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleAddEmail = () => {
-    setEmailDistribution({
-      ...emailDistribution,
-      emailList: [...emailDistribution.emailList, ""],
-    });
-  };
-
-  const handleRemoveEmail = (index: number) => {
-    setEmailDistribution({
-      ...emailDistribution,
-      emailList: emailDistribution.emailList.filter((_, i) => i !== index),
-    });
-  };
-
-  const handleEmailChange = (value: string, index: number) => {
-    const newEmailList = [...emailDistribution.emailList];
-    newEmailList[index] = value;
-    setEmailDistribution({
-      ...emailDistribution,
-      emailList: newEmailList,
-    });
-  };
-
-  const handleContinue = () => {
-    if (showEmailList) {
+  const handleContinue = async () => {
+    if (!emailDistribution) {
       // Validate emails
-      if (emailDistribution.emailList.some((email) => !email)) {
-        alert("Please fill in all email addresses or remove empty fields.");
-        return;
-      }
-
-      if (!emailDistribution.subject) {
-        alert("Please enter an email subject.");
-        return;
-      }
+      alert("Enter email before proceding");
+      if (!showEmail) setShowEmail(true);
+      return;
     }
 
     setStep(4);
@@ -125,77 +63,35 @@ const EmailPreviewPage: React.FC = () => {
         </div>
 
         <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 font-mono text-sm whitespace-pre-wrap mb-6 text-wrap">
-          {generatedEmail}
+          {generatedEmail.email.subject}
+        </div>
+        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 font-mono text-sm whitespace-pre-wrap mb-6 text-wrap">
+          {generatedEmail.email.body}
         </div>
 
         <div className="flex justify-between">
           <Button
-            variant={showEmailList ? "primary" : "outline"}
-            onClick={() => setShowEmailList(true)}
+            variant={showEmail ? "primary" : "outline"}
+            onClick={() => setShowEmail(true)}
           >
             Send via Email
           </Button>
           <Button
-            variant={!showEmailList ? "primary" : "outline"}
-            onClick={() => setShowEmailList(false)}
+            variant={!showEmail ? "primary" : "outline"}
+            onClick={() => setShowEmail(false)}
           >
             Copy Text
           </Button>
         </div>
 
-        {showEmailList && (
-          <div className="mt-6 animate-fadeIn">
-            <TextField
-              label="Email Subject"
-              placeholder="e.g. Application for [Position] at [Company]"
-              fullWidth
-              value={emailDistribution.subject}
-              onChange={(e) =>
-                setEmailDistribution({
-                  ...emailDistribution,
-                  subject: e.target.value,
-                })
-              }
-              required
-              className="mb-4"
-            />
-
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Recipient Email Addresses
-            </label>
-
-            {emailDistribution.emailList.map((email, index) => (
-              <div key={`email-${index}`} className="flex items-center mb-2">
-                <TextField
-                  placeholder="e.g. contact@company.com"
-                  fullWidth
-                  type="email"
-                  value={email}
-                  onChange={(e) => handleEmailChange(e.target.value, index)}
-                  className="mr-2"
-                />
-                {emailDistribution.emailList.length > 1 && (
-                  <Button
-                    variant="text"
-                    icon={<span className="text-red-500">×</span>}
-                    onClick={() => handleRemoveEmail(index)}
-                    aria-label="Remove email"
-                  >
-                    Remove
-                  </Button>
-                )}
-              </div>
-            ))}
-
-            <Button
-              variant="text"
-              size="sm"
-              onClick={handleAddEmail}
-              className="mt-1"
-            >
-              + Add another email
-            </Button>
-          </div>
+        {showEmail && (
+          <TextField
+            placeholder="e.g. hrEmail@company.com"
+            fullWidth
+            type="email"
+            onChange={(e) => setEmailDistribution(e.target.value)}
+            className="mr-2 mt-4"
+          />
         )}
       </Card>
 

@@ -5,6 +5,7 @@ interface CardProps {
   className?: string;
   hoverable?: boolean;
   selected?: boolean;
+  isActive? : boolean,
   onClick?: () => void;
 }
 
@@ -12,13 +13,15 @@ const Card: React.FC<CardProps> = ({
   children, 
   className = '', 
   hoverable = false,
+  isActive = false,
   selected = false,
   onClick
 }) => {
   return (
     <div 
       className={`
-        bg-white rounded-xl shadow-sm border border-gray-200
+        rounded-xl shadow-sm border border-gray-200
+        ${isActive ? 'bg-white' : 'bg-[#E5E7EB]'}
         ${hoverable ? 'cursor-pointer transition-all duration-200 hover:shadow-md hover:-translate-y-1 hover:border-blue-200' : ''}
         ${selected ? 'ring-2 ring-blue-500 shadow-md border-transparent' : ''}
         ${className}

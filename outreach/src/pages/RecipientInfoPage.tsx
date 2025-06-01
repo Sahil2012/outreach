@@ -5,46 +5,42 @@ import ProgressBar from "../components/ui/ProgressBar";
 import Button from "../components/ui/Button";
 import TextField from "../components/ui/TextField";
 import Card from "../components/ui/Card";
+import { generateMail } from "../service/mailService";
 
 const RecipientInfoPage: React.FC = () => {
-  const { step, setStep, recipientInfo, setRecipientInfo } = useOutreach();
+  const { setStep, recipientInfo, setRecipientInfo, setGeneratedEmail } =
+    useOutreach();
   const [jobIdState, setJobIdState] = useState("");
-  const [jobLinkState, setJobLinkState] = useState("");
 
   const handleAddJob = () => {
     setRecipientInfo({
       ...recipientInfo,
       jobIds: [...recipientInfo.jobIds, jobIdState],
-      jobLinks: [...recipientInfo.jobLinks, jobLinkState],
     });
   };
 
   const handleRemoveJob = (index: number) => {
     setRecipientInfo({
       ...recipientInfo,
-      jobLinks: recipientInfo.jobLinks.filter((_, i) => i !== index),
       jobIds: recipientInfo.jobIds.filter((_, i) => i !== index),
     });
   };
 
-  const handleJobIdChange = () => {
-    // setJobIdState(value);
-    const newJobIds = [...recipientInfo.jobIds];
-    setRecipientInfo({
-      ...recipientInfo,
-      jobIds: newJobIds,
-    });
+  const handleGenerate = async () => {
+    try {
+      const res = await generateMail({
+        resumeLink: recipientInfo.resumeLink,
+        jobId: recipientInfo.jobIds,
+        hrName: recipientInfo.contactName,
+        companyName: recipientInfo.companyName,
+      });
+      setGeneratedEmail(res);
+    } catch (error) {
+      console.error("Error sending mail:", error);
+    }
   };
 
-  const handleJobLinkChange = () => {
-    const newJobLinks = [...recipientInfo.jobLinks];
-    setRecipientInfo({
-      ...recipientInfo,
-      jobLinks: newJobLinks,
-    });
-  };
-
-  const handleContinue = () => {
+  const handleSchmeaValidation = () => {
     if (!recipientInfo.contactName) {
       alert("Please enter the contact name.");
       return;
@@ -58,14 +54,18 @@ const RecipientInfoPage: React.FC = () => {
     let jobs: boolean = true;
 
     for (let ind = 0; ind < recipientInfo.jobIds.length; ind++) {
-      jobs =
-        jobs && (!!recipientInfo.jobIds[ind] || !!recipientInfo.jobLinks[ind]);
+      jobs = jobs && !!recipientInfo.jobIds[ind];
     }
 
     if (!jobs) {
       alert("Please fill in all job IDs or remove empty fields.");
       return;
     }
+  };
+
+  const handleContinue = async () => {
+    handleSchmeaValidation();
+    await handleGenerate();
 
     setStep(3);
   };
@@ -82,37 +82,6 @@ const RecipientInfoPage: React.FC = () => {
       </p>
 
       <Card className="p-6 mb-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <TextField
-            label="Name"
-            placeholder="e.g. John Doe"
-            fullWidth
-            value={recipientInfo.userName}
-            onChange={(e) =>
-              setRecipientInfo({
-                ...recipientInfo,
-                userName: e.target.value,
-              })
-            }
-            required
-          />
-
-          <TextField
-            label="Contact"
-            placeholder="e.g. +91 99999999"
-            fullWidth
-            value={recipientInfo.userContact}
-            type="number"
-            className="[&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-            onChange={(e) =>
-              setRecipientInfo({
-                ...recipientInfo,
-                userContact:  e.target.value,
-              })
-            }
-            required
-          />
-        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <TextField
             label="Contact/HR Person Name"
@@ -169,21 +138,6 @@ const RecipientInfoPage: React.FC = () => {
               className="mr-2"
             />
           </div>
-
-          <div className="mt-6">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Job Links
-            </label>
-            <TextField
-              placeholder="e.g. https://company.com/careers/job-123456"
-              fullWidth
-              value={jobLinkState}
-              onChange={(e) => {
-                setJobLinkState(e.target.value);
-              }}
-              className="mr-2"
-            />
-          </div>
         </div>
         <div className="flex justify-end">
           <Button
@@ -197,26 +151,29 @@ const RecipientInfoPage: React.FC = () => {
           </Button>
         </div>
 
-          <div className="mt-6">
-            {recipientInfo.jobLinks.map((jobLink, index) => (
-              <div key={`jobLink-${index}`}  className="flex flex-col w-full md:flex-row pb-4 gap-4" >
-                <span className=" md:w-1/5 mr-2 text-wrap">{recipientInfo.jobIds[index]}</span>
-                <span className="md:w-3/5 mr-2 line-clamp-2">{jobLink}</span>
-                {recipientInfo.jobLinks.length > 0 && (
-                  <Button
-                    className="md:w-1/5"
-                    variant="text"
-                    icon={<Trash2 className="h-4 w-4" />}
-                    onClick={() => handleRemoveJob(index)}
-                    aria-label="Remove job link"
-                  >
-                    Remove
-                  </Button>
-                )}
-              </div>
-            ))}
+        <div className="mt-6">
+          {recipientInfo.jobIds.map((_, index) => (
+            <div
+              key={`jobLink-${index}`}
+              className="flex flex-col w-full md:flex-row pb-4 gap-4"
+            >
+              <span className=" md:w-1/5 mr-2 text-wrap">
+                {recipientInfo.jobIds[index]}
+              </span>
+              {recipientInfo.jobIds.length > 0 && (
+                <Button
+                  className="md:w-1/5"
+                  variant="text"
+                  icon={<Trash2 className="h-4 w-4" />}
+                  onClick={() => handleRemoveJob(index)}
+                  aria-label="Remove job link"
+                >
+                  Remove
+                </Button>
+              )}
+            </div>
+          ))}
         </div>
-        
       </Card>
 
       <div className="flex justify-between">
