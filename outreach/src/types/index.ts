@@ -14,7 +14,17 @@ export interface RecipientInfo {
   resumeLink?: string;
 }
 
-export interface EmailDistribution {
-  emailList: string[];
-  subject: string;
+interface Email {
+  subject : string,
+  body : string
+}
+
+export interface GeneratedEmail {
+  email : Email
+}
+
+export interface SendEmail {
+  subject : string,
+  text : string,
+  to : string
 }

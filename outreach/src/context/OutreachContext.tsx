@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState } from 'react';
-import { RecipientInfo, Template, EmailDistribution } from '../types';
+import { RecipientInfo, Template, GeneratedEmail } from '../types';
 
 interface OutreachContextType {
   step: number;
@@ -10,10 +10,10 @@ interface OutreachContextType {
   setCustomTemplate: React.Dispatch<React.SetStateAction<string>>;
   recipientInfo: RecipientInfo;
   setRecipientInfo: React.Dispatch<React.SetStateAction<RecipientInfo>>;
-  emailDistribution: EmailDistribution;
-  setEmailDistribution: React.Dispatch<React.SetStateAction<EmailDistribution>>;
-  generatedEmail: string;
-  setGeneratedEmail: React.Dispatch<React.SetStateAction<string>>;
+  emailDistribution: string;
+  setEmailDistribution: React.Dispatch<React.SetStateAction<string>>;
+  generatedEmail: GeneratedEmail;
+  setGeneratedEmail: React.Dispatch<React.SetStateAction<GeneratedEmail>>;
   useCustomTemplate: boolean;
   setUseCustomTemplate: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -34,11 +34,13 @@ export const OutreachProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     jobLinks: [],
     resumeLink: '',
   });
-  const [emailDistribution, setEmailDistribution] = useState<EmailDistribution>({
-    emailList: [''],
-    subject: '',
+  const [emailDistribution, setEmailDistribution] = useState<string>('');
+  const [generatedEmail, setGeneratedEmail] = useState<GeneratedEmail>({
+    email : {
+      subject : '',
+      body : ''
+    }
   });
-  const [generatedEmail, setGeneratedEmail] = useState('');
 
   return (
     <OutreachContext.Provider
