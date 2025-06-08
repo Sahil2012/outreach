@@ -19,14 +19,20 @@ const TemplateSelectionPage: React.FC = () => {
   } = useOutreach();
 
   const handleSelectTemplate = (templateId: string) => {
+    if(templateId != '1') {
+      alert("This template option is in progress.")
+      return;
+    }
     const template = templates.find((t) => t.id === templateId);
     setSelectedTemplate(template || null);
     setUseCustomTemplate(false);
   };
 
   const handleUseCustomTemplate = () => {
-    setSelectedTemplate(null);
-    setUseCustomTemplate(true);
+    
+    alert("This option is not available yet.")
+    // setSelectedTemplate(null);
+    // setUseCustomTemplate(true);
   };
 
   const handleContinue = () => {

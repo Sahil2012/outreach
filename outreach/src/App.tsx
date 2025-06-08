@@ -7,9 +7,10 @@ import EmailPreviewPage from './pages/EmailPreviewPage';
 import SendEmailPage from './pages/SendEmailPage';
 
 import './index.css';
+import { Loader } from './components/ui/loader';
 
 const OutreachWizard: React.FC = () => {
-  const { step } = useOutreach();
+  const { step, isLoading } = useOutreach();
 
   const renderStep = () => {
     switch (step) {
@@ -28,7 +29,7 @@ const OutreachWizard: React.FC = () => {
 
   return (
     <div className="min-h-screen">
-      {renderStep()}
+      {isLoading ? <Loader size="lg" text="Generating Email..." className='h-64'/> : renderStep()}
     </div>
   );
 };

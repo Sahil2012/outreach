@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState } from 'react';
-import { RecipientInfo, Template, GeneratedEmail } from '../types';
+import React, { createContext, useContext, useState } from "react";
+import { RecipientInfo, Template, GeneratedEmail } from "../types";
 
 interface OutreachContextType {
   step: number;
@@ -16,31 +16,63 @@ interface OutreachContextType {
   setGeneratedEmail: React.Dispatch<React.SetStateAction<GeneratedEmail>>;
   useCustomTemplate: boolean;
   setUseCustomTemplate: React.Dispatch<React.SetStateAction<boolean>>;
+  isLoading: boolean;
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  resetForm: () => void;
 }
 
-const OutreachContext = createContext<OutreachContextType | undefined>(undefined);
+const OutreachContext = createContext<OutreachContextType | undefined>(
+  undefined
+);
 
-export const OutreachProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const OutreachProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [step, setStep] = useState(1);
-  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
-  const [customTemplate, setCustomTemplate] = useState('');
+  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(
+    null
+  );
+  const [customTemplate, setCustomTemplate] = useState("");
   const [useCustomTemplate, setUseCustomTemplate] = useState(false);
   const [recipientInfo, setRecipientInfo] = useState<RecipientInfo>({
-    userName : '',
-    userContact : '',
-    contactName: '',
-    companyName: '',
+    userName: "",
+    userContact: "",
+    contactName: "",
+    companyName: "",
     jobIds: [],
     jobLinks: [],
-    resumeLink: '',
+    resumeLink: "",
   });
-  const [emailDistribution, setEmailDistribution] = useState<string>('');
+  const [emailDistribution, setEmailDistribution] = useState<string>("");
   const [generatedEmail, setGeneratedEmail] = useState<GeneratedEmail>({
-    email : {
-      subject : '',
-      body : ''
-    }
+    email: {
+      subject: "",
+      body: "",
+    },
   });
+
+  const [isLoading, setIsLoading] = useState(false);
+  const resetForm = () => {
+    setSelectedTemplate(null);
+    setCustomTemplate("");
+    setUseCustomTemplate(false);
+    setRecipientInfo({
+      userName: "",
+      userContact: "",
+      contactName: "",
+      companyName: "",
+      jobIds: [],
+      jobLinks: [],
+      resumeLink: "",
+    });
+    setGeneratedEmail({
+      email: {
+        subject: "",
+        body: "",
+      },
+    });
+    setIsLoading(false);
+  };
 
   return (
     <OutreachContext.Provider
@@ -59,6 +91,9 @@ export const OutreachProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setGeneratedEmail,
         useCustomTemplate,
         setUseCustomTemplate,
+        isLoading,
+        setIsLoading,
+        resetForm,
       }}
     >
       {children}
@@ -69,7 +104,7 @@ export const OutreachProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 export const useOutreach = (): OutreachContextType => {
   const context = useContext(OutreachContext);
   if (!context) {
-    throw new Error('useOutreach must be used within an OutreachProvider');
+    throw new Error("useOutreach must be used within an OutreachProvider");
   }
   return context;
 };

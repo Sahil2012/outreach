@@ -8,7 +8,7 @@ import Card from "../components/ui/Card";
 import { generateMail } from "../service/mailService";
 
 const RecipientInfoPage: React.FC = () => {
-  const { setStep, recipientInfo, setRecipientInfo, setGeneratedEmail } =
+  const { setStep, recipientInfo, setRecipientInfo, setGeneratedEmail, setIsLoading} =
     useOutreach();
   const [jobIdState, setJobIdState] = useState("");
 
@@ -17,6 +17,7 @@ const RecipientInfoPage: React.FC = () => {
       ...recipientInfo,
       jobIds: [...recipientInfo.jobIds, jobIdState],
     });
+    setJobIdState("");
   };
 
   const handleRemoveJob = (index: number) => {
@@ -65,9 +66,10 @@ const RecipientInfoPage: React.FC = () => {
 
   const handleContinue = async () => {
     handleSchmeaValidation();
+    setIsLoading(true);
     await handleGenerate();
-
     setStep(3);
+    setIsLoading(false);
   };
 
   return (
@@ -114,7 +116,7 @@ const RecipientInfoPage: React.FC = () => {
 
         <div className="mt-6">
           <TextField
-            label="Resume Link (Optional)"
+            label="Resume Link (Google Drive)"
             placeholder="e.g. https://drive.google.com/file/your-resume"
             fullWidth
             value={recipientInfo.resumeLink}

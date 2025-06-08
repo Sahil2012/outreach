@@ -7,7 +7,7 @@ import Card from "../components/ui/Card";
 import { sendMail } from "../service/mailService";
 
 const SendEmailPage: React.FC = () => {
-  const { setStep, emailDistribution, generatedEmail } = useOutreach();
+  const { setStep, emailDistribution, generatedEmail, resetForm } = useOutreach();
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -25,8 +25,8 @@ const SendEmailPage: React.FC = () => {
     setError(null);
 
     try {
-      // In a real application, you would send the email here using a service
-      await handleSendMail();
+      // In a real application, you would send the email here using a service      
+      await handleSendMail();      
       setSent(true);
     } catch (err) {
       setError("An error occurred while sending the email. Please try again.");
@@ -37,6 +37,7 @@ const SendEmailPage: React.FC = () => {
 
   const handleReset = () => {
     setStep(1);
+    resetForm();
   };
 
   return (
