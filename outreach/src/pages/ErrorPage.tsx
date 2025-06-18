@@ -18,7 +18,7 @@ const ErrorPage = ({
   const navigate = useNavigate();
 
   const handleRefresh = () => {
-    window.location.reload();
+    navigate('/');
   };
 
   const handleGoHome = () => {
