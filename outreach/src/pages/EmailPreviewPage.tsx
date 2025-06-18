@@ -30,6 +30,11 @@ const EmailPreviewPage: React.FC = () => {
     setStep(4);
   };
 
+  const handleOpenGmail = () => {
+    const gmailUrl  = `https://mail.google.com/mail/?view=cm&fs=1&tf=1&su=${encodeURIComponent(generatedEmail.email.subject)}&body=${encodeURIComponent(generatedEmail.email.body)}`;
+    window.open(gmailUrl, '_blank');
+  };
+
   return (
     <div className="animate-fadeIn">
       <ProgressBar currentStep={3} totalSteps={4} />
@@ -78,9 +83,9 @@ const EmailPreviewPage: React.FC = () => {
           </Button>
           <Button
             variant={!showEmail ? "primary" : "outline"}
-            onClick={() => setShowEmail(false)}
+            onClick={() => handleOpenGmail()}
           >
-            Copy Text
+            Open Gmail
           </Button>
         </div>
 
