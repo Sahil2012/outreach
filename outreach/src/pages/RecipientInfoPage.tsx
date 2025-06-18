@@ -6,11 +6,13 @@ import Button from "../components/ui/Button";
 import TextField from "../components/ui/TextField";
 import Card from "../components/ui/Card";
 import { generateMail } from "../service/mailService";
+import { useNavigate } from "react-router-dom";
 
 const RecipientInfoPage: React.FC = () => {
   const { setStep, recipientInfo, setRecipientInfo, setGeneratedEmail, setIsLoading} =
     useOutreach();
   const [jobIdState, setJobIdState] = useState("");
+  const navigate = useNavigate();
 
   const handleAddJob = () => {
     setRecipientInfo({
@@ -38,18 +40,19 @@ const RecipientInfoPage: React.FC = () => {
       setGeneratedEmail(res);
     } catch (error) {
       console.error("Error sending mail:", error);
+      navigate("/error");
     }
   };
 
   const handleSchmeaValidation = () => {
     if (!recipientInfo.contactName) {
       alert("Please enter the contact name.");
-      return;
+      return false;
     }
 
     if (!recipientInfo.companyName) {
       alert("Please enter the company name.");
-      return;
+      return false;
     }
 
     let jobs: boolean = true;
@@ -60,12 +63,16 @@ const RecipientInfoPage: React.FC = () => {
 
     if (!jobs) {
       alert("Please fill in all job IDs or remove empty fields.");
-      return;
+      return false;
     }
+
+    return true;
   };
 
   const handleContinue = async () => {
-    handleSchmeaValidation();
+    if(!handleSchmeaValidation()) {
+      return;
+    }
     setIsLoading(true);
     await handleGenerate();
     setStep(3);
