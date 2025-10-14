@@ -1,4 +1,4 @@
-function convertGoogleDriveUrl(viewUrl) {
+function convertGoogleDriveUrl(viewUrl : string) : string {
   const match = viewUrl.match(/\/file\/d\/([^\/]+)(?:\/|$)/);
   
   if (!match) throw new Error("Invalid Google Drive URL");

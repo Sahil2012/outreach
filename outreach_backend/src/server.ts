@@ -1,5 +1,5 @@
 import { configDotenv } from "dotenv";
-import express from "express";
+import express, { ErrorRequestHandler, NextFunction } from "express";
 import emailSender from "./controller/emailSender.js";
 import generateMail from "./controller/generateMail.js";
 import cors from 'cors';
@@ -23,11 +23,12 @@ app.post("/generateMail", generateMail);
 app.post("/sendEmail", emailSender);
 
 
-// Global error handler
-app.use((err, req, res, next) => {    
+const errorHandler : ErrorRequestHandler = (err, req, res , next) => {    
   console.error("Unhandled error:", err);
   res.status(err.status || 500).json({ error: err.message});
-});
+}
+// Global error handler
+app.use(errorHandler);
 
 
 app.listen(PORT, (error) => {

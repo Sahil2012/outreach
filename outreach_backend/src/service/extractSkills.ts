@@ -9,7 +9,7 @@ import { userDetailsSchema } from "../schema/schema.js";
 
 configDotenv();
 
-async function extractSkils(url) {
+async function extractSkils(url : string){
   let dowloadUrl = convertGoogleDriveUrl(url);
 
   await downloadPDF(dowloadUrl);

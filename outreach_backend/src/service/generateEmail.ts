@@ -3,7 +3,7 @@ import callLLM from "./geminichat.js";
 import { emailSchema } from "../schema/schema.js";
 import { StructuredOutputParser } from "langchain/output_parsers";
 
-async function generateEmail(userDetails) {
+async function generateEmail(userDetails : any) {
   const referralPrompt = PromptTemplate.fromTemplate(
     `
         You are an expert writing a email asking for refferal.

@@ -1,9 +1,11 @@
 import { configDotenv } from 'dotenv';
+import { NextFunction, Request, Response } from 'express';
 import nodemailer from 'nodemailer';
+import EmailRequest from '../types/EmailRequest.js';
 
 configDotenv();
 
-const sendEmail = async (req, res, next) => {
+const sendEmail = async (req : Request<{},{},EmailRequest> , res : Response, next : NextFunction) => {
   try {
     const { to, subject, text, attachment } = req.body;
 
@@ -20,17 +22,8 @@ const sendEmail = async (req, res, next) => {
       to,
       subject,
       text,
+      attachments: attachment ? [{ filename: attachment.filename, path: attachment.path }] : undefined,
     };
-
-    // Only add attachment if provided
-    if (attachment) {
-      mailOptions.attachments = [
-        {
-          filename: attachment.filename,
-          path: attachment.path,
-        },
-      ];
-    }
 
     await transporter.sendMail(mailOptions);
 

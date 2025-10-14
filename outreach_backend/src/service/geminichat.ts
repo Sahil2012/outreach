@@ -1,6 +1,6 @@
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 
-async function callLLM(prompt) {
+async function callLLM(prompt : string) : Promise<string> {
 
     const model = new ChatGoogleGenerativeAI({
         model : 'gemini-2.5-flash-preview-05-20',
@@ -10,7 +10,7 @@ async function callLLM(prompt) {
 
     const res = await model.invoke(prompt);
     
-    return res.content;
+    return res.content as string;
 }
 
 export default callLLM;
