@@ -11,11 +11,9 @@ configDotenv();
 
 async function extractSkils(url : string){
   let dowloadUrl = convertGoogleDriveUrl(url);
-
-  await downloadPDF(dowloadUrl);
-
+  const pdfPath = await downloadPDF(dowloadUrl);
   //load the file
-  let loader = new PDFLoader("./resume.pdf");
+  let loader = new PDFLoader(pdfPath);
   let docs = await loader.load();
 
   // convert to text to provide it as context

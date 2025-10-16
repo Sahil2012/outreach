@@ -6,9 +6,14 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-async function downloadPDF(url : string) {
+const PDF_PATH = join(__dirname, "../resume.pdf");
+
+
+async function downloadPDF(url : string) : Promise<string> {
   const response = await axios.get(url, { responseType: 'arraybuffer' });
-  writeFileSync(join(__dirname,'../resume.pdf'), response.data);
+  writeFileSync(PDF_PATH, response.data);
+
+  return PDF_PATH;
 }
 
 export default downloadPDF;
