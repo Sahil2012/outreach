@@ -10,10 +10,8 @@ import { userDetailsSchema } from "../schema/schema.js";
 configDotenv();
 
 async function extractSkils(url : string){
-  let dowloadUrl = convertGoogleDriveUrl(url);
-  const pdfPath = await downloadPDF(dowloadUrl);
   //load the file
-  let loader = new PDFLoader(pdfPath);
+  let loader = new PDFLoader("./uploads/resume.pdf");
   let docs = await loader.load();
 
   // convert to text to provide it as context
