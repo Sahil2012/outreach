@@ -1,18 +1,42 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ArrowLeft, ArrowRight, Plus, Trash2 } from "lucide-react";
 import { useOutreach } from "../context/OutreachContext";
+import { useAuth } from "../context/AuthContext";
+import { supabase } from "../lib/supabase";
 import ProgressBar from "../components/ui/ProgressBar";
 import Button from "../components/ui/Button";
 import TextField from "../components/ui/TextField";
 import Card from "../components/ui/Card";
 import { generateMail } from "../service/mailService";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const RecipientInfoPage: React.FC = () => {
-  const { setStep, recipientInfo, setRecipientInfo, setGeneratedEmail, setIsLoading} =
+  const { setStep, recipientInfo, setRecipientInfo, setGeneratedEmail, setIsLoading, selectedTemplate } =
     useOutreach();
+  const { user } = useAuth();
   const [jobIdState, setJobIdState] = useState("");
+  const [companyId, setCompanyId] = useState<string | null>(null);
+  const [employeeId, setEmployeeId] = useState<string | null>(null);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const { company, employee } = location.state || {};
+    if (company) {
+      setRecipientInfo({
+        ...recipientInfo,
+        companyName: company.name,
+      });
+      setCompanyId(company.id);
+    }
+    if (employee) {
+      setRecipientInfo({
+        ...recipientInfo,
+        contactName: employee.name,
+      });
+      setEmployeeId(employee.id);
+    }
+  }, [location.state]);
 
   const handleAddJob = () => {
     setRecipientInfo({
@@ -31,6 +55,51 @@ const RecipientInfoPage: React.FC = () => {
 
   const handleGenerate = async () => {
     try {
+      let finalCompanyId = companyId;
+      let finalEmployeeId = employeeId;
+
+      if (!companyId) {
+        const { data: existingCompany } = await supabase
+          .from('companies')
+          .select('id')
+          .eq('name', recipientInfo.companyName)
+          .maybeSingle();
+
+        if (existingCompany) {
+          finalCompanyId = existingCompany.id;
+        } else {
+          const { data: newCompany } = await supabase
+            .from('companies')
+            .insert({ name: recipientInfo.companyName })
+            .select('id')
+            .single();
+          finalCompanyId = newCompany?.id || null;
+        }
+      }
+
+      if (!employeeId && finalCompanyId) {
+        const { data: existingEmployee } = await supabase
+          .from('employees')
+          .select('id')
+          .eq('company_id', finalCompanyId)
+          .eq('name', recipientInfo.contactName)
+          .maybeSingle();
+
+        if (existingEmployee) {
+          finalEmployeeId = existingEmployee.id;
+        } else {
+          const { data: newEmployee } = await supabase
+            .from('employees')
+            .insert({
+              company_id: finalCompanyId,
+              name: recipientInfo.contactName,
+            })
+            .select('id')
+            .single();
+          finalEmployeeId = newEmployee?.id || null;
+        }
+      }
+
       const res = await generateMail({
         resumeLink: recipientInfo.resumeLink,
         jobId: recipientInfo.jobIds,
@@ -38,6 +107,17 @@ const RecipientInfoPage: React.FC = () => {
         companyName: recipientInfo.companyName,
       });
       setGeneratedEmail(res);
+
+      if (finalCompanyId) {
+        await supabase.from('referrals').insert({
+          user_id: user!.id,
+          company_id: finalCompanyId,
+          employee_id: finalEmployeeId,
+          template_type: selectedTemplate?.name || 'Custom',
+          email_content: res.email.body,
+          status: 'pending',
+        });
+      }
     } catch (error) {
       console.error("Error sending mail:", error);
       navigate("/error");
