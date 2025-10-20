@@ -1,0 +1,116 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum RefStatus {
+  FollowUp
+  Closed
+  Pending
+}
+
+model User {
+  id             String           @id @default(uuid()) @db.Uuid
+  authUserId     String           @unique
+  userName       String?
+  email          String?          @unique
+  phoneNo        BigInt?          @unique
+  resumeUrl      String?
+  bio            String?
+  profilePicture String?
+  templatesUsed  Int              @default(0)
+  messages       ReferralMsg[]
+  jobsAdded      JobPool[]
+  profileData    UserProfileData? @relation(fields: [profileDataId], references: [id])
+  profileDataId  Int?             @unique
+  createdAt      DateTime         @default(now())
+}
+
+model UserProfileData {
+  id            Int                  @id @default(autoincrement())
+  summary       String?
+  education     Json?
+  profileSkills ProfilSkillMapping[]
+  experiences   Experience[]
+  user          User?                @relation
+}
+
+model ProfilSkillMapping {
+  id                Int             @id @default(autoincrement())
+  userProfileDataId Int
+  skillId           Int
+  UserProfileData   UserProfileData @relation(fields: [userProfileDataId], references: [id])
+  Skills            Skills          @relation(fields: [skillId], references: [id])
+}
+
+model Skills {
+  id                 Int                  @id @default(autoincrement())
+  name               String               @unique
+  category           String
+  ProfilSkillMapping ProfilSkillMapping[]
+}
+
+model Experience {
+  id                Int             @id @default(autoincrement())
+  companyName       String
+  role              String
+  startDate         DateTime
+  endDate           DateTime?
+  description       String?
+  userProfileDataId Int
+  UserProfileData   UserProfileData @relation(fields: [userProfileDataId], references: [id])
+}
+
+model ReferralMsg {
+  id            Int           @id @default(autoincrement())
+  message       String
+  subject       String?
+  userId        String        @db.Uuid
+  employeeId    Int
+  jobId         Int?
+  date          DateTime      @default(now())
+  status        RefStatus     @default(Pending)
+  User          User          @relation(fields: [userId], references: [id])
+  Employee      EmpInfo       @relation(fields: [employeeId], references: [id])
+  Job           JobPool?      @relation(fields: [jobId], references: [id])
+  followUps     FollowUpMsg[]
+  replyReceived Boolean       @default(false)
+}
+
+model FollowUpMsg {
+  id          Int         @id @default(autoincrement())
+  message     String
+  referralId  Int
+  version     Int         @default(1)
+  sentAt      DateTime    @default(now())
+  ReferralMsg ReferralMsg @relation(fields: [referralId], references: [id])
+}
+
+model EmpInfo {
+  id          Int           @id @default(autoincrement())
+  name        String
+  email       String?
+  phoneNo     BigInt?
+  linkedInUrl String?
+  companyName String
+  referrals   ReferralMsg[]
+  createdAt   DateTime      @default(now())
+}
+
+model JobPool {
+  id          Int           @id @default(autoincrement())
+  niche       String
+  title       String?
+  jobUrl      String?
+  jobId       String?
+  companyName String?
+  addedById   String?       @db.Uuid
+  addedBy     User?         @relation(fields: [addedById], references: [id])
+  referrals   ReferralMsg[]
+  createdAt   DateTime      @default(now())
+}
