@@ -91,7 +91,7 @@ function App() {
               <Route path='/dashboard' element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
               <Route path='/company-search' element={<ProtectedRoute><CompanySearchPage /></ProtectedRoute>} />
               <Route path='/followups' element={<FollowupsPage />} />
-              <Route path='/outreach' element={<ProtectedRoute><OutreachFlow /></ProtectedRoute>}/>
+              <Route path='/outreach' element={<OutreachFlow />}/>
               <Route path='/error' element={<ErrorPage />} />
               <Route path='*' element={<NotFound />} />
             </Routes>
