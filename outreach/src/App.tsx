@@ -1,6 +1,7 @@
 import React from 'react';
 import { OutreachProvider, useOutreach } from './context/OutreachContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 import MainLayout from './components/layout/MainLayout';
 import TemplateSelectionPage from './pages/TemplateSelectionPage';
 import RecipientInfoPage from './pages/RecipientInfoPage';
@@ -79,21 +80,23 @@ function App() {
   return (
     <ErrorBoundary>
       <BrowserRouter>
-        <AuthProvider>
-          <Routes>
-            <Route path='/' element={<HomePage />}/>
-            <Route path='/login' element={<LoginPage />} />
-            <Route path='/signup' element={<SignupPage />} />
-            <Route path='/profile/create' element={<ProfileCreatePage />} />
-            <Route path='/profile/edit' element={<ProfileEditPage />} />
-            <Route path='/dashboard' element={<DashboardPage />} />
-            <Route path='/company-search' element={<CompanySearchPage />} />
-            <Route path='/followups' element={<FollowupsPage />} />
-            <Route path='/outreach' element={<OutreachFlow />}/>
-            <Route path='/error' element={<ErrorPage />} />
-            <Route path='*' element={<NotFound />} />
-          </Routes>
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <Routes>
+              <Route path='/' element={<HomePage />}/>
+              <Route path='/login' element={<LoginPage />} />
+              <Route path='/signup' element={<SignupPage />} />
+              <Route path='/profile/create' element={<ProtectedRoute><ProfileCreatePage /></ProtectedRoute>} />
+              <Route path='/profile/edit' element={<ProtectedRoute><ProfileEditPage /></ProtectedRoute>} />
+              <Route path='/dashboard' element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+              <Route path='/company-search' element={<ProtectedRoute><CompanySearchPage /></ProtectedRoute>} />
+              <Route path='/followups' element={<ProtectedRoute><FollowupsPage /></ProtectedRoute>} />
+              <Route path='/outreach' element={<ProtectedRoute><OutreachFlow /></ProtectedRoute>}/>
+              <Route path='/error' element={<ErrorPage />} />
+              <Route path='*' element={<NotFound />} />
+            </Routes>
+          </AuthProvider>
+        </ThemeProvider>
       </BrowserRouter>
     </ErrorBoundary>
   );
