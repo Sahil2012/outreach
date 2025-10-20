@@ -4,6 +4,7 @@ import emailSender from "./controller/emailSender.js";
 import generateMail from "./controller/generateMail.js";
 import cors from 'cors';
 import {fileUploader} from "./controller/fileUploader.js";
+import profileRouter from "./routes/profileRoutes.js";
 
 configDotenv();
 
@@ -24,6 +25,8 @@ app.post("/generateMail", generateMail);
 app.post("/sendEmail", emailSender);
 
 app.post("/uploadFile", fileUploader);
+
+app.use("/profile", profileRouter);
 
 const errorHandler : ErrorRequestHandler = (err, req, res , next) => {    
   console.error("Unhandled error:", err);

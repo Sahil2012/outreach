@@ -1,13 +1,13 @@
 import express from 'express';
 import multer from 'multer';
 import { requireAuth } from '../middlleware/requireAuth.js';
-import { getProfile, updateProfile } from '../controller/profileController.js';
+import { getProfile, updateProfile, uploadResume } from '../controller/profileController.js';
 
-const router = express.Router();
+const profileRouter = express.Router();
 const upload = multer();
 
-router.get('/me', requireAuth, getProfile);
-router.put('/update', requireAuth, updateProfile);
-router.post('/upload/resume', requireAuth, upload.single('resume'), updateProfile);
+profileRouter.get('/me', requireAuth, getProfile);
+profileRouter.put('/update', requireAuth, updateProfile);
+profileRouter.post('/upload/resume',requireAuth, upload.single('resume'), uploadResume);
 
-export default router;
+export default profileRouter;
