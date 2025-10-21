@@ -3,7 +3,6 @@ import express, { ErrorRequestHandler, NextFunction } from "express";
 import emailSender from "./controller/emailSender.js";
 import generateMail from "./controller/generateMail.js";
 import cors from 'cors';
-import {fileUploader} from "./controller/fileUploader.js";
 import profileRouter from "./routes/profileRoutes.js";
 
 configDotenv();
@@ -23,8 +22,6 @@ app.use(express.json());
 app.post("/generateMail", generateMail);
 
 app.post("/sendEmail", emailSender);
-
-app.post("/uploadFile", fileUploader);
 
 app.use("/profile", profileRouter);
 

@@ -4,3 +4,4 @@ package-lock.json
 resume.pdf
 /generated/prisma
 dist
+prisma/migrations
