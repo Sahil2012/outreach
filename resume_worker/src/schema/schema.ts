@@ -1,18 +1,55 @@
+import { endianness } from "os";
 import { z } from "zod";
 
 const userDetailsSchema = z.object({
-    name: z.string().describe("Full name of the candidate"),
-    email: z.string().describe("Email address"),
-    phone: z.string().describe("Contact phone number"),
-    experience: z.string().describe("Overall professional experience"),
-    skills: z.array(z.string()).describe("List of technical skills"),
-    noticePeriod: z.string().optional().describe("Availability or notice period"),
-    achievements: z.array(z.string()).optional().describe("List of achievements or recognitions"),
+  name: z.string().nullable().describe("Full name of the candidate"),
+  email: z.string().nullable().describe("Email address of the candidate"),
+  phone: z.string().nullable().describe("Contact phone number"),
+  experience: z
+    .array(
+      z.object({
+        startdate: z
+          .string()
+          .optional()
+          .describe("Start date of the experience"),
+        enddate: z.string().optional().describe("End date of the experience"),
+        role: z.string().optional().describe("Role or position held"),
+        companyName: z
+          .string()
+          .optional()
+          .describe("Name of the company or organization"),
+        description: z
+          .string()
+          .optional()
+          .describe("Detailed experience description"),
+      })
+    )
+    .nullable(),
+  projects: z
+    .array(z.string())
+    .optional()
+    .default([])
+    .describe(
+      "Notable projects, applications, or initiatives mentioned in the resume"
+    ),
+  skills: z
+    .array(z.string())
+    .optional()
+    .default([])
+    .describe(
+      "List of technical skills, languages, frameworks, tools, or technologies"
+    ),
+  noticePeriod: z
+    .string()
+    .nullable()
+    .describe(
+      "Notice period or availability (default to 90 days if not provided)"
+    ),
+  achievements: z
+    .array(z.string())
+    .optional()
+    .default([])
+    .describe("Coding achievements, contests, awards, or recognitions"),
 });
 
-const emailSchema = z.object({
-    subject : z.string().describe('Subject line relevant to the job and candidate'),
-    body : z.string().describe('Email body')
-})
-
-export {userDetailsSchema, emailSchema};
+export { userDetailsSchema };
