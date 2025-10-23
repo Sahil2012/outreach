@@ -5,7 +5,7 @@ const userDetailsSchema = z.object({
   name: z.string().nullable().describe("Full name of the candidate"),
   email: z.string().nullable().describe("Email address of the candidate"),
   phone: z.string().nullable().describe("Contact phone number"),
-  experience: z
+  experiences: z
     .array(
       z.object({
         startdate: z
@@ -33,7 +33,12 @@ const userDetailsSchema = z.object({
       "Notable projects, applications, or initiatives mentioned in the resume"
     ),
   skills: z
-    .array(z.string())
+    .array(
+      z.object({
+        name: z.string().describe("Name of the skill or technology"),
+        category: z.string().optional().describe("Category of the skill"),
+      })
+    )
     .optional()
     .default([])
     .describe(
