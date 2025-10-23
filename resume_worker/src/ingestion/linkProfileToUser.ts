@@ -1,7 +1,6 @@
-import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
+import { Prisma } from "@prisma/client";
 
-export async function linkProfileToUser(tx: PrismaClient, userId: string, profileId: number) {
+export async function linkProfileToUser(tx: Prisma.TransactionClient, userId: string, profileId: number) {
   return await tx.userTable.update({
     where: { id: userId },
     data: { profileDataId: profileId },

@@ -2,8 +2,8 @@ import { Worker } from 'bullmq';
 import { redisConnection } from './utils/redis';
 import { supabase } from './apis/supabaseClient';
 import { log } from 'console';
-import extractDataFromResume from './service/extractDataFromResume';
 import { processResume } from './service/processResume';
+import extractDataFromResume from './service/extractDataFromResume';
 
 // Define the interface for the job data
 interface ResumeJob {
@@ -27,19 +27,13 @@ const worker = new Worker<ResumeJob>(
     }
 
     const fileBuffer = await res.data.arrayBuffer();
-    log(fileBuffer)
-    // extractSkills(Buffer.from(fileBuffer));
     const parsedData = await extractDataFromResume(Buffer.from(fileBuffer));
-    // const parsedData = await extractSkills();
-    await processResume(userId, parsedData);
-    log(parsedData);
-    // Update the Supabase table
-    // const { error } = await supabase
-    //   .from('User')
-    //   .update({ parsedData })
-    //   .eq('id', userId);
 
-    // if (error) throw error;
+    log('Extracted data:', parsedData);
+    
+    await processResume(userId, parsedData);
+    log('Finished processing job:', job.id);
+    return { success: true };
 
   },
   {

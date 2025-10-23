@@ -1,7 +1,6 @@
-import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
+import { Prisma } from "@prisma/client";
 
-export async function ingestSkills(tx: PrismaClient, skillNames: string[], profileId: number) {
+export async function ingestSkills(tx: Prisma.TransactionClient, skillNames: string[], profileId: number) {
   if (!skillNames.length) return;
 
   const existingSkills = await tx.skills.findMany({

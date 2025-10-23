@@ -1,8 +1,8 @@
-import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
+import { Prisma } from "@prisma/client";
+import { log } from "console";
 
 export async function ingestUserProfile(
-  tx: PrismaClient,
+  tx: Prisma.TransactionClient,
   userId: string,
   data: any
 ) {
@@ -14,6 +14,7 @@ export async function ingestUserProfile(
 
   if (user?.profileDataId) {
     // Update existing profile
+    log("Updating existing profile for user:", userId);
     return tx.userProfileData.update({
       where: { id: user.profileDataId },
       data: {
@@ -22,6 +23,8 @@ export async function ingestUserProfile(
       },
     });
   }
+
+  log("Creating new profile for user:", userId);
   // Create new profile and link it to user
   return await tx.userProfileData.create({
     data: {
