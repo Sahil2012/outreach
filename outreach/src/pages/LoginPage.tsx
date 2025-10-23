@@ -1,15 +1,15 @@
-import { useState } from 'react';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import Card from '../components/ui/Card';
-import Button from '../components/ui/Button';
-import TextField from '../components/ui/TextField';
-import { Mail } from 'lucide-react';
+import { useState } from "react";
+import { useNavigate, useLocation, Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import Card from "../components/ui/Card";
+import Button from "../components/ui/Button";
+import TextField from "../components/ui/TextField";
+import { Mail } from "lucide-react";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const { signIn } = useAuth();
@@ -18,7 +18,7 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
 
     const { error } = await signIn(email, password);
@@ -29,9 +29,9 @@ export default function LoginPage() {
     } else {
       const selectedTemplate = location.state?.selectedTemplate;
       if (selectedTemplate) {
-        navigate('/outreach', { state: { selectedTemplate } });
+        navigate("/outreach", { state: { selectedTemplate } });
       } else {
-        navigate('/dashboard');
+        navigate("/dashboard");
       }
     }
   };
@@ -46,7 +46,9 @@ export default function LoginPage() {
             </div>
           </div>
           <h1 className="text-3xl font-bold text-slate-900">Welcome Back</h1>
-          <p className="text-slate-600 mt-2">Sign in to continue your referral journey</p>
+          <p className="text-slate-600 mt-2">
+            Sign in to continue your referral journey
+          </p>
         </div>
 
         <Card className="p-8">
@@ -57,14 +59,21 @@ export default function LoginPage() {
               </div>
             )}
 
-            <TextField
-              label="Email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              required
-            />
+            <div className="space-y-2">
+              
+              <div className="relative">
+                <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-700" />
+                <TextField
+                  label="Email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  required
+                  className="w-full pl-12 pr-4 py-3 bg-white border border-slate-300  rounded-xl focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 focus:border-transparent transition-all "
+                />
+              </div>
+            </div>
 
             <TextField
               label="Password"
@@ -75,19 +84,18 @@ export default function LoginPage() {
               required
             />
 
-            <Button
-              type="submit"
-              disabled={loading}
-              className="w-full"
-            >
-              {loading ? 'Signing in...' : 'Sign In'}
+            <Button type="submit" disabled={loading} className="w-full">
+              {loading ? "Signing in..." : "Sign In"}
             </Button>
           </form>
 
           <div className="mt-6 text-center">
             <p className="text-slate-600">
-              Don't have an account?{' '}
-              <Link to="/signup" className="text-slate-700 font-semibold hover:underline">
+              Don't have an account?{" "}
+              <Link
+                to="/signup"
+                className="text-slate-700 font-semibold hover:underline"
+              >
                 Sign up
               </Link>
             </p>

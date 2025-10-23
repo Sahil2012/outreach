@@ -39,7 +39,7 @@ export default function SignupPage() {
       setError(error.message);
       setLoading(false);
     } else {
-      navigate('/profile/create');
+      navigate('/login');
     }
   };
 

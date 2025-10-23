@@ -6,6 +6,7 @@ interface CardProps {
   hoverable?: boolean;
   selected?: boolean;
   isActive? : boolean,
+  style?: React.CSSProperties;
   onClick?: () => void;
 }
 

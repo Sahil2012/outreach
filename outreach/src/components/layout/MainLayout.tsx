@@ -9,22 +9,22 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const outreach = "NaukriOutreach";
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-emerald-50 to-cyan-50 z-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50  to-cyan-50 z-50">
       <header className="border-b border-slate-200 sticky top-0 bg-white/95 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Mail className="h-5 w-5 text-emerald-600" />
+            <Mail className="h-5 w-5 text-blue-600" />
             <h1 className="font-medium text-xl text-slate-800">{outreach}</h1>
           </div>
           <nav className="hidden sm:block">
             <ul className="flex items-center gap-8">
               <li>
-                <a href="/" className="text-slate-600 hover:text-emerald-600 text-sm font-medium transition-colors">
+                <a href="/" className="text-slate-600 hover:text-blue-600 text-sm font-medium transition-colors">
                   LogIn
                 </a>
               </li>
               <li>
-                <a href="#" className="text-slate-600 hover:text-emerald-600 text-sm font-medium transition-colors">
+                <a href="#" className="text-slate-600 hover:text-blue-600 text-sm font-medium transition-colors">
                   SignUp
                 </a>
               </li>
