@@ -138,37 +138,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      <nav className="bg-white border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-2">
-              <Mail className="w-8 h-8 text-slate-700" />
-              <span className="text-xl font-semibold text-slate-800">ReferralHub</span>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Button variant="outline" onClick={() => navigate('/profile/edit')}>
-                Edit Profile
-              </Button>
-              <Button variant="outline" onClick={() => navigate('/company-search')}>
-                <Search className="w-4 h-4 mr-2" />
-                Find Employees
-              </Button>
-              <Button variant="outline" onClick={() => navigate('/followups')}>
-                <Calendar className="w-4 h-4 mr-2" />
-                Follow-ups
-              </Button>
-              <Button onClick={() => navigate('/outreach')}>
-                <Plus className="w-4 h-4 mr-2" />
-                New Referral
-              </Button>
-              <Button variant="outline" onClick={signOut}>
-                <LogOut className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      </nav>
+    <div className="min-h-screen bg-transparent">
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">

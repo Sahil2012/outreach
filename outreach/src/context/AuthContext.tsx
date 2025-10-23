@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
+import Cookies from 'js-cookie';
 
 interface AuthContextType {
   user: User | null;
@@ -22,10 +23,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [hasProfile, setHasProfile] = useState(false);
 
   const checkProfile = async () => {
-    if (!user) {
-      setHasProfile(false);
-      return;
-    }
+    if (!user) return setHasProfile(false);
 
     const { data } = await supabase
       .from('profiles')
@@ -36,42 +34,61 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setHasProfile(!!data);
   };
 
+  // Initialize user/session from Supabase or cookie
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    const initAuth = async () => {
+      let currentSession: Session | null = null;
+
+      // Try Supabase session first
+      const { data: { session } } = await supabase.auth.getSession();
+      currentSession = session;
+
+      // If no session, check cookie
+      if (!currentSession) {
+        const userId = Cookies.get('sb-user-id');
+        if (userId) {
+          // fetch user profile from Supabase
+          const { data: userData } = await supabase.auth.getUser();
+          currentSession = userData?.user ? { user: userData.user, expires_at: 0 } as Session : null;
+        }
+      }
+
+      setSession(currentSession);
+      setUser(currentSession?.user ?? null);
+      setLoading(false);
+    };
+
+    initAuth();
+
+    // Subscribe to auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
-    });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      (() => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
-      })();
+      if (session?.user) {
+        Cookies.set('sb-user-id', session.user.id);
+      } else {
+        Cookies.remove('sb-user-id');
+      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
-    if (user) {
-      checkProfile();
-    }
+    if (user) checkProfile();
+    else setHasProfile(false);
   }, [user]);
 
+  // Sign Up
   const signUp = async (email: string, password: string, fullName: string) => {
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: {
-          data: {
-            full_name: fullName,
-          },
-        },
+        options: { data: { full_name: fullName } },
       });
-
       if (error) throw error;
 
       if (data.user) {
@@ -80,6 +97,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           email: data.user.email!,
           full_name: fullName,
         });
+
+        // Immediately set user and cookie
+        setUser(data.user);
+        Cookies.set('sb-user-id', data.user.id);
       }
 
       return { error: null };
@@ -88,14 +109,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Sign In
   const signIn = async (email: string, password: string) => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
+
+      if (data.user) {
+        // Immediately set user and cookie
+        setUser(data.user);
+        setSession(data.session ?? null);
+        Cookies.set('sb-user-id', data.user.id);
+      }
 
       return { error: null };
     } catch (error) {
@@ -103,28 +128,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Sign Out
   const signOut = async () => {
     await supabase.auth.signOut();
+    setUser(null);
+    setSession(null);
+    Cookies.remove('sb-user-id');
   };
 
-  const value = {
-    user,
-    session,
-    loading,
-    signUp,
-    signIn,
-    signOut,
-    hasProfile,
-    checkProfile,
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        session,
+        loading,
+        signUp,
+        signIn,
+        signOut,
+        hasProfile,
+        checkProfile,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
+  if (!context) throw new Error('useAuth must be used within an AuthProvider');
   return context;
 }

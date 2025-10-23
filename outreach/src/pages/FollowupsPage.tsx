@@ -4,8 +4,6 @@ import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
-import TextField from '../components/ui/TextField';
-import TextArea from '../components/ui/TextArea';
 import { Loader } from '../components/ui/loader';
 import { Calendar, CheckCircle, Clock, ArrowLeft, Plus, Building2 } from 'lucide-react';
 

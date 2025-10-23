@@ -35,7 +35,7 @@ export default function ProfileCreatePage() {
 
     if (resumeFile) {
       setUploading(true);
-      const fileExt = resumeFile.name.split('.').pop();
+      const fileExt = resumeFile.name.split('.').pop();      
       const fileName = `${user!.id}-${Date.now()}.${fileExt}`;
       const filePath = `resumes/${fileName}`;
 
