@@ -4,6 +4,7 @@ import emailSender from "./controller/emailSender.js";
 import generateMail from "./controller/generateMail.js";
 import cors from 'cors';
 import profileRouter from "./routes/profileRoutes.js";
+import { requireAuth } from "./middlleware/requireAuth.js";
 
 configDotenv();
 
@@ -19,7 +20,7 @@ app.use(cors({
 app.use(express.json());
 
 
-app.post("/generateMail", generateMail);
+app.post("/generateMail", requireAuth, generateMail);
 
 app.post("/sendEmail", emailSender);
 

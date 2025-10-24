@@ -44,6 +44,7 @@ model ProfilSkillMapping {
   id                Int             @id @default(autoincrement())
   userProfileDataId Int
   skillId           Int
+  @@unique([userProfileDataId, skillId])
   UserProfileData   UserProfileData @relation(fields: [userProfileDataId], references: [id])
   Skills            Skills          @relation(fields: [skillId], references: [id])
 }
