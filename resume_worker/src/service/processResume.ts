@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { log } from "console";
 import { ingestSkills } from "../ingestion/skillsIngestion";
 import { ingestUserProfile } from "../ingestion/profileDataIngestion";

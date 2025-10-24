@@ -26,5 +26,6 @@ export async function ingestSkills(tx: Prisma.TransactionClient, skillNames: str
       userProfileDataId: profileId,
       skillId: skill.id,
     })),
+    skipDuplicates : true
   });
 }
