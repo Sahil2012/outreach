@@ -9,44 +9,54 @@ datasource db {
 }
 
 enum RefStatus {
-  FollowUp
-  Closed
-  Pending
+  FOLLOWUP
+  CLOSED
+  PENDING
 }
 
+enum ProfileCompletenessStatus {
+  INCOMPLETE
+  PARTIAL
+  COMPLETE
+}
+
+
 model UserTable {
-  id             String           @id @default(uuid()) @db.Uuid
-  authUserId     String           @unique
-  userName       String?
-  email          String?          @unique
-  phoneNo        BigInt?          @unique
-  resumeUrl      String?
-  bio            String?
-  profilePicture String?
-  templatesUsed  Int              @default(0)
-  messages       ReferralMsg[]
-  jobsAdded      JobPool[]
-  profileData    UserProfileData? @relation(fields: [profileDataId], references: [id])
-  profileDataId  Int?             @unique
-  createdAt      DateTime         @default(now())
+  id              String           @id @default(uuid()) @db.Uuid
+  authUserId      String           @unique
+  userName        String?
+  email           String?          @unique
+  phoneNo         BigInt?          @unique
+  resumeUrl       String?
+  bio             String?
+  profilePicture  String?
+  templatesUsed   Int              @default(0)
+  messages        ReferralMsg[]
+  jobsAdded       JobPool[]
+  userProfileData UserProfileData?
+  profileDataId   Int?             @unique
+  createdAt       DateTime         @default(now())
 }
 
 model UserProfileData {
-  id            Int                  @id @default(autoincrement())
-  summary       String?
-  education     Json?
-  profileSkills ProfilSkillMapping[]
-  experiences   Experience[]
-  user          UserTable?           @relation
+  id               Int                  @id @default(autoincrement())
+  summary          String?
+  education        Json?
+  userId           String               @unique @db.Uuid
+  User             UserTable            @relation(fields: [userId], references: [id])
+  profileSkills    ProfilSkillMapping[]
+  experiences      Experience[]
+  profileReadiness ProfileReadiness?
 }
 
 model ProfilSkillMapping {
   id                Int             @id @default(autoincrement())
   userProfileDataId Int
   skillId           Int
-  @@unique([userProfileDataId, skillId])
   UserProfileData   UserProfileData @relation(fields: [userProfileDataId], references: [id])
   Skills            Skills          @relation(fields: [skillId], references: [id])
+
+  @@unique([userProfileDataId, skillId])
 }
 
 model Skills {
@@ -75,7 +85,7 @@ model ReferralMsg {
   employeeId    Int
   jobId         Int?
   date          DateTime      @default(now())
-  status        RefStatus     @default(Pending)
+  status        RefStatus     @default(PENDING)
   User          UserTable     @relation(fields: [userId], references: [id])
   Employee      EmpInfo       @relation(fields: [employeeId], references: [id])
   Job           JobPool?      @relation(fields: [jobId], references: [id])
@@ -114,4 +124,12 @@ model JobPool {
   addedBy     UserTable?    @relation(fields: [addedById], references: [id])
   referrals   ReferralMsg[]
   createdAt   DateTime      @default(now())
+}
+
+model ProfileReadiness {
+  id                 Int                       @id @default(autoincrement())
+  userProfileId      Int                       @unique
+  completenessStatus ProfileCompletenessStatus @default(INCOMPLETE)
+  lastUpdated        DateTime                  @default(now())
+  UserProfileData    UserProfileData           @relation(fields: [userProfileId], references: [id])
 }
