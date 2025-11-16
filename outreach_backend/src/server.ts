@@ -1,11 +1,11 @@
 import { configDotenv } from "dotenv";
 import express, { ErrorRequestHandler, NextFunction } from "express";
 import emailSender from "./controller/emailSender.js";
-import generateMail from "./controller/generateMail.js";
 import cors from 'cors';
 import profileRouter from "./routes/profileRoutes.js";
 import { requireAuth } from "./middlleware/requireAuth.js";
 import authRoutes from "./routes/authRoutes.js";
+import mailGeneratorController from "./controller/mailGeneratorController.js";
 
 configDotenv();
 
@@ -20,7 +20,7 @@ app.use(cors({
 
 app.use(express.json());
 
-app.post("/generateMail", requireAuth, generateMail);
+app.post("/generateMail", requireAuth, mailGeneratorController);
 
 app.post("/sendEmail", emailSender);
 
