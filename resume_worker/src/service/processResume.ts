@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, ProfileCompletenessStatus } from "@prisma/client";
 import { log } from "console";
 import { ingestSkills } from "../ingestion/skillsIngestion";
 import { ingestUserProfile } from "../ingestion/profileDataIngestion";
@@ -35,6 +35,12 @@ export async function processResume(id: string, extracted: any) {
 
       // 4. Link to user
       await linkProfileToUser(tx, user.id, profile.id);
+
+      await tx.profileReadiness.upsert({
+        where: { userProfileId: profile.id },
+        create: { userProfileId: profile.id, completenessStatus: ProfileCompletenessStatus.COMPLETE },
+        update: { completenessStatus: ProfileCompletenessStatus.COMPLETE },
+      });
 
       return { success: true, profileId: profile.id };
     });

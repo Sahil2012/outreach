@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { supabase } from '../apis/supabaseClient.js';
 import { enqueueResumeJob } from '../utils/enqueResume.js';
 import { log } from 'console';
+import prisma from '../apis/prismaClient.js';
 
 
 // GET /profile/me
@@ -17,6 +18,36 @@ export const getProfile = async (req: Request, res: Response) => {
 
     if (error) throw error;
     res.json(data);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+//GET /profile/readiness
+export const checkReadiness = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user.id;
+
+    prisma.$connect();
+    const profile = await prisma.userProfileData.findUnique({
+      where: { userId: userId },
+    });
+
+    if (!profile) {
+      return res.status(404).json({ error: 'Profile not found' });
+    }
+
+    const readiness = await prisma.profileReadiness.findUnique({
+      where: { userProfileId: profile.id },
+    });
+
+    prisma.$disconnect();
+
+    if (!readiness) {
+      return res.status(404).json({ error: 'Readiness status not found' });
+    }
+
+    res.json({ completenessStatus: readiness.completenessStatus });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
@@ -43,7 +74,6 @@ export const updateProfile = async (req: Request, res: Response) => {
 
 
 // POST /profile/upload/resume
-
 export const uploadResume = async (req : Request, res : Response) => {
   try {
     const userId = req.user.id;
