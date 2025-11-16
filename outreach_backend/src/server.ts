@@ -19,7 +19,6 @@ app.use(cors({
 
 app.use(express.json());
 
-
 app.post("/generateMail", requireAuth, generateMail);
 
 app.post("/sendEmail", emailSender);
@@ -32,7 +31,6 @@ const errorHandler : ErrorRequestHandler = (err, req, res , next) => {
 }
 // Global error handler
 app.use(errorHandler);
-
 
 app.listen(PORT, (error) => {
   if (error) {

@@ -18,12 +18,12 @@ export async function ingestExperience(
       return;
     }
 
-    // 1️⃣ Delete existing experiences for this profile
+    // Delete existing experiences for this profile
     await tx.experience.deleteMany({
       where: { userProfileDataId: profileId },
     });
 
-    // 2️⃣ Insert new experiences
+    // Insert new experiences
     await tx.experience.createMany({
       data: experiences.map((exp) => ({
         companyName: exp.companyName,

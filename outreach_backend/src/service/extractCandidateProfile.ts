@@ -11,45 +11,43 @@ export async function getCandidateProfile(authUserId: string) {
 
     console.log("Fetching candidate profile for:", authUserId);
 
-    // Fetch user with nested profile, skills, and experiences
+    // Fetch user
     const user = await prisma.userTable.findUnique({
       where: { authUserId },
       select: {
         id: true,
         userName: true,
         email: true,
-        profileData: {
-          select: {
-            summary: true,
-            education: true,
-            experiences: true,
-            profileSkills: {
-              select: {
-                Skills: {
-                  select: { id: true, name: true, category: true },
-                },
-              },
-            },
-          },
-        },
-      },
+      }
     });
 
-    if (!user) {
+    if (!user || !user.id) {
       console.warn("No user found for authUserId:", authUserId);
       return { success: false, message: "User not found" };
     }
 
-    if (!user.profileData) {
-      console.warn("User found but profile data is missing:", authUserId);
+    const profileData = await prisma.userProfileData.findUnique({
+      where: { userId: user.id },
+      include: {
+        profileSkills: {
+          include: {
+            Skills: true,
+          },
+        },
+        experiences: true,
+      },
+    });
+
+    if (!profileData) {
+      console.warn("User found but profile data is missing:", user.id);
       return { success: false, message: "Profile data not found for user" };
     }
 
     // Flatten skills and experiences
     const skills =
-      user.profileData.profileSkills.map((s) => s.Skills) || [];
+      profileData.profileSkills.map((s) => s.Skills) || [];
 
-    const experiences = user.profileData.experiences || [];
+    const experiences = profileData.experiences || [];
 
     console.log("Profile fetched successfully for:", authUserId);
 
@@ -58,8 +56,8 @@ export async function getCandidateProfile(authUserId: string) {
       userId: user.id,
       userName: user.userName,
       email: user.email,
-      summary: user.profileData.summary,
-      education: user.profileData.education,
+      summary: profileData.summary,
+      education: profileData.education,
       skills,
       experiences,
     };

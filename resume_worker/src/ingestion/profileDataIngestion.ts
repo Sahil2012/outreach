@@ -6,30 +6,20 @@ export async function ingestUserProfile(
   userId: string,
   data: any
 ) {
-  // Find the user's existing profileDataId
-  const user = await tx.userTable.findUnique({
-    where: { id: userId },
-    select: { profileDataId: true },
-  });
+  log("Ingesting user profile for userId:", userId);
 
-  if (user?.profileDataId) {
-    // Update existing profile
-    log("Updating existing profile for user:", userId);
-    return tx.userProfileData.update({
-      where: { id: user.profileDataId },
-      data: {
-        summary: data.summary || null,
-        education: data.education || null,
-      },
-    });
-  }
+  const profileData = {
+    summary: data.summary || null,
+    education: data.education || null,
+  };
 
-  log("Creating new profile for user:", userId);
-  // Create new profile and link it to user
-  return await tx.userProfileData.create({
+  const profile = await tx.userProfileData.create({
     data: {
-      summary: data.summary || null,
-      education: data.education || null,
+      ...profileData,
+      userId: userId,
     },
   });
+
+  log("Created user profile with id:", profile.id);
+  return profile;
 }
