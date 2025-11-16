@@ -2,27 +2,27 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-export async function getCandidateProfile(authUserId: string) {
+export async function getCandidateProfile(id: string) {
   try {
     await prisma.$connect();
-    if (!authUserId) {
-      throw new Error("authUserId is required");
+    if (!id) {
+      throw new Error("id is required");
     }
 
-    console.log("Fetching candidate profile for:", authUserId);
+    console.log("Fetching candidate profile for:", id);
 
     // Fetch user
     const user = await prisma.userTable.findUnique({
-      where: { authUserId },
+      where: { id },
       select: {
         id: true,
         userName: true,
         email: true,
-      }
+      },
     });
 
     if (!user || !user.id) {
-      console.warn("No user found for authUserId:", authUserId);
+      console.warn("No user found for authUserId:", id);
       return { success: false, message: "User not found" };
     }
 
@@ -44,12 +44,17 @@ export async function getCandidateProfile(authUserId: string) {
     }
 
     // Flatten skills and experiences
-    const skills =
-      profileData.profileSkills.map((s) => s.Skills) || [];
+    const skills = profileData.profileSkills.map((s) => s.Skills.name) || [];
 
-    const experiences = profileData.experiences || [];
+    const experiences =
+      profileData.experiences
+        ?.map(
+          (exp) =>
+            `${exp.role} at ${exp.companyName} from ${exp.startDate} to ${exp.endDate} working on ${exp.description}`
+        )
+        .join(", ") || "No experience listed";
 
-    console.log("Profile fetched successfully for:", authUserId);
+    console.log("Profile fetched successfully for:", id);
 
     return {
       success: true,

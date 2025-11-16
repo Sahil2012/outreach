@@ -1,7 +1,6 @@
 import { log } from "console";
 import { Request, Response } from "express";
 import prisma from "../apis/prismaClient.js";
-import { ca } from "zod/v4/locales";
 
 // GET /auth/me
 export const getMe = async (req: Request, res: Response) => {
