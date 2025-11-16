@@ -28,7 +28,6 @@ export const checkReadiness = async (req: Request, res: Response) => {
   try {
     const userId = req.user.id;
 
-    prisma.$connect();
     const profile = await prisma.userProfileData.findUnique({
       where: { userId: userId },
     });
@@ -40,8 +39,6 @@ export const checkReadiness = async (req: Request, res: Response) => {
     const readiness = await prisma.profileReadiness.findUnique({
       where: { userProfileId: profile.id },
     });
-
-    prisma.$disconnect();
 
     if (!readiness) {
       return res.status(404).json({ error: 'Readiness status not found' });

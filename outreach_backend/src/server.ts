@@ -5,6 +5,7 @@ import generateMail from "./controller/generateMail.js";
 import cors from 'cors';
 import profileRouter from "./routes/profileRoutes.js";
 import { requireAuth } from "./middlleware/requireAuth.js";
+import authRoutes from "./routes/authRoutes.js";
 
 configDotenv();
 
@@ -23,6 +24,7 @@ app.post("/generateMail", requireAuth, generateMail);
 
 app.post("/sendEmail", emailSender);
 
+app.use("/auth",authRoutes);
 app.use("/profile", profileRouter);
 
 const errorHandler : ErrorRequestHandler = (err, req, res , next) => {    
