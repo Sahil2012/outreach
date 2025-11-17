@@ -1,5 +1,6 @@
 import React from "react";
 import { Mail } from "lucide-react";
+import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/clerk-react";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -17,22 +18,27 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             <h1 className="font-medium text-xl text-slate-800">{outreach}</h1>
           </div>
           <nav className="hidden sm:block">
-            <ul className="flex items-center gap-8">
-              <li>
-                <a href="/" className="text-slate-600 hover:text-blue-600 text-sm font-medium transition-colors">
-                  LogIn
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-slate-600 hover:text-blue-600 text-sm font-medium transition-colors">
-                  SignUp
-                </a>
-              </li>
-            </ul>
+            <SignedOut>
+              <SignInButton />
+            </SignedOut>
+            <SignedIn>
+              <UserButton />
+            </SignedIn>
           </nav>
           <button className="block sm:hidden text-slate-600">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 6h16M4 12h16M4 18h16"
+              />
             </svg>
           </button>
         </div>
@@ -42,7 +48,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
       <footer className="bg-transparent py-6 border-t-2 border-neutral-100">
         <div className="container mx-auto px-4 text-center text-slate-500 text-sm">
-          <p>&copy; {new Date().getFullYear()} {outreach}. All rights reserved.</p>
+          <p>
+            &copy; {new Date().getFullYear()} {outreach}. All rights reserved.
+          </p>
         </div>
       </footer>
     </div>

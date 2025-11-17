@@ -1,7 +1,11 @@
 import { Request, Response, NextFunction } from "express";
 import { supabase } from "../apis/supabaseClient.js";
 
-export const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
+export const requireAuth = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const authHeader = req.headers.authorization;
 
@@ -17,6 +21,7 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
       return res.status(401).json({ error: "Unauthorized" });
     }
 
+    (req as any).token = token;
     (req as any).user = data.user;
     next();
   } catch (err) {

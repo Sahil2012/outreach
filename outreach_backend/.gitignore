@@ -5,3 +5,4 @@ resume.pdf
 /generated/prisma
 dist
 prisma/migrations
+credentials.json
