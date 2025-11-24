@@ -4,6 +4,9 @@ import emailSender from "./controller/emailSender.js";
 import cors from "cors";
 import profileRouter from "./routes/profileRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
+import companyRouter from "./routes/companyRoutes.js";
+import followupRouter from "./routes/followupRoutes.js";
+import referralRouter from "./routes/referralRoutes.js";
 import mailGeneratorController from "./controller/mailGeneratorController.js";
 import { clerkMiddleware, requireAuth } from "@clerk/express"
 
@@ -18,8 +21,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
     origin: [process.env.FRONTEND_URL || "", "http://localhost:5173"],
-    methods: ["GET", "POST", "OPTIONS"],
-    allowedHeaders: ["Content-Type"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 app.use(express.json());
@@ -31,6 +34,9 @@ app.post("/sendEmail", emailSender);
 app.post("/sendEmailV2", requireAuth(), emailSender);
 app.use("/auth", authRoutes);
 app.use("/profile", profileRouter);
+app.use("/companies", companyRouter);
+app.use("/followups", followupRouter);
+app.use("/referrals", referralRouter);
 
 // Global error handler
 const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
