@@ -21,6 +21,7 @@ import { ErrorBoundary } from "./components/ErrorBoundry";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import ErrorPage from "./pages/ErrorPage";
 import NotFound from "./pages/NotFound";
+import GoogleAuth from "./pages/GoogleAuth";
 
 const OutreachWizard: React.FC = () => {
   const { step, isLoading } = useOutreach();
@@ -87,6 +88,7 @@ function App() {
                 <Route path="/followups" element={<ProtectedRoute><FollowupsPage /></ProtectedRoute>} />
                 <Route path="/outreach" element={<ProtectedRoute><OutreachWizard /></ProtectedRoute>} />
                 <Route path="/error" element={<ErrorPage />} />
+                <Route path="/auth/google" element={<GoogleAuth />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </MainLayout>

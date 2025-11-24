@@ -12,6 +12,8 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   hasProfile: boolean;
   checkProfile: () => Promise<void>;
+  token: string | null;
+  setToken: (token: string | null) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -21,6 +23,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [hasProfile, setHasProfile] = useState(false);
+  const [token, setToken] = useState<string | null>(null);
 
   const checkProfile = async () => {
     if (!user) return setHasProfile(false);
@@ -147,6 +150,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signOut,
         hasProfile,
         checkProfile,
+        token,
+        setToken,
       }}
     >
       {children}
