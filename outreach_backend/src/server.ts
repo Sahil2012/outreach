@@ -3,15 +3,18 @@ import express, { ErrorRequestHandler, NextFunction } from "express";
 import emailSender from "./controller/emailSender.js";
 import cors from "cors";
 import profileRouter from "./routes/profileRoutes.js";
-import { requireAuth } from "./middlleware/requireAuth.js";
 import authRoutes from "./routes/authRoutes.js";
 import mailGeneratorController from "./controller/mailGeneratorController.js";
+import { clerkMiddleware, requireAuth } from "@clerk/express"
 
 configDotenv();
 
 const PORT = process.env.PORT;
 const app = express();
 
+// Use Middlewares
+app.use(clerkMiddleware());
+app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
     origin: [process.env.FRONTEND_URL || "", "http://localhost:5173"],
@@ -19,24 +22,24 @@ app.use(
     allowedHeaders: ["Content-Type"],
   })
 );
-
 app.use(express.json());
 
-app.post("/generateMail", requireAuth, mailGeneratorController);
-
+// Routers
+// TODO: Convert everything to routers
+app.post("/generateMail", requireAuth(), mailGeneratorController);
 app.post("/sendEmail", emailSender);
-app.post("/sendEmailV2", requireAuth, emailSender);
-
-app.use("/auth",authRoutes);
+app.post("/sendEmailV2", requireAuth(), emailSender);
+app.use("/auth", authRoutes);
 app.use("/profile", profileRouter);
 
+// Global error handler
 const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
   console.error("Unhandled error:", err);
   res.status(err.status || 500).json({ error: err.message });
 };
-// Global error handler
 app.use(errorHandler);
 
+// Start the server
 app.listen(PORT, (error) => {
   if (error) {
     console.log("We ran into an error");

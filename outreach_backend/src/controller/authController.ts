@@ -1,27 +1,35 @@
 import { log } from "console";
 import { Request, Response } from "express";
 import prisma from "../apis/prismaClient.js";
+import { clerkClient, getAuth } from "@clerk/express";
 
 // GET /auth/me
 export const getMe = async (req: Request, res: Response) => {
-  let authUserId = req.user.id;
-  log("Authenticated User ID:", authUserId);
+  let { userId: clerkUserId } = getAuth(req);
+  log("Authenticated User ID:", clerkUserId);
 
-  const user = await prisma.userTable.findUnique({
-    where: { id: authUserId },
+  if (!clerkUserId) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  const clerkUser = await clerkClient.users.getUser(clerkUserId);
+
+  const appUser = await prisma.userTable.findUnique({
+    where: { id: clerkUserId },
   });
 
-  if (!user) {
-    log("User not found, creating new user with ID:", req.user.id);
+  if (!appUser) {
+    log("User not found, creating new user with ID:", clerkUserId);
+
     try {
       await prisma.userTable.create({
         data: {
-          authUserId: req.user.id,
-          userName: req.user.userName,
-          email: req.user.email,
+          authUserId: clerkUser.id,
+          userName: clerkUser.username,
+          email: clerkUser.emailAddresses[0].emailAddress,
         },
       });
-      log("User created successfully with ID:", req.user.id);
+      log("User created successfully with ID:", clerkUser.id);
     } catch (err: any) {
       log("Error creating user:", err.message);
       res.status(500).json({ error: "Failed to initialize the user." });

@@ -3,33 +3,43 @@ import { log } from "console";
 import { GenerateMailRequest } from "../types/GenerateMailRequest.js";
 import { emailStrategy } from "../service/email/emailStratergy.js";
 import prisma from "../apis/prismaClient.js";
+import { getAuth } from "@clerk/express";
 
-const mailGeneratorController = async (req : Request<{},{},GenerateMailRequest>, res : Response, next : NextFunction) => {
+const mailGeneratorController = async (
+  req: Request<{}, {}, GenerateMailRequest>,
+  res: Response,
+  next: NextFunction
+) => {
   try {
-    const authUserId = req.user.id;
-    
-    const user = await prisma.userTable.findUnique({
-      where: { authUserId: authUserId },
-      select: { id: true }
+    const { userId: clerkUserId } = getAuth(req);
+
+    if (!clerkUserId) {
+      log("Unauthorized access attempt to mail generator");
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const appUser = await prisma.userTable.findUnique({
+      where: { authUserId: clerkUserId },
+      select: { id: true },
     });
 
-    if (!user) {
-      log("User not found for authUserId:", authUserId);
+    if (!appUser) {
+      log("User not found for authUserId:", clerkUserId);
       return res.status(404).json({ error: "User not found" });
     } else {
-      log("Generating email for userId:", user.id);
-      req.body.userId = user.id;
+      log("Generating email for userId:", appUser.id);
+      req.body.userId = appUser.id;
     }
 
     const emailGenerator = emailStrategy[req.body.type];
-    
+
     if (!emailGenerator) {
       log("No email strategy found for type:", req.body.type);
       return res.status(400).json({ error: "Invalid email type" });
     }
 
     const emailContent = await emailGenerator(req.body);
-    
+
     log("Email generated successfully for userId:", req.body.userId);
 
     res.status(200).json({ emailContent });
