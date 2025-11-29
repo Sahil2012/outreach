@@ -25,7 +25,6 @@ app.use(
 app.use(express.json());
 
 // Routers
-// TODO: Convert everything to routers
 app.post("/generateMail", requireAuth(), mailGeneratorController);
 app.post("/sendEmail", emailSender);
 app.post("/sendEmailV2", requireAuth(), emailSender);

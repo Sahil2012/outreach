@@ -19,7 +19,7 @@ export const sendEmail = async (
 ) => {
   // You can use UTF-8 encoding for the subject using the method below.
   // You can also just use a plain string if you don't need anything fancy.
-  // const subject = "🤘 Hello 🤘";
+  // const subject = " Hello ";
   // const utf8Subject = `=?utf-8?B?${Buffer.from(subject).toString("base64")}?=`;
   const { to, subject, text, attachment } = emailDetails;
 
