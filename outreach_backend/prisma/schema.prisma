@@ -37,6 +37,8 @@ model UserTable {
   authUserId      String           @unique
   userName        String?
   email           String?          @unique
+  firstName       String?
+  lastName        String?
   phoneNo         BigInt?          @unique
   resumeUrl       String?
   bio             String?
@@ -126,7 +128,7 @@ model FollowUpMsg {
 
 model Thread {
   id                Int                       @id @default(autoincrement())
-  userId            String                    
+  userId            String                    @db.Uuid             
   type              EmailType 
   threadId          String
   createdAt         DateTime                  @default(now())

@@ -6,6 +6,7 @@ import profileRouter from "./routes/profileRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import mailGeneratorController from "./controller/mailGeneratorController.js";
 import { clerkMiddleware, requireAuth } from "@clerk/express"
+import { ensureAppUser } from "./middlleware/ensureAppUser.js";
 
 configDotenv();
 
@@ -25,9 +26,9 @@ app.use(
 app.use(express.json());
 
 // Routers
-app.post("/generateMail", requireAuth(), mailGeneratorController);
+app.post("/generateMail", requireAuth(), ensureAppUser, mailGeneratorController);
 app.post("/sendEmail", emailSender);
-app.post("/sendEmailV2", requireAuth(), emailSender);
+app.post("/sendEmailV2", requireAuth(), ensureAppUser, emailSender);
 app.use("/auth", authRoutes);
 app.use("/profile", profileRouter);
 

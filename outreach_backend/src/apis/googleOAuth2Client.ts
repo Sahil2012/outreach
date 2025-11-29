@@ -10,7 +10,7 @@ const clientMap: Record<string, Auth.OAuth2Client> = {};
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const credentialsPath = path.resolve(__dirname, "../../credentials.json");
+const credentialsPath = path.resolve(__dirname, "../../../credentials.json");
 const credentials = JSON.parse(fs.readFileSync(credentialsPath, "utf8"));
 // The web object contains your client ID, secret, and redirect URIs
 const { client_id, client_secret, redirect_uris } = credentials.web;
