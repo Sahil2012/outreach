@@ -1,3 +1,4 @@
+import Header from "../../components/layout/Header";
 import Hero from "./Hero";
 import Demo from "./Demo";
 import Features from "./Features";
@@ -10,6 +11,7 @@ import Footer from "./Footer";
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
+      <Header />
       <Hero />
       <Demo />
       <Features />

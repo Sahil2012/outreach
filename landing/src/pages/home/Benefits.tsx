@@ -3,7 +3,7 @@ import { Check } from "lucide-react";
 
 export default function Benefits() {
   return (
-    <section className="py-32 bg-muted/30 border-y border-border">
+    <section id="benefits" className="py-32 bg-muted/30 border-y border-border">
       <div className="container mx-auto px-4">
         <div className="grid lg:grid-cols-2 gap-20 items-center max-w-6xl mx-auto">
           <div>
