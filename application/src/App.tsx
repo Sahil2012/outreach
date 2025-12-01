@@ -20,7 +20,7 @@ import { ErrorBoundary } from "./components/ErrorBoundry";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import ErrorPage from "./pages/error";
 import NotFound from "./pages/not-found";
-import GoogleAuth from "./pages/auth/google";
+
 
 const OutreachWizard: React.FC = () => {
   const { step, isLoading } = useOutreach();
@@ -75,22 +75,20 @@ function App() {
       <BrowserRouter>
         <AuthProvider>
           <OutreachProvider>
-            <MainLayout>
-              <Routes>
-                <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/signup" element={<SignupPage />} />
-                <Route path="/profile/create" element={<ProtectedRoute><ProfileCreatePage /></ProtectedRoute>} />
-                <Route path="/profile/edit" element={<ProtectedRoute><ProfileEditPage /></ProtectedRoute>} />
-                <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-                <Route path="/company-search" element={<ProtectedRoute><CompanySearchPage /></ProtectedRoute>} />
-                <Route path="/followups" element={<ProtectedRoute><FollowupsPage /></ProtectedRoute>} />
-                <Route path="/outreach" element={<ProtectedRoute><OutreachWizard /></ProtectedRoute>} />
-                <Route path="/error" element={<ErrorPage />} />
-                <Route path="/auth/google" element={<GoogleAuth />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </MainLayout>
+            <Routes>
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/signup" element={<SignupPage />} />
+
+              <Route path="/" element={<MainLayout><Navigate to="/dashboard" replace /></MainLayout>} />
+              <Route path="/profile/create" element={<ProtectedRoute><MainLayout><ProfileCreatePage /></MainLayout></ProtectedRoute>} />
+              <Route path="/profile/edit" element={<ProtectedRoute><MainLayout><ProfileEditPage /></MainLayout></ProtectedRoute>} />
+              <Route path="/dashboard" element={<ProtectedRoute><MainLayout><DashboardPage /></MainLayout></ProtectedRoute>} />
+              <Route path="/company-search" element={<ProtectedRoute><MainLayout><CompanySearchPage /></MainLayout></ProtectedRoute>} />
+              <Route path="/followups" element={<ProtectedRoute><MainLayout><FollowupsPage /></MainLayout></ProtectedRoute>} />
+              <Route path="/outreach" element={<ProtectedRoute><MainLayout><OutreachWizard /></MainLayout></ProtectedRoute>} />
+              <Route path="/error" element={<MainLayout><ErrorPage /></MainLayout>} />
+              <Route path="*" element={<MainLayout><NotFound /></MainLayout>} />
+            </Routes>
           </OutreachProvider>
         </AuthProvider>
       </BrowserRouter>
