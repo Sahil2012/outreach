@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { ArrowLeft, ArrowRight, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useOutreach } from "../../../context/OutreachContext";
 import { useAuth } from "../../../context/AuthContext";
-import ProgressBar from "../../../components/ui/ProgressBar";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Label } from "../../../components/ui/label";
 import { Card, CardContent } from "../../../components/ui/card";
+import { Textarea } from "../../../components/ui/textarea";
 import { generateMail } from "../../../service/mailService";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
@@ -15,7 +15,6 @@ const RecipientInfoPage: React.FC = () => {
   const { setStep, recipientInfo, setRecipientInfo, setGeneratedEmail, setIsLoading, selectedTemplate } =
     useOutreach();
   const { getToken } = useAuth();
-  const [jobIdState, setJobIdState] = useState("");
   const [companyId, setCompanyId] = useState<string | null>(null);
   const [employeeId, setEmployeeId] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -24,35 +23,20 @@ const RecipientInfoPage: React.FC = () => {
   useEffect(() => {
     const { company, employee } = location.state || {};
     if (company) {
-      setRecipientInfo({
-        ...recipientInfo,
+      setRecipientInfo((prev) => ({
+        ...prev,
         companyName: company.name,
-      });
+      }));
       setCompanyId(company.id);
     }
     if (employee) {
-      setRecipientInfo({
-        ...recipientInfo,
+      setRecipientInfo((prev) => ({
+        ...prev,
         contactName: employee.name,
-      });
+      }));
       setEmployeeId(employee.id);
     }
-  }, [location.state]);
-
-  const handleAddJob = () => {
-    setRecipientInfo({
-      ...recipientInfo,
-      jobIds: [...recipientInfo.jobIds, jobIdState],
-    });
-    setJobIdState("");
-  };
-
-  const handleRemoveJob = (index: number) => {
-    setRecipientInfo({
-      ...recipientInfo,
-      jobIds: recipientInfo.jobIds.filter((_, i) => i !== index),
-    });
-  };
+  }, [location.state, setRecipientInfo]);
 
   const handleGenerate = async () => {
     try {
@@ -82,10 +66,10 @@ const RecipientInfoPage: React.FC = () => {
 
       // Generate email
       const res = await generateMail({
-        resumeLink: recipientInfo.resumeLink,
-        jobId: recipientInfo.jobIds,
+        jobId: recipientInfo.jobIds.filter(Boolean), // Pass only valid job IDs
         hrName: recipientInfo.contactName,
         companyName: recipientInfo.companyName,
+        jobDescription: recipientInfo.jobDescription,
       });
       setGeneratedEmail(res);
 
@@ -111,7 +95,12 @@ const RecipientInfoPage: React.FC = () => {
 
   const handleSchemaValidation = () => {
     if (!recipientInfo.contactName) {
-      alert("Please enter the contact name.");
+      alert("Please enter the employee name.");
+      return false;
+    }
+
+    if (!recipientInfo.userContact) {
+      alert("Please enter the employee email.");
       return false;
     }
 
@@ -120,14 +109,8 @@ const RecipientInfoPage: React.FC = () => {
       return false;
     }
 
-    let jobs: boolean = true;
-
-    for (let ind = 0; ind < recipientInfo.jobIds.length; ind++) {
-      jobs = jobs && !!recipientInfo.jobIds[ind];
-    }
-
-    if (!jobs) {
-      alert("Please fill in all job IDs or remove empty fields.");
+    if (!recipientInfo.jobDescription) {
+      alert("Please enter the job description.");
       return false;
     }
 
@@ -135,7 +118,7 @@ const RecipientInfoPage: React.FC = () => {
   };
 
   const handleContinue = async () => {
-    if(!handleSchemaValidation()) {
+    if (!handleSchemaValidation()) {
       return;
     }
     setIsLoading(true);
@@ -145,21 +128,12 @@ const RecipientInfoPage: React.FC = () => {
   };
 
   return (
-    <div className="animate-fadeIn">
-      <ProgressBar currentStep={2} totalSteps={4} />
-
-      <h1 className="font-serif text-3xl font-medium text-navy-800 mb-2">
-        Recipient Information
-      </h1>
-      <p className="text-gray-600 mb-8">
-        Add details about the recipient and the position you're applying for.
-      </p>
-
+    <div className="animate-fadeIn space-y-6">
       <Card>
         <CardContent className="p-6 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label htmlFor="contact-name">Contact/HR Person Name *</Label>
+              <Label htmlFor="contact-name">Employee Name</Label>
               <Input
                 id="contact-name"
                 placeholder="e.g. John Smith"
@@ -170,12 +144,27 @@ const RecipientInfoPage: React.FC = () => {
                     contactName: e.target.value,
                   })
                 }
-                required
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="company-name">Company Name *</Label>
+              <Label htmlFor="employee-email">Employee Email</Label>
+              <Input
+                id="employee-email"
+                placeholder="e.g. john.smith@company.com"
+                type="email"
+                value={recipientInfo.userContact}
+                onChange={(e) =>
+                  setRecipientInfo({
+                    ...recipientInfo,
+                    userContact: e.target.value,
+                  })
+                }
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="company-name">Company Name</Label>
               <Input
                 id="company-name"
                 placeholder="e.g. Acme Corporation"
@@ -186,86 +175,59 @@ const RecipientInfoPage: React.FC = () => {
                     companyName: e.target.value,
                   })
                 }
-                required
               />
             </div>
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="resume-link">Resume Link (Google Drive)</Label>
-            <Input
-              id="resume-link"
-              placeholder="e.g. https://drive.google.com/file/your-resume"
-              value={recipientInfo.resumeLink}
-              onChange={(e) =>
-                setRecipientInfo({ ...recipientInfo, resumeLink: e.target.value })
-              }
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="job-id">Job IDs</Label>
-            <div className="flex gap-2">
+            <div className="space-y-2">
+              <Label htmlFor="job-id">Job ID (Optional)</Label>
               <Input
                 id="job-id"
                 placeholder="e.g. JOB-123456"
-                value={jobIdState}
-                onChange={(e) => setJobIdState(e.target.value)}
-                className="flex-1"
+                value={recipientInfo.jobIds[0] || ""}
+                onChange={(e) =>
+                  setRecipientInfo({
+                    ...recipientInfo,
+                    jobIds: [e.target.value],
+                  })
+                }
               />
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleAddJob}
-              >
-                <Plus className="h-4 w-4 mr-1" />
-                Add Job
-              </Button>
             </div>
           </div>
 
-          {recipientInfo.jobIds.length > 0 && (
-            <div className="space-y-2">
-              <Label>Added Job IDs</Label>
-              <div className="space-y-2">
-                {recipientInfo.jobIds.map((jobId, index) => (
-                  <div
-                    key={`jobLink-${index}`}
-                    className="flex items-center justify-between p-3 bg-slate-50 rounded-lg"
-                  >
-                    <span className="text-sm font-medium">{jobId}</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleRemoveJob(index)}
-                      aria-label="Remove job link"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          <div className="space-y-2">
+            <Label htmlFor="job-description">Job Description</Label>
+            <Textarea
+              id="job-description"
+              placeholder="Paste the job description here..."
+              rows={6}
+              value={recipientInfo.jobDescription || ""}
+              onChange={(e) =>
+                setRecipientInfo({
+                  ...recipientInfo,
+                  jobDescription: e.target.value,
+                })
+              }
+              className="resize-none"
+            />
+          </div>
         </CardContent>
       </Card>
 
-      <div className="flex justify-between mt-8">
+      <div className="flex justify-between pt-4">
         <Button
           variant="outline"
           size="lg"
           onClick={() => setStep(1)}
         >
-          <ArrowLeft className="w-5 h-5 mr-2" />
+          <ArrowLeft className="w-4 h-4 mr-2" />
           Back
         </Button>
         <Button
-          variant="default"
           size="lg"
           onClick={handleContinue}
         >
-          Continue
-          <ArrowRight className="w-5 h-5 ml-2" />
+          Generate Email
+          <ArrowRight className="w-4 h-4 ml-2" />
         </Button>
       </div>
     </div>

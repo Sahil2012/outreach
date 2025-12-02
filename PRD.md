@@ -14,7 +14,7 @@ Flows:
 
 Features:
 dashboard:
-- create mail button -> mail create stepper (1. select template, 2. Fill in details (employee Name, Email, Company Name, Job ID (optional), Job Description), 3. Preview, 4. Send (send via gmail (easy) or copy to clipboard (hard)))
+- create mail button -> mail create stepper (1. select template, 2. Fill in details (employee Name, Email, Company Name, Job ID (optional), Job Description), 3. Preview, 4. Send (send via gmail (easy for user) or copy to clipboard (should be hard for user so that he uses gmail)))
 - Stats
     - simple stats
     - search & filters

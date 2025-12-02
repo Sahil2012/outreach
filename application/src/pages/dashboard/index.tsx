@@ -25,7 +25,6 @@ import { Badge } from "@/components/ui/badge";
 import {
   Mail,
   Building2,
-  User,
   Clock,
   CheckCircle,
   MoreHorizontal,
@@ -180,7 +179,7 @@ export default function DashboardPage() {
         </div>
         <Button onClick={() => navigate('/outreach')}>
           <Plus className="w-4 h-4 mr-2" />
-          New Request
+          Create Mail
         </Button>
       </div>
 

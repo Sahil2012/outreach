@@ -41,6 +41,7 @@ export const OutreachProvider: React.FC<{ children: React.ReactNode }> = ({
     companyName: "",
     jobIds: [],
     jobLinks: [],
+    jobDescription: "",
     resumeLink: "",
   });
   const [emailDistribution, setEmailDistribution] = useState<string>("");
@@ -63,6 +64,7 @@ export const OutreachProvider: React.FC<{ children: React.ReactNode }> = ({
       companyName: "",
       jobIds: [],
       jobLinks: [],
+      jobDescription: "",
       resumeLink: "",
     });
     setGeneratedEmail({

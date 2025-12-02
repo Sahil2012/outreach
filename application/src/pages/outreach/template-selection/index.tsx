@@ -1,8 +1,7 @@
 import React, { useEffect } from "react";
-import { ArrowRight, FileText, PlusCircle } from "lucide-react";
+import { ArrowRight, FileText, PlusCircle, Check } from "lucide-react";
 import { useOutreach } from "../../../context/OutreachContext";
-import ProgressBar from "../../../components/ui/ProgressBar";
-import { Card, CardContent } from "../../../components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../../components/ui/card";
 import { Button } from "../../../components/ui/button";
 import { Textarea } from "../../../components/ui/textarea";
 import { Label } from "../../../components/ui/label";
@@ -38,9 +37,9 @@ const TemplateSelectionPage: React.FC = () => {
   }, [location.state, setRecipientInfo]);
 
   const handleSelectTemplate = (templateId: string) => {
-    if(templateId != '1') {
-      alert("This template option is in progress.")
-      return;
+    if (templateId != '1') {
+      // alert("This template option is in progress.")
+      // return;
     }
     const template = templates.find((t) => t.id === templateId);
     setSelectedTemplate(template || null);
@@ -48,10 +47,8 @@ const TemplateSelectionPage: React.FC = () => {
   };
 
   const handleUseCustomTemplate = () => {
-    
-    alert("This option is not available yet.")
-    // setSelectedTemplate(null);
-    // setUseCustomTemplate(true);
+    setSelectedTemplate(null);
+    setUseCustomTemplate(true);
   };
 
   const handleContinue = () => {
@@ -69,99 +66,94 @@ const TemplateSelectionPage: React.FC = () => {
   };
 
   return (
-    <div className="animate-fadeIn">
-      <ProgressBar currentStep={1} totalSteps={4} />
-
-      <h1 className="font-serif text-3xl font-medium mb-2">
-        Choose Your Template
-      </h1>
-      <p className="text-gray-600 mb-8">
-        Start with a pre-built template or create your own custom message.
-      </p>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-        <div>
-          <h2 className="text-xl font-medium text-gray-800 mb-4">
-            Pre-built Templates
-          </h2>
-          <div className="space-y-4">
-            {templates.map((template) => (
-              <Card
-                key={template.id}
-                className={cn(
-                  "cursor-pointer transition-all hover:shadow-md",
-                  selectedTemplate?.id === template.id ? "border-blue-500 ring-2 ring-blue-500" : ""
-                )}
-                onClick={() => handleSelectTemplate(template.id)}
-              >
-                <CardContent className="p-4 flex items-start">
-                  <div className="bg-blue-100 rounded-lg p-2 mr-4">
-                    <FileText className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-gray-900">
-                      {template.name}
-                    </h3>
-                    <p className="text-gray-600 text-sm mt-1">
-                      {template.content.substring(0, 100)}...
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <h2 className="text-xl font-medium text-gray-800 mb-4">
-            Custom Template
-          </h2>
+    <div className="animate-fadeIn space-y-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {templates.map((template) => (
           <Card
+            key={template.id}
             className={cn(
-              "cursor-pointer transition-all hover:shadow-md mb-4",
-              useCustomTemplate ? "border-blue-500 ring-2 ring-blue-500" : ""
+              "cursor-pointer transition-all hover:shadow-md py-6 relative overflow-hidden",
+              selectedTemplate?.id === template.id
+                ? "border-primary ring-2 ring-primary/20 bg-primary/5"
+                : "hover:border-primary/50"
             )}
-            onClick={handleUseCustomTemplate}
+            onClick={() => handleSelectTemplate(template.id)}
           >
-            <CardContent className="p-4 flex items-start">
-              <div className="bg-blue-100 rounded-lg p-2 mr-4">
-                <PlusCircle className="h-5 w-5 text-blue-600" />
+            {selectedTemplate?.id === template.id && (
+              <div className="absolute top-0 right-0 p-2 bg-primary text-primary-foreground rounded-bl-lg">
+                <Check className="w-4 h-4" />
               </div>
-              <div>
-                <h3 className="font-medium text-gray-900">Create Your Own</h3>
-                <p className="text-gray-600 text-sm mt-1">
-                  Write a custom message tailored to your specific needs.
-                </p>
+            )}
+            <CardHeader>
+              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
+                <FileText className="h-5 w-5 text-primary" />
               </div>
+              <CardTitle className="text-lg">{template.name}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground text-sm line-clamp-3">
+                {template.content}
+              </p>
             </CardContent>
           </Card>
+        ))}
 
+        <Card
+          className={cn(
+            "cursor-pointer transition-all hover:shadow-md py-6 relative overflow-hidden",
+            useCustomTemplate
+              ? "border-primary ring-2 ring-primary/20 bg-primary/5"
+              : "hover:border-primary/50"
+          )}
+          onClick={handleUseCustomTemplate}
+        >
           {useCustomTemplate && (
-            <div className="animate-fadeIn space-y-2">
-              <Label htmlFor="custom-template">Your Custom Template</Label>
-              <Textarea
-                id="custom-template"
-                placeholder="Write your email template here. Use {{contactName}}, {{companyName}}, {{jobIds}}, and {{jobLinks}} as placeholders for dynamic content."
-                rows={8}
-                value={customTemplate}
-                onChange={(e) => setCustomTemplate(e.target.value)}
-              />
-              <p className="text-sm text-gray-500">
-                Use {"{{placeholders}}"} for dynamic content that will be filled in the next step.
-              </p>
+            <div className="absolute top-0 right-0 p-2 bg-primary text-primary-foreground rounded-bl-lg">
+              <Check className="w-4 h-4" />
             </div>
           )}
-        </div>
+          <CardHeader>
+            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
+              <PlusCircle className="h-5 w-5 text-primary" />
+            </div>
+            <CardTitle className="text-lg">Create Your Own</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground text-sm">
+              Write a custom message tailored to your specific needs.
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
-      <div className="flex justify-end">
+      {useCustomTemplate && (
+        <Card className="animate-fadeIn py-6 gap-6">
+          <CardHeader>
+            <CardTitle>Custom Template</CardTitle>
+            <CardDescription className="">
+              Use {"{{placeholders}}"} for dynamic content that will be filled in the next step.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Textarea
+              placeholder="Write your email template here. Use {{contactName}}, {{companyName}}, {{jobIds}}, and {{jobLinks}} as placeholders."
+              rows={5}
+              value={customTemplate}
+              onChange={(e) => setCustomTemplate(e.target.value)}
+              className="font-mono text-sm field-sizing-content"
+            />
+          </CardContent>
+        </Card>
+      )}
+
+      <div className="flex justify-end pt-4">
         <Button
-          variant="default"
           size="lg"
           onClick={handleContinue}
+          className="w-full sm:w-auto"
         >
           Continue
-          <ArrowRight className="w-5 h-5 ml-2" />
+          <ArrowRight className="w-4 h-4 ml-2" />
         </Button>
       </div>
     </div>

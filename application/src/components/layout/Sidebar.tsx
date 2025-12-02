@@ -59,12 +59,6 @@ export function Sidebar({ className }: SidebarProps) {
             href: '/followups',
             active: location.pathname === '/followups',
         },
-        {
-            label: 'Profile',
-            icon: User,
-            href: '/profile',
-            active: location.pathname.startsWith('/profile'),
-        },
     ];
 
     return (

@@ -5,26 +5,27 @@ export interface Template {
 }
 
 export interface RecipientInfo {
-  userName : string,
-  userContact : string,
+  userName: string,
+  userContact: string,
   contactName: string;
   companyName: string;
   jobIds: string[];
   jobLinks: string[];
+  jobDescription?: string;
   resumeLink?: string;
 }
 
 interface Email {
-  subject : string,
-  body : string
+  subject: string,
+  body: string
 }
 
 export interface GeneratedEmail {
-  email : Email
+  email: Email
 }
 
 export interface SendEmail {
-  subject : string,
-  text : string,
-  to : string
+  subject: string,
+  text: string,
+  to: string
 }

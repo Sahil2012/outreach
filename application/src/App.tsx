@@ -1,11 +1,8 @@
 import React from "react";
-import { OutreachProvider, useOutreach } from "./context/OutreachContext";
+import { OutreachProvider } from "./context/OutreachContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import MainLayout from "./components/layout/MainLayout";
-import TemplateSelectionPage from "./pages/outreach/template-selection";
-import RecipientInfoPage from "./pages/outreach/recipient-info";
-import EmailPreviewPage from "./pages/outreach/email-preview";
-import SendEmailPage from "./pages/outreach/send-email";
+import OutreachWizard from "./pages/outreach";
 import LoginPage from "./pages/auth/login";
 import SignupPage from "./pages/auth/signup";
 import ProfilePage from "./pages/profile";
@@ -14,45 +11,23 @@ import DashboardPage from "./pages/dashboard";
 import CompanySearchPage from "./pages/company-search";
 import FollowupsPage from "./pages/followups";
 
+import OnboardingLayout from "./components/layout/OnboardingLayout";
+import BasicInfoPage from "./pages/onboarding/basic-info";
+import ProfessionalInfoPage from "./pages/onboarding/professional-info";
+
 import "./index.css";
 import { Loader } from "./components/ui/loader";
 import { ErrorBoundary } from "./components/ErrorBoundry";
-import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate, useLocation } from "react-router-dom";
 import ErrorPage from "./pages/error";
 import NotFound from "./pages/not-found";
 
 
-const OutreachWizard: React.FC = () => {
-  const { step, isLoading } = useOutreach();
 
-  const renderStep = () => {
-    switch (step) {
-      case 1:
-        return <TemplateSelectionPage />;
-      case 2:
-        return <RecipientInfoPage />;
-      case 3:
-        return <EmailPreviewPage />;
-      case 4:
-        return <SendEmailPage />;
-      default:
-        return <TemplateSelectionPage />;
-    }
-  };
-
-  return (
-    <div className="min-h-screen">
-      {isLoading ? (
-        <Loader size="lg" text="Generating Email..." className="h-64" />
-      ) : (
-        renderStep()
-      )}
-    </div>
-  );
-};
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
+  const { user, loading, isOnboarded } = useAuth();
+  const location = useLocation();
 
   if (loading) {
     return (
@@ -66,6 +41,38 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
     return <Navigate to="/login" />;
   }
 
+  // If user is NOT onboarded and NOT on an onboarding page, redirect to onboarding
+  if (!isOnboarded && !location.pathname.startsWith('/onboarding')) {
+    return <Navigate to="/onboarding/basic-info" />;
+  }
+
+  // If user IS onboarded and tries to access onboarding, redirect to dashboard
+  if (isOnboarded && location.pathname.startsWith('/onboarding')) {
+    return <Navigate to="/dashboard" />;
+  }
+
+  return <>{children}</>;
+}
+
+function PublicRoute({ children }: { children: React.ReactNode }) {
+  const { user, loading, isOnboarded } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader size="lg" />
+      </div>
+    );
+  }
+
+  if (user) {
+    if (isOnboarded) {
+      return <Navigate to="/dashboard" />;
+    } else {
+      return <Navigate to="/onboarding/basic-info" />;
+    }
+  }
+
   return <>{children}</>;
 }
 
@@ -76,9 +83,14 @@ function App() {
         <AuthProvider>
           <OutreachProvider>
             <Routes>
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/signup" element={<SignupPage />} />
+              <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
+              <Route path="/signup" element={<PublicRoute><SignupPage /></PublicRoute>} />
 
+              {/* Onboarding Routes */}
+              <Route path="/onboarding/basic-info" element={<ProtectedRoute><OnboardingLayout><BasicInfoPage /></OnboardingLayout></ProtectedRoute>} />
+              <Route path="/onboarding/professional-info" element={<ProtectedRoute><OnboardingLayout><ProfessionalInfoPage /></OnboardingLayout></ProtectedRoute>} />
+
+              {/* Main App Routes */}
               <Route path="/" element={<MainLayout><Navigate to="/dashboard" replace /></MainLayout>} />
               <Route path="/profile" element={<ProtectedRoute><MainLayout><ProfilePage /></MainLayout></ProtectedRoute>} />
               <Route path="/settings" element={<ProtectedRoute><MainLayout><SettingsPage /></MainLayout></ProtectedRoute>} />
