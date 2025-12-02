@@ -149,7 +149,7 @@ export default function SignupPage() {
       title="Create an account"
       subtitle="Enter your email below to create your account"
     >
-      <Card className="border-border/40 shadow-xl rounded-3xl backdrop-blur-sm bg-background/95 !py-0">
+      <Card>
         <CardContent className="pt-8 px-8">
           <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
@@ -167,7 +167,6 @@ export default function SignupPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="h-11 rounded-xl bg-muted/30 border-muted-foreground/20 focus-visible:ring-primary/20"
               />
             </div>
             <div className="space-y-2">
@@ -178,12 +177,11 @@ export default function SignupPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="h-11 rounded-xl bg-muted/30 border-muted-foreground/20 focus-visible:ring-primary/20"
               />
             </div>
             <Button
               type="submit"
-              className="w-full h-11 rounded-full font-semibold text-base shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+              className="w-full"
               disabled={isLoading}
             >
               {isLoading ? <Loader className="w-4 h-4 mr-2" /> : null}
@@ -205,7 +203,7 @@ export default function SignupPage() {
           <Button
             variant="outline"
             type="button"
-            className="w-full h-11 rounded-full font-medium border-border/60 hover:bg-muted/30 hover:border-border transition-all"
+            className="w-full"
             onClick={handleGoogleSignUp}
           >
             <svg className="mr-2 h-4 w-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512">

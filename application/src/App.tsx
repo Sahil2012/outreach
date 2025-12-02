@@ -8,8 +8,8 @@ import EmailPreviewPage from "./pages/outreach/email-preview";
 import SendEmailPage from "./pages/outreach/send-email";
 import LoginPage from "./pages/auth/login";
 import SignupPage from "./pages/auth/signup";
-import ProfileCreatePage from "./pages/profile/create";
-import ProfileEditPage from "./pages/profile/edit";
+import ProfilePage from "./pages/profile";
+import SettingsPage from "./pages/settings";
 import DashboardPage from "./pages/dashboard";
 import CompanySearchPage from "./pages/company-search";
 import FollowupsPage from "./pages/followups";
@@ -80,8 +80,8 @@ function App() {
               <Route path="/signup" element={<SignupPage />} />
 
               <Route path="/" element={<MainLayout><Navigate to="/dashboard" replace /></MainLayout>} />
-              <Route path="/profile/create" element={<ProtectedRoute><MainLayout><ProfileCreatePage /></MainLayout></ProtectedRoute>} />
-              <Route path="/profile/edit" element={<ProtectedRoute><MainLayout><ProfileEditPage /></MainLayout></ProtectedRoute>} />
+              <Route path="/profile" element={<ProtectedRoute><MainLayout><ProfilePage /></MainLayout></ProtectedRoute>} />
+              <Route path="/settings" element={<ProtectedRoute><MainLayout><SettingsPage /></MainLayout></ProtectedRoute>} />
               <Route path="/dashboard" element={<ProtectedRoute><MainLayout><DashboardPage /></MainLayout></ProtectedRoute>} />
               <Route path="/company-search" element={<ProtectedRoute><MainLayout><CompanySearchPage /></MainLayout></ProtectedRoute>} />
               <Route path="/followups" element={<ProtectedRoute><MainLayout><FollowupsPage /></MainLayout></ProtectedRoute>} />
