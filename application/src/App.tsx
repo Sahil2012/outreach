@@ -21,6 +21,7 @@ import { ErrorBoundary } from "./components/ErrorBoundry";
 import { BrowserRouter, Route, Routes, Navigate, useLocation } from "react-router-dom";
 import ErrorPage from "./pages/error";
 import NotFound from "./pages/not-found";
+import SSOCallbackPage from "./pages/auth/sso-callback";
 
 
 
@@ -85,6 +86,7 @@ function App() {
             <Routes>
               <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
               <Route path="/signup" element={<PublicRoute><SignupPage /></PublicRoute>} />
+              <Route path="/sso-callback" element={<PublicRoute><SSOCallbackPage /></PublicRoute>} />
 
               {/* Onboarding Routes */}
               <Route path="/onboarding/basic-info" element={<ProtectedRoute><OnboardingLayout><BasicInfoPage /></OnboardingLayout></ProtectedRoute>} />
