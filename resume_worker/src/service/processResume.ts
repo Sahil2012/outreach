@@ -24,7 +24,7 @@ export async function processResume(id: string, extracted: any) {
       log("User found:", user.id);
 
       // 1. Create profile
-      const profile = await ingestUserProfile(tx, user.id, extracted);
+      const profile = await ingestUserProfile(tx, user.authUserId, extracted);
 
       // 2. Handle skills
       const skillNames = extracted.skills?.map((s: any) => s.name) || [];
