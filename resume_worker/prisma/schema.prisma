@@ -13,6 +13,8 @@ model UserTable {
   authUserId      String           @unique
   userName        String?
   email           String?          @unique
+  firstName       String?
+  lastName        String?
   phoneNo         BigInt?          @unique
   resumeUrl       String?
   bio             String?
@@ -20,8 +22,6 @@ model UserTable {
   templatesUsed   Int              @default(0)
   profileDataId   Int?             @unique
   createdAt       DateTime         @default(now())
-  firstName       String?
-  lastName        String?
   jobsAdded       JobPool[]
   messages        ReferralMsg[]
   Thread          Thread[]
@@ -74,8 +74,8 @@ model ReferralMsg {
   userId     String
   employeeId Int
   jobId      Int?
-  date       DateTime      @default(now())
   threadId   Int
+  date       DateTime      @default(now())
   followUps  FollowUpMsg[]
   Employee   EmpInfo       @relation(fields: [employeeId], references: [id])
   Job        JobPool?      @relation(fields: [jobId], references: [id])
@@ -87,9 +87,9 @@ model FollowUpMsg {
   id          Int         @id @default(autoincrement())
   message     String
   referralId  Int
+  threadId    Int
   version     Int         @default(1)
   sentAt      DateTime    @default(now())
-  threadId    Int
   ReferralMsg ReferralMsg @relation(fields: [referralId], references: [id])
   Thread      Thread      @relation(fields: [threadId], references: [id])
 }
@@ -112,9 +112,9 @@ model JobPool {
   jobUrl      String?
   jobId       String?
   companyName String?
-  addedById   String?       @db.Uuid
+  addedById   String?
   createdAt   DateTime      @default(now())
-  addedBy     UserTable?    @relation(fields: [addedById], references: [id])
+  addedBy     UserTable?    @relation(fields: [addedById], references: [authUserId])
   referrals   ReferralMsg[]
 }
 
@@ -128,14 +128,14 @@ model ProfileReadiness {
 
 model Thread {
   id          Int           @id @default(autoincrement())
+  userId      String        @db.Uuid
   type        EmailType
   threadId    String
   createdAt   DateTime      @default(now())
   status      ThreadStatus  @default(PENDING)
-  userId      String
   FollowUpMsg FollowUpMsg[]
   ReferralMsg ReferralMsg[]
-  UserTable   UserTable     @relation(fields: [userId], references: [authUserId])
+  UserTable   UserTable     @relation(fields: [userId], references: [id])
 }
 
 enum RefStatus {

@@ -28,6 +28,8 @@ export async function ingestExperience(
       data: experiences.map((exp) => ({
         companyName: exp.companyName,
         role: exp.role,
+        startDate: exp.startDate ? new Date(exp.startDate) : null,
+        endDate: exp.endDate ? new Date(exp.endDate) : null,
         description: exp.description || null,
         userProfileDataId: profileId,
       })),
