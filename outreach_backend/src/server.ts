@@ -7,7 +7,7 @@ import authRoutes from "./routes/authRoutes.js";
 import mailGeneratorController from "./controller/mailGeneratorController.js";
 import { clerkMiddleware, requireAuth } from "@clerk/express"
 import { ensureAppUser } from "./middlleware/ensureAppUser.js";
-
+import { getEmailTypes } from "./controller/emailController.js";
 configDotenv();
 
 const PORT = process.env.PORT;
@@ -31,6 +31,7 @@ app.post("/sendEmail", emailSender);
 app.post("/sendEmailV2", requireAuth(), ensureAppUser, emailSender);
 app.use("/auth", authRoutes);
 app.use("/profile", profileRouter);
+app.get("/email/type", getEmailTypes);
 
 // Global error handler
 const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
