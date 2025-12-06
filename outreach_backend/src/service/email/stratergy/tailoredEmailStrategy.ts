@@ -1,4 +1,3 @@
-import { ReferralEmailRequest } from "../../../types/GenerateMailRequest.js";
 import { getCandidateProfile } from "../../extractCandidateProfile.js";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { referralEmailPrompt } from "../../../utils/prompts/referralPromptTemplate.js";
@@ -6,9 +5,10 @@ import { StructuredOutputParser } from "langchain/output_parsers";
 import { emailSchema } from "../../../schema/schema.js";
 import callLLM from "../../../apis/geminichat.js";
 import { log } from "console";
+import { TailoredEmailRequest } from "../../../types/GenerateMailRequest.js";
 
-export const referralEmailStrategy = async (
-  emailRequest: ReferralEmailRequest
+export const tailoredEmailStrategy = async (
+  emailRequest: TailoredEmailRequest
 ) => {
   const userId = emailRequest.userId;
   const jobDescription = emailRequest.jobDescription;
@@ -26,7 +26,7 @@ export const referralEmailStrategy = async (
   const res = await callLLM(
     await referralPrompt.format({
       jobDescription: jobDescription,
-      jobIds: emailRequest.jobId,
+      jobIds: emailRequest.jobs.join(", "),
       skills: profileDetails.skills,
       experience: profileDetails.experiences,
       education: profileDetails.education,

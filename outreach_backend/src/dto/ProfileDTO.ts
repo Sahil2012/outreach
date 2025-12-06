@@ -7,7 +7,7 @@ export interface ProfileDTO {
   experiences: Array<{
     title: string;
     company: string;
-    startDate: string;
+    startDate?: string | null;
     endDate?: string | null;
     description?: string | null;
   }>;

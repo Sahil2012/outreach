@@ -1,6 +1,6 @@
 
 export type EmailType =
-  | "referral"
+  | "tailored"
   | "followup"
   | "cold"
   | "thankyou";
@@ -9,11 +9,14 @@ export interface EmailRequestBase {
   userId?: string;
   type: EmailType;
   contactName: string;
+  contactEmail?: string;
+  companyName: string;
+  role?: string;
 }
 
-export interface ReferralEmailRequest extends EmailRequestBase {
-  type: "referral";
-  jobId: string;
+export interface TailoredEmailRequest extends EmailRequestBase {
+  type: "tailored";
+  jobs: [string];
   jobDescription: string;
 }
 
@@ -32,7 +35,7 @@ export interface ThankYouEmailRequest extends EmailRequestBase {
 }
 
 export type GenerateMailRequest =
-  | ReferralEmailRequest
+  | TailoredEmailRequest
   | FollowupEmailRequest
   | ColdEmailRequest
   | ThankYouEmailRequest;
