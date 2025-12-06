@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Loader } from '../../components/ui/loader';
@@ -33,7 +32,7 @@ import {
   Search,
   Filter
 } from 'lucide-react';
-import axios from 'axios';
+import { useApi } from '@/hooks/useApi';
 
 interface Referral {
   id: string;
@@ -97,7 +96,7 @@ export default function DashboardPage() {
   const [filterType, setFilterType] = useState<'all' | 'company' | 'employee' | 'hr'>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const { getToken } = useAuth();
+  const api = useApi();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -110,11 +109,8 @@ export default function DashboardPage() {
 
   const loadReferrals = async () => {
     try {
-      const token = await getToken();
       // Try to fetch from API
-      const { data } = await axios.get('http://localhost:3000/referrals', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const { data } = await api.get('/referrals');
       setReferrals(data);
     } catch (error) {
       console.warn('Failed to load referrals from API, using mock data:', error);

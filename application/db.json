@@ -1,0 +1,217 @@
+{
+  "companies": [
+    {
+      "id": "1",
+      "name": "Tech Corp",
+      "industry": "Technology",
+      "website": "https://techcorp.com"
+    },
+    {
+      "id": "2",
+      "name": "Innovate Inc",
+      "industry": "Software",
+      "website": "https://innovate.com"
+    }
+  ],
+  "employees": [
+    {
+      "id": "1",
+      "company_id": "1",
+      "name": "Alice Smith",
+      "email": "alice@techcorp.com",
+      "linkedin_url": "https://linkedin.com/in/alice",
+      "position": "Senior Engineer",
+      "is_hr": false
+    },
+    {
+      "id": "2",
+      "company_id": "1",
+      "name": "Bob Jones",
+      "email": "bob@techcorp.com",
+      "linkedin_url": "https://linkedin.com/in/bob",
+      "position": "Recruiter",
+      "is_hr": true
+    }
+  ],
+  "followups": [
+    {
+      "id": "1",
+      "referral_id": "101",
+      "followup_date": "2025-12-10T10:00:00Z",
+      "notes": "Follow up on application",
+      "completed": false,
+      "created_at": "2025-12-01T10:00:00Z",
+      "referrals": {
+        "companies": {
+          "name": "Tech Corp"
+        },
+        "employees": {
+          "name": "Alice Smith"
+        }
+      }
+    }
+  ],
+  "profile": {
+    "id": "1",
+    "isResumeUploaded": false,
+    "isResumeParsed": true,
+    "skills": [
+      "React",
+      "Tailwind"
+    ],
+    "projects": [
+      {
+        "id": "1",
+        "title": "Portfolio",
+        "description": "My personal portfolio",
+        "technologies": [
+          "React",
+          "Tailwind"
+        ],
+        "project_url": "https://portfolio.com"
+      }
+    ],
+    "education": [
+      {
+        "id": "1",
+        "institution": "University of Tech 2",
+        "degree": "B.S. Computer Science",
+        "start_date": "2018",
+        "end_date": "2022",
+        "field_of_study": "Compute scien",
+        "grade": "9,23",
+        "year_of_passing": "asdf"
+      }
+    ],
+    "experience": [
+      {
+        "id": "1",
+        "company": "Tech Corp ",
+        "position": "Software Engineer",
+        "start_date": "2022",
+        "end_date": "2025",
+        "title": "Software Engineer"
+      }
+    ],
+    "firstName": "Himanshu",
+    "lastName": "Jaroli"
+  },
+  "onboarding_readiness": {
+    "status": "completed"
+  },
+  "outreach_types": [
+    {
+      "id": "1",
+      "name": "Cold Email",
+      "content": "Hi {{employeeName}},\nI am writing to express my interest in the {{jobTitle}} position at {{companyName}}. I am super excited to work with you."
+    },
+    {
+      "id": "2",
+      "name": "Follow Up",
+      "content": "Hi {{employeeName}},\nI am writing to express my interest in the {{jobTitle}} position at {{companyName}}."
+    }
+  ],
+  "outreach_generate": {
+    "employeeName": "Himanshu Jaroli",
+    "employeeEmail": "jaroli.himanshu@gmail.com",
+    "companyName": "Google",
+    "jobDescription": "kjhadf",
+    "templateId": "1"
+  },
+  "outreach_edit": {},
+  "outreach_send": {
+    "id": "lR9jw3I",
+    "manageThread": false
+  },
+  "outreach_drafts": [
+    {
+      "id": "1",
+      "employeeName": "Himanshu Jaroli",
+      "employeeEmail": "jaroli.himanshu@gmail.com",
+      "companyName": "Google",
+      "jobDescription": "kjhadf",
+      "templateId": "1"
+    },
+    {
+      "employeeName": "Himanshu Jaroli",
+      "employeeEmail": "jaroli.himanshu@gmail.com",
+      "companyName": "Google",
+      "jobDescription": "sdfsdf",
+      "templateId": "1",
+      "id": "6FLswJf",
+      "email": {
+        "subject": "Generated Subject",
+        "body": "Generated Body"
+      },
+      "isMailGenerated": true,
+      "isDraftCompleted": false
+    },
+    {
+      "employeeName": "Himanshu Jaroli",
+      "employeeEmail": "jaroli.himanshu@gmail.com",
+      "companyName": "Google",
+      "jobDescription": "lkjlkdfa",
+      "templateId": "1",
+      "id": "Cs7NSKH",
+      "email": {
+        "subject": "Generated Subject",
+        "body": "Generated Body"
+      },
+      "isMailGenerated": true,
+      "isDraftCompleted": false
+    },
+    {
+      "employeeName": "Himanshu Jaroli",
+      "employeeEmail": "jaroli.himanshu@gmail.com",
+      "companyName": "Google",
+      "jobDescription": "lkj;sdf",
+      "templateId": "1",
+      "id": "teGAE4M",
+      "email": {
+        "subject": "Generated Subject",
+        "body": "Generated Body"
+      },
+      "isMailGenerated": true,
+      "isDraftCompleted": false
+    },
+    {
+      "employeeName": "Himanshu Jaroli",
+      "employeeEmail": "jaroli.himanshu@gmail.com",
+      "companyName": "Google",
+      "jobDescription": "asdf",
+      "templateId": "1",
+      "id": "iSKiIc9"
+    },
+    {
+      "employeeName": "Himanshu Jaroli",
+      "employeeEmail": "jaroli.himanshu@gmail.com",
+      "companyName": "Google",
+      "jobDescription": "qwer",
+      "templateId": "1",
+      "id": "pHBcJyV"
+    },
+    {
+      "employeeName": "Himanshu Jaroli",
+      "employeeEmail": "jaroli.himanshu@gmail.com",
+      "companyName": "Google",
+      "jobDescription": "lkjdsf",
+      "templateId": "1",
+      "id": "lR9jw3I",
+      "email": {
+        "subject": "Generated Subject",
+        "body": "Generated Body"
+      },
+      "isMailGenerated": true,
+      "isDraftCompleted": true
+    }
+  ],
+  "resume": {},
+  "referrals": [],
+  "generateMail": {
+    "subject": "Generated Subject",
+    "body": "Generated Body"
+  },
+  "sendEmail": {
+    "success": true
+  }
+}

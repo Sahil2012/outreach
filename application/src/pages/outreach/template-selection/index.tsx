@@ -1,167 +1,86 @@
-import React, { useEffect } from "react";
-import { ArrowRight, FileText, PlusCircle } from "lucide-react";
-import { useOutreach } from "../../../context/OutreachContext";
-import ProgressBar from "../../../components/ui/ProgressBar";
-import { Card, CardContent } from "../../../components/ui/card";
-import { Button } from "../../../components/ui/button";
-import { Textarea } from "../../../components/ui/textarea";
-import { Label } from "../../../components/ui/label";
-import { templates } from "../../../data/templates";
-import { useLocation } from "react-router-dom";
-import { RecipientInfo } from "../../../types";
-import { cn } from "../../../lib/utils";
+import React, { useEffect, useState } from "react";
+import { ArrowRight, FileText, Check } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import { cn } from "@/lib/utils";
+import { Template } from "@/lib/types";
+import { useOutreachActions } from "@/hooks/useOutreachActions";
+import { toast } from "sonner";
 
 const TemplateSelectionPage: React.FC = () => {
-  const {
-    setStep,
-    selectedTemplate,
-    setSelectedTemplate,
-    customTemplate,
-    setCustomTemplate,
-    useCustomTemplate,
-    setUseCustomTemplate,
-    setRecipientInfo,
-  } = useOutreach();
-
-  const location = useLocation();
+  const { fetchTemplates } = useOutreachActions();
+  const [templates, setTemplates] = useState<Template[]>([]);
+  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (location.state?.company && location.state?.employee) {
-      const { company, employee } = location.state;
-      setRecipientInfo((prev: RecipientInfo) => ({
-        ...prev,
-        companyName: company.name,
-        contactName: employee.name,
-        userContact: employee.email || "",
-      }));
-    }
-  }, [location.state, setRecipientInfo]);
+    const loadTemplates = async () => {
+      try {
+        const data = await fetchTemplates();
+        setTemplates(data);
+      } catch (error) {
+        console.error("Failed to load templates", error);
+        toast.error("Failed to load templates. Please try again later.");
+      }
+    };
+    loadTemplates();
+  }, []);
 
-  const handleSelectTemplate = (templateId: string) => {
-    if(templateId != '1') {
-      alert("This template option is in progress.")
-      return;
-    }
-    const template = templates.find((t) => t.id === templateId);
-    setSelectedTemplate(template || null);
-    setUseCustomTemplate(false);
-  };
-
-  const handleUseCustomTemplate = () => {
-    
-    alert("This option is not available yet.")
-    // setSelectedTemplate(null);
-    // setUseCustomTemplate(true);
+  const handleSelectTemplate = (template: Template) => {
+    setSelectedTemplate(template);
   };
 
   const handleContinue = () => {
-    if (useCustomTemplate && !customTemplate) {
-      alert("Please enter your custom template or select a pre-built one.");
+    if (!selectedTemplate) {
+      toast.error("Please select a template.");
       return;
     }
-
-    if (!useCustomTemplate && !selectedTemplate) {
-      alert("Please select a template or create your own.");
-      return;
-    }
-
-    setStep(2);
+    navigate(`/outreach/recipient-info?templateId=${selectedTemplate.id}`);
   };
 
   return (
-    <div className="animate-fadeIn">
-      <ProgressBar currentStep={1} totalSteps={4} />
-
-      <h1 className="font-serif text-3xl font-medium mb-2">
-        Choose Your Template
-      </h1>
-      <p className="text-gray-600 mb-8">
-        Start with a pre-built template or create your own custom message.
-      </p>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-        <div>
-          <h2 className="text-xl font-medium text-gray-800 mb-4">
-            Pre-built Templates
-          </h2>
-          <div className="space-y-4">
-            {templates.map((template) => (
-              <Card
-                key={template.id}
-                className={cn(
-                  "cursor-pointer transition-all hover:shadow-md",
-                  selectedTemplate?.id === template.id ? "border-blue-500 ring-2 ring-blue-500" : ""
-                )}
-                onClick={() => handleSelectTemplate(template.id)}
-              >
-                <CardContent className="p-4 flex items-start">
-                  <div className="bg-blue-100 rounded-lg p-2 mr-4">
-                    <FileText className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-gray-900">
-                      {template.name}
-                    </h3>
-                    <p className="text-gray-600 text-sm mt-1">
-                      {template.content.substring(0, 100)}...
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <h2 className="text-xl font-medium text-gray-800 mb-4">
-            Custom Template
-          </h2>
+    <div className="animate-fadeIn space-y-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {templates.map((template) => (
           <Card
+            key={template.id}
             className={cn(
-              "cursor-pointer transition-all hover:shadow-md mb-4",
-              useCustomTemplate ? "border-blue-500 ring-2 ring-blue-500" : ""
+              "cursor-pointer transition-all hover:shadow-md py-6 relative overflow-hidden",
+              selectedTemplate?.id === template.id
+                ? "border-primary ring-2 ring-primary/20 bg-primary/5"
+                : "hover:border-primary/50"
             )}
-            onClick={handleUseCustomTemplate}
+            onClick={() => handleSelectTemplate(template)}
           >
-            <CardContent className="p-4 flex items-start">
-              <div className="bg-blue-100 rounded-lg p-2 mr-4">
-                <PlusCircle className="h-5 w-5 text-blue-600" />
+            {selectedTemplate?.id === template.id && (
+              <div className="absolute top-0 right-0 p-2 bg-primary text-primary-foreground rounded-bl-lg">
+                <Check className="w-4 h-4" />
               </div>
-              <div>
-                <h3 className="font-medium text-gray-900">Create Your Own</h3>
-                <p className="text-gray-600 text-sm mt-1">
-                  Write a custom message tailored to your specific needs.
-                </p>
+            )}
+            <CardHeader className="mb-2">
+              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
+                <FileText className="h-5 w-5 text-primary" />
+              </div>
+              <CardTitle className="text-lg">{template.name}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-muted-foreground overflow-hidden italic text-xs w-full line-clamp-3 whitespace-pre-wrap">
+                <span>{template.content}</span>
               </div>
             </CardContent>
           </Card>
-
-          {useCustomTemplate && (
-            <div className="animate-fadeIn space-y-2">
-              <Label htmlFor="custom-template">Your Custom Template</Label>
-              <Textarea
-                id="custom-template"
-                placeholder="Write your email template here. Use {{contactName}}, {{companyName}}, {{jobIds}}, and {{jobLinks}} as placeholders for dynamic content."
-                rows={8}
-                value={customTemplate}
-                onChange={(e) => setCustomTemplate(e.target.value)}
-              />
-              <p className="text-sm text-gray-500">
-                Use {"{{placeholders}}"} for dynamic content that will be filled in the next step.
-              </p>
-            </div>
-          )}
-        </div>
+        ))}
       </div>
 
-      <div className="flex justify-end">
+      <div className="flex justify-end pt-4">
         <Button
-          variant="default"
           size="lg"
           onClick={handleContinue}
+          className="w-full sm:w-auto"
         >
           Continue
-          <ArrowRight className="w-5 h-5 ml-2" />
+          <ArrowRight className="w-4 h-4 ml-2" />
         </Button>
       </div>
     </div>

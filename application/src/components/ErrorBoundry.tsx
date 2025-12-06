@@ -1,6 +1,5 @@
-
 import { Component, ErrorInfo, ReactNode } from 'react';
-import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
+import { AlertTriangle, Home, RotateCcw } from 'lucide-react';
 import { Button } from './ui/button';
 
 interface Props {
@@ -30,68 +29,55 @@ export class ErrorBoundary extends Component<Props, State> {
     });
   }
 
-  private handleRefresh = () => {
-    window.location.reload();
+  private readonly handleRefresh = () => {
+    globalThis.location.reload();
   };
 
-  private handleGoHome = () => {
-    window.location.href = '/';
+  private readonly handleGoHome = () => {
+    globalThis.location.href = '/';
   };
 
   public render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-          <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
-            <div className="flex justify-center mb-6">
-              <div className="p-3 bg-red-100 rounded-full">
-                <AlertTriangle className="h-8 w-8 text-red-600" />
+        <div className="min-h-screen bg-background font-sans text-foreground flex flex-col items-center justify-center relative overflow-hidden p-6">
+          <div className="flex flex-col items-center max-w-lg w-full text-center space-y-8">
+            {/* Icon / Graphic */}
+            <div className="relative">
+              <div className="absolute inset-0 bg-red-100 rounded-full blur-2xl opacity-50 animate-pulse" />
+              <div className="relative bg-background p-4 rounded-2xl border shadow-sm ring-1 ring-border/50">
+                <AlertTriangle className="h-10 w-10 text-gray-900" />
               </div>
             </div>
-            
-            <h1 className="text-2xl font-semibold text-gray-900 mb-2">
-              Something went wrong
-            </h1>
-            
-            <p className="text-gray-600 mb-6">
-              We're sorry, but something unexpected happened. Please try refreshing the page or go back to the home page.
-            </p>
 
-            {process.env.NODE_ENV === 'development' && this.state.error && (
-              <div className="mb-6 p-4 bg-gray-100 rounded-lg text-left">
-                <h3 className="font-medium text-gray-900 mb-2">Error Details:</h3>
-                <p className="text-sm text-red-600 font-mono">
-                  {this.state.error.message}
-                </p>
-                {this.state.errorInfo && (
-                  <details className="mt-2">
-                    <summary className="text-sm text-gray-600 cursor-pointer">
-                      Stack trace
-                    </summary>
-                    <pre className="text-xs text-gray-600 mt-2 whitespace-pre-wrap">
-                      {this.state.errorInfo.componentStack}
-                    </pre>
-                  </details>
-                )}
-              </div>
-            )}
+            {/* Typography */}
+            <div className="space-y-4">
+              <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl text-gray-900 pb-1">
+                {this.state.error?.name || 'Something went wrong'}
+              </h1>
+              <p className="text-lg text-muted-foreground leading-snug max-w-md mx-auto">
+                {this.state.error?.message || 'We encountered an unexpected error. Please try refreshing the page or return to the dashboard.'}
+              </p>
+            </div>
 
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            {/* Actions */}
+            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
               <Button
                 onClick={this.handleRefresh}
-                className="bg-blue-500 hover:bg-blue-600 text-white"
+                size="lg"
+                className="w-full sm:w-auto min-w-[140px] shadow-md hover:shadow-lg transition-all"
               >
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Refresh Page
+                <RotateCcw className="mr-2 h-4 w-4" />
+                Try Again
               </Button>
-              
               <Button
                 onClick={this.handleGoHome}
                 variant="outline"
-                className="border-gray-300"
+                size="lg"
+                className="w-full sm:w-auto min-w-[140px] bg-background/50 hover:bg-accent hover:text-accent-foreground backdrop-blur-sm transition-all"
               >
-                <Home className="h-4 w-4 mr-2" />
-                Go to Home
+                <Home className="mr-2 h-4 w-4" />
+                Back to Home
               </Button>
             </div>
           </div>

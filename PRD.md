@@ -20,16 +20,15 @@ Features:
   - /profile/readiness (for status) status: pending | completed
   - /profile (for resume) data
 
-- create mail: create mail button -> mail create stepper 
-    - select template 
-        - /outreach/types (GET) 
-    - Fill in details (employee Name, Email, Company Name,Job ID (optional), Job Description) 
-        - /outreach/generate/:id (POST) 
-        { name, email, company name, jobid, jobdescription, template_type } 
-    - Preview 
-        - /outreach/edit/:id (POST) 
-    - Send (send via gmail (easy for user) or copy to clipboard (should be hard for user so that he uses gmail)) 
-        - /outreach/send/:id (POST)
+- create mail: create mail button -> mail create stepper
+
+  1. select template - /outreach/types (GET)
+  2. Fill in details (employee Name, Email, Company Name, Job ID (optional), Job
+     Description) - /outreach/generate/:id (POST) { name, email, company name,
+     jobid, jobdescription, template_type }
+  3. Preview - /outreach/edit/:id (POST)
+  4. Send (send via gmail (easy for user) or copy to clipboard (should be hard
+     for user so that he uses gmail)) - /outreach/send/:id (POST)
 
 - pricing
 

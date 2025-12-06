@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
 import { useUser } from '@clerk/clerk-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
@@ -19,7 +18,7 @@ import {
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '../../components/ui/avatar';
 import { Label } from '../../components/ui/label';
-import axios from 'axios';
+import { useApi } from '@/hooks/useApi';
 
 interface Skill {
   id?: string;
@@ -48,6 +47,7 @@ interface Education {
 }
 
 export default function ProfilePage() {
+  const api = useApi();
   const { user, isLoaded: isUserLoaded } = useUser();
   const [skills, setSkills] = useState<Skill[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
@@ -59,7 +59,6 @@ export default function ProfilePage() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
 
-  const { getToken } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -75,10 +74,7 @@ export default function ProfilePage() {
 
   const loadProfileData = async () => {
     try {
-      const token = await getToken();
-      const response = await axios.get('http://localhost:3000/profile/details', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.get('/profile/details');
 
       setSkills(response.data.skills || []);
       setProjects(response.data.projects || []);
@@ -102,11 +98,9 @@ export default function ProfilePage() {
       }
 
       // Update Backend Data
-      const token = await getToken();
-      await axios.put(
-        'http://localhost:3000/profile/details',
-        { skills, projects, education },
-        { headers: { Authorization: `Bearer ${token}` } }
+      await api.put(
+        '/profile/details',
+        { skills, projects, education }
       );
       navigate('/dashboard');
     } catch (error) {
@@ -130,10 +124,7 @@ export default function ProfilePage() {
   const deleteItem = async (type: 'skills' | 'projects' | 'education', index: number, id?: string) => {
     if (id) {
       try {
-        const token = await getToken();
-        await axios.delete(`http://localhost:3000/profile/item/${type}/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        await api.delete(`/profile/item/${type}/${id}`);
       } catch (error) {
         console.error(`Failed to delete ${type} item:`, error);
         return;
