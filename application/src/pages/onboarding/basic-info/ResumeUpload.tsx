@@ -12,7 +12,7 @@ interface ResumeUploadProps {
 }
 
 export function ResumeUpload({ onUpload, onRemove, initialResume }: Readonly<ResumeUploadProps>) {
-  const { uploadResume, deleteResume, isLoading: isResumeProcessing, deleteError, uploadError } = useResume();
+  const { uploadResume, deleteResume, isLoading: isResumeProcessing } = useResume();
   const [resume, setResume] = useState<File | null>(initialResume || null);
   const [displayError, setDisplayError] = useState<string | null>(null);
 
@@ -21,16 +21,6 @@ export function ResumeUpload({ onUpload, onRemove, initialResume }: Readonly<Res
       setResume(initialResume);
     }
   }, [initialResume]);
-
-  useEffect(() => {
-    if (uploadError) {
-      setDisplayError("Failed to process resume. Please try again.");
-    } else if (deleteError) {
-      setDisplayError("Failed to delete resume. Please try again.");
-    } else {
-      setDisplayError(null);
-    }
-  }, [uploadError, deleteError]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -44,6 +34,7 @@ export function ResumeUpload({ onUpload, onRemove, initialResume }: Readonly<Res
       onUpload(file);
     } catch (error) {
       console.error("Failed to upload resume", error);
+      setDisplayError("Failed to process resume. Please try again.");
     }
   };
 
@@ -58,6 +49,7 @@ export function ResumeUpload({ onUpload, onRemove, initialResume }: Readonly<Res
       onRemove();
     } catch (error) {
       console.error("Failed to delete resume", error);
+      setDisplayError("Failed to delete resume. Please try again.");
     }
   };
 

@@ -15,7 +15,7 @@ import { Project, Education, Experience } from '@/lib/types';
 export default function ProfessionalInfoPage() {
   const { user } = useUser();
   const navigate = useNavigate();
-  const { profile, updateProfile, refetch: refetchProfile } = useProfile();
+  const { profile, updateProfile, pollProfile, stopPollingProfile, isPollingProfile } = useProfile();
   const { completeOnboarding, checkOnboardingStatus } = useOnboarding();
 
   const [skills, setSkills] = useState<string[]>([]);
@@ -24,36 +24,23 @@ export default function ProfessionalInfoPage() {
   const [experience, setExperience] = useState<Experience[]>([]);
 
   const [loading, setLoading] = useState(false);
-  const [isPolling, setIsPolling] = useState(false);
 
   useEffect(() => {
     if (!profile) return;
 
-    if (profile.isResumeUploaded && !profile.isResumeParsed) {
-      setIsPolling(true);
-      return;
-    }
-
     if (profile.isResumeParsed) {
-      setIsPolling(false);
-      setSkills(profile.skills || []);
-      setProjects(profile.projects || []);
-      setEducation(profile.education || []);
-      setExperience(profile.experience || []);
+      if (profile.isResumeParsed) {
+        stopPollingProfile();
+        setSkills(profile.skills || []);
+        setProjects(profile.projects || []);
+        setEducation(profile.education || []);
+        setExperience(profile.experience || []);
+      } else {
+        pollProfile();
+        return;
+      }
     }
   }, [profile]);
-
-  useEffect(() => {
-    let intervalId: NodeJS.Timeout;
-
-    if (isPolling) {
-      intervalId = setInterval(async () => {
-        await refetchProfile();
-      }, 2000);
-    }
-
-    return () => clearInterval(intervalId);
-  }, [isPolling, refetchProfile]);
 
   const handleFinish = async () => {
     setLoading(true);
@@ -93,7 +80,7 @@ export default function ProfessionalInfoPage() {
         <p className="text-muted-foreground">Add your professional background to complete your profile.</p>
       </div>
 
-      {isPolling && (
+      {isPollingProfile && (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
           <div className="flex flex-col items-center gap-4">
             <Loader className="h-8 w-8 animate-spin text-primary" />

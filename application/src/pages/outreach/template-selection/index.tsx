@@ -1,31 +1,17 @@
-import React, { useEffect, useState } from "react";
-import { ArrowRight, FileText, Check } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState } from "react";
+import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { cn } from "@/lib/utils";
 import { Template } from "@/lib/types";
-import { useOutreachActions } from "@/hooks/useOutreachActions";
+import { useOutreach } from "@/hooks/useOutreach";
 import { toast } from "sonner";
+import { TemplateCard } from "./TemplateCard";
+import { Loader } from "@/components/ui/loader";
 
 const TemplateSelectionPage: React.FC = () => {
-  const { fetchTemplates } = useOutreachActions();
-  const [templates, setTemplates] = useState<Template[]>([]);
+  const { templates, isLoadingTemplates, templatesError } = useOutreach();
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const loadTemplates = async () => {
-      try {
-        const data = await fetchTemplates();
-        setTemplates(data);
-      } catch (error) {
-        console.error("Failed to load templates", error);
-        toast.error("Failed to load templates. Please try again later.");
-      }
-    };
-    loadTemplates();
-  }, []);
 
   const handleSelectTemplate = (template: Template) => {
     setSelectedTemplate(template);
@@ -39,37 +25,33 @@ const TemplateSelectionPage: React.FC = () => {
     navigate(`/outreach/recipient-info?templateId=${selectedTemplate.id}`);
   };
 
+  if (isLoadingTemplates) {
+      return (
+          <div className="flex items-center justify-center min-h-[400px]">
+              <Loader size="lg" />
+          </div>
+      );
+  }
+
+  if (templatesError) {
+      return (
+          <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+              <div className="text-destructive font-medium">Failed to load templates.</div>
+              <Button variant="outline" onClick={() => window.location.reload()}>Retry</Button>
+          </div>
+      );
+  }
+
   return (
     <div className="animate-fadeIn space-y-8">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {templates.map((template) => (
-          <Card
+        {templates?.map((template) => (
+          <TemplateCard
             key={template.id}
-            className={cn(
-              "cursor-pointer transition-all hover:shadow-md py-6 relative overflow-hidden",
-              selectedTemplate?.id === template.id
-                ? "border-primary ring-2 ring-primary/20 bg-primary/5"
-                : "hover:border-primary/50"
-            )}
-            onClick={() => handleSelectTemplate(template)}
-          >
-            {selectedTemplate?.id === template.id && (
-              <div className="absolute top-0 right-0 p-2 bg-primary text-primary-foreground rounded-bl-lg">
-                <Check className="w-4 h-4" />
-              </div>
-            )}
-            <CardHeader className="mb-2">
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
-                <FileText className="h-5 w-5 text-primary" />
-              </div>
-              <CardTitle className="text-lg">{template.name}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-muted-foreground overflow-hidden italic text-xs w-full line-clamp-3 whitespace-pre-wrap">
-                <span>{template.content}</span>
-              </div>
-            </CardContent>
-          </Card>
+            template={template}
+            isSelected={selectedTemplate?.id === template.id}
+            onSelect={handleSelectTemplate}
+          />
         ))}
       </div>
 

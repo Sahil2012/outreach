@@ -120,8 +120,8 @@
   },
   "outreach_edit": {},
   "outreach_send": {
-    "id": "lR9jw3I",
-    "manageThread": false
+    "id": "rOMFkk-",
+    "manageThread": true
   },
   "outreach_drafts": [
     {
@@ -200,6 +200,21 @@
       "email": {
         "subject": "Generated Subject",
         "body": "Generated Body"
+      },
+      "isMailGenerated": true,
+      "isDraftCompleted": true
+    },
+    {
+      "employeeName": "Himanshu Jaroli",
+      "employeeEmail": "jaroli.himanshu@gmail.com",
+      "companyName": "Google",
+      "jobId": "",
+      "jobDescription": "asldkfj",
+      "templateId": "1",
+      "id": "rOMFkk-",
+      "email": {
+        "subject": "Generated Subject",
+        "body": "Generated Body\n\nElse thing this is a very long text. Let's see how it looks laksdjf aksldfj a ;lasjdflk aslkdfjlkasj fdajsldfkj. Else thing this is a very long text. Let's see how it looks laksdjf aksldfj a ;lasjdflk aslkdfjlkasj fdajsldfkj "
       },
       "isMailGenerated": true,
       "isDraftCompleted": true
