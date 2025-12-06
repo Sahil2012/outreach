@@ -45,3 +45,17 @@ export async function updateMessage(
     data: updateData,
   });
 }
+
+export async function getMessageById(
+  tx: Prisma.TransactionClient,
+  messageId: number,
+  authUserId: string
+) {
+  log("Retrieving message ID:", messageId, "for user:", authUserId);
+  return tx.message.findFirst({
+    where: {
+      id: messageId,
+      authUserId: authUserId,
+    },
+  });
+}
