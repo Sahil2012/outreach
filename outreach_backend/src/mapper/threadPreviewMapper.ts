@@ -1,4 +1,4 @@
-import { ThreadPreviewDTO } from "../dto/ThreadPreviewDTO.js";
+import { ThreadPreviewDTO } from "../dto/reponse/ThreadPreviewDTO.js";
 
 export const toThreadPreviewDTO = (thread : any) : ThreadPreviewDTO => {
 

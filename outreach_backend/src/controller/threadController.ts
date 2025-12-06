@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { getThreadPreview } from "../service/threadService.js";
 import prisma from "../apis/prismaClient.js";
 import { getAuth } from "@clerk/express";
-import { ThreadPreviewDTO } from "../dto/ThreadPreviewDTO.js";
+import { ThreadPreviewDTO } from "../dto/reponse/ThreadPreviewDTO.js";
 import { toThreadPreviewDTO } from "../mapper/threadPreviewMapper.js";
 import { log } from "console";
 
