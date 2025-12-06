@@ -19,3 +19,23 @@ export async function createThread(
     },
   });
 }
+
+export async function getThreadPreview(
+  tx: Prisma.TransactionClient,
+  authUserId: string,
+  threadId: number
+) {
+  
+  log("Fetching preview for thread ID:", threadId);
+  return tx.thread.findUnique({
+    where: { id: threadId, AND: { authUserId: authUserId } },
+    include: {
+      Message : {
+        orderBy: {
+          date : 'desc',
+        },
+        take: 1
+      }
+    }
+  });
+}

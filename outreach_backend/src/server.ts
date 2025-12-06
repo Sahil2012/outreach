@@ -10,7 +10,7 @@ import { ensureAppUser } from "./middlleware/ensureAppUser.js";
 import { getEmailTypes } from "./controller/emailController.js";
 import { getAccessToken } from "./controller/auth/google.js";
 import { sendMailUsingClerkToken } from "./controller/test.js";
-import { get } from "http";
+import threadRoutes from "./routes/threadRoutes.js";
 configDotenv();
 
 const PORT = process.env.PORT;
@@ -37,6 +37,7 @@ app.use("/profile", profileRouter);
 app.get("/email/type", getEmailTypes);
 app.post("/test",requireAuth(), sendMailUsingClerkToken);
 app.get("/test", getAccessToken);
+app.use("/thread", requireAuth(), threadRoutes);
 
 // Global error handler
 const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
