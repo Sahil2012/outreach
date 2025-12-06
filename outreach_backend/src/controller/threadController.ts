@@ -2,6 +2,9 @@ import { Request, Response } from "express";
 import { getThreadPreview } from "../service/threadService.js";
 import prisma from "../apis/prismaClient.js";
 import { getAuth } from "@clerk/express";
+import { ThreadPreviewDTO } from "../dto/ThreadPreviewDTO.js";
+import { toThreadPreviewDTO } from "../mapper/threadPreviewMapper.js";
+import { log } from "console";
 
 export const previewThread = async (req: Request, res: Response) => {
 
@@ -18,7 +21,9 @@ export const previewThread = async (req: Request, res: Response) => {
         if (!threadPreview) {
             return res.status(404).json({ error: "Thread not found" });
         }
-        return res.status(200).json(threadPreview);
+        const threadPreviewDTO = toThreadPreviewDTO(threadPreview);
+        log("Fetched thread preview DTO:", threadPreview);
+        return res.status(200).json(threadPreviewDTO);
     } catch (error) {
         console.error("Error fetching thread preview:", error);
         return res.status(500).json({ error: "Internal server error" });
