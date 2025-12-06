@@ -22,8 +22,7 @@ model UserTable {
   templatesUsed   Int              @default(0)
   profileDataId   Int?             @unique
   createdAt       DateTime         @default(now())
-  jobsAdded       JobPool[]
-  messages        ReferralMsg[]
+  Message         Message[]
   Thread          Thread[]
   userProfileData UserProfileData?
 }
@@ -67,57 +66,6 @@ model Experience {
   UserProfileData   UserProfileData @relation(fields: [userProfileDataId], references: [id])
 }
 
-model ReferralMsg {
-  id         Int           @id @default(autoincrement())
-  message    String
-  subject    String?
-  userId     String
-  employeeId Int
-  jobId      Int?
-  threadId   Int
-  date       DateTime      @default(now())
-  followUps  FollowUpMsg[]
-  Employee   EmpInfo       @relation(fields: [employeeId], references: [id])
-  Job        JobPool?      @relation(fields: [jobId], references: [id])
-  Thread     Thread        @relation(fields: [threadId], references: [id])
-  User       UserTable     @relation(fields: [userId], references: [authUserId])
-}
-
-model FollowUpMsg {
-  id          Int         @id @default(autoincrement())
-  message     String
-  referralId  Int
-  threadId    Int
-  version     Int         @default(1)
-  sentAt      DateTime    @default(now())
-  ReferralMsg ReferralMsg @relation(fields: [referralId], references: [id])
-  Thread      Thread      @relation(fields: [threadId], references: [id])
-}
-
-model EmpInfo {
-  id          Int           @id @default(autoincrement())
-  name        String
-  email       String?
-  phoneNo     BigInt?
-  linkedInUrl String?
-  companyName String
-  createdAt   DateTime      @default(now())
-  referrals   ReferralMsg[]
-}
-
-model JobPool {
-  id          Int           @id @default(autoincrement())
-  niche       String
-  title       String?
-  jobUrl      String?
-  jobId       String?
-  companyName String?
-  addedById   String?
-  createdAt   DateTime      @default(now())
-  addedBy     UserTable?    @relation(fields: [addedById], references: [authUserId])
-  referrals   ReferralMsg[]
-}
-
 model ProfileReadiness {
   id                 Int                       @id @default(autoincrement())
   userProfileId      Int                       @unique
@@ -127,15 +75,60 @@ model ProfileReadiness {
 }
 
 model Thread {
-  id          Int           @id @default(autoincrement())
-  userId      String        @db.Uuid
-  type        EmailType
-  threadId    String
-  createdAt   DateTime      @default(now())
-  status      ThreadStatus  @default(PENDING)
-  FollowUpMsg FollowUpMsg[]
-  ReferralMsg ReferralMsg[]
-  UserTable   UserTable     @relation(fields: [userId], references: [id])
+  id               Int                @id @default(autoincrement())
+  type             EmailType
+  threadId         String?
+  createdAt        DateTime           @default(now())
+  status           ThreadStatus       @default(PENDING)
+  authUserId       String
+  employeeId       Int
+  lastUpdated      DateTime
+  Message          Message[]
+  UserTable        UserTable          @relation(fields: [authUserId], references: [authUserId])
+  Employee         Employee           @relation(fields: [employeeId], references: [id])
+  ThreadJobMapping ThreadJobMapping[]
+}
+
+model Employee {
+  id       Int      @id @default(autoincrement())
+  name     String
+  email    String   @unique
+  position String
+  company  String
+  Thread   Thread[]
+}
+
+model Job {
+  id               Int                @id @default(autoincrement())
+  title            String
+  company          String
+  location         String
+  description      String
+  link             String
+  niche            String
+  ThreadJobMapping ThreadJobMapping[]
+}
+
+model Message {
+  id         Int       @id @default(autoincrement())
+  body       String
+  subject    String?
+  authUserId String
+  threadId   Int
+  date       DateTime  @default(now())
+  fromUser   Boolean
+  UserTable  UserTable @relation(fields: [authUserId], references: [authUserId])
+  Thread     Thread    @relation(fields: [threadId], references: [id])
+}
+
+model ThreadJobMapping {
+  id       Int    @id @default(autoincrement())
+  threadId Int
+  jobId    Int
+  Job      Job    @relation(fields: [jobId], references: [id])
+  Thread   Thread @relation(fields: [threadId], references: [id])
+
+  @@unique([threadId, jobId])
 }
 
 enum RefStatus {
@@ -151,12 +144,14 @@ enum ProfileCompletenessStatus {
 }
 
 enum EmailType {
-  USER
-  REPLY
+  TAILORED
+  COLD
 }
 
 enum ThreadStatus {
   PENDING
-  FOLLOWUP
+  FIRST_FOLLOWUP
+  SECOND_FOLLOWUP
+  THIRD_FOLLOWUP
   CLOSED
 }
