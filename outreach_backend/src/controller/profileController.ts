@@ -6,7 +6,7 @@ import prisma from "../apis/prismaClient.js";
 import { getAuth } from "@clerk/express";
 import { toProfileDTO } from "../mapper/profile.profileDTO.js";
 import { getUserProfile } from "../service/profile.service.js";
-import { ProfileDTO } from "../dto/ProfileDTO.js";
+import { ProfileDTO } from "../dto/reponse/ProfileDTO.js";
 
 // GET /profile/me
 export const getProfile = async (req: Request, res: Response<ProfileDTO | any>) => {
@@ -40,7 +40,7 @@ export const getProfile = async (req: Request, res: Response<ProfileDTO | any>) 
     return res.status(500).json({
       error: "INTERNAL_SERVER_ERROR",
       message: "Something went wrong",
-      details: process.env.NODE_ENV === "development" ? error.message : undefined,
+      details:  error.message,
     });
   }
 };

@@ -28,8 +28,8 @@ export async function saveDraftEmail(
       await handleTailoredJobs(tx, thread.id, req.jobs, req.jobDescription);
     }
 
-    await saveMessage(tx, thread.id, authUserId, subject, body);
+    const message = await saveMessage(tx, thread.id, authUserId, subject, body);
 
-    return thread;
+    return {messageId : message.id, ...thread};
   });
 }

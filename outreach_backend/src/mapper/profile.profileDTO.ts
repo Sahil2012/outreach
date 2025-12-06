@@ -1,4 +1,4 @@
-import { ProfileDTO } from "../dto/ProfileDTO.js";
+import { ProfileDTO } from "../dto/reponse/ProfileDTO.js";
 
 export const toProfileDTO = (profile: any): ProfileDTO | null => {
   if (!profile) return null;

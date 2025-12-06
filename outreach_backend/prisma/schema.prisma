@@ -76,23 +76,24 @@ model ProfileReadiness {
 }
 
 model Employee {
-  id       Int    @id @default(autoincrement())
+  id       Int     @id @default(autoincrement())
   name     String
-  email    String @unique
-  position String
-  company  String
+  email    String? @unique
+  position String?
+  company  String?
 
   threads Thread[]
 }
 
 model Job {
   id          Int    @id @default(autoincrement())
-  title       String
-  company     String
-  location    String
-  description String
-  link        String
-  niche       String
+  title       String?
+  company     String?
+  location    String?
+  description String?
+  jobId       String  @unique
+  link        String?
+  niche       String?
 
   thread ThreadJobMapping[]
 }
