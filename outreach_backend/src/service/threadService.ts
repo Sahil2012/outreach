@@ -39,3 +39,28 @@ export async function getThreadPreview(
     }
   });
 }
+
+export async function getThreadById(
+  tx: Prisma.TransactionClient,
+  authUserId: string,
+  threadId: number
+) {
+  
+  log("Fetching full thread for thread ID:", threadId);
+  return tx.thread.findUnique({
+    where: { id: threadId, AND: { authUserId: authUserId } },
+    include: {
+      Message : {
+        orderBy: {
+          date : 'asc',
+        }
+      },
+      Employee: true,
+      Job: {
+        select:{
+          Job: true
+        }
+      }
+    }
+  });
+}
