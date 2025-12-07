@@ -71,7 +71,7 @@ export const checkReadiness = async (req: Request, res: Response) => {
       return res.status(404).json({ error: "Readiness status not found" });
     }
 
-    res.json({ completenessStatus: readiness.completenessStatus });
+    res.json({ status: readiness.completenessStatus });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }

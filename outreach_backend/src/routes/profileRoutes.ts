@@ -6,7 +6,7 @@ import { requireAuth } from '@clerk/express';
 const profileRouter = express.Router();
 const upload = multer();
 
-profileRouter.get('/me', requireAuth(), getProfile);
+profileRouter.get('/', requireAuth(), getProfile);
 profileRouter.put('/update', requireAuth(), updateProfile);
 profileRouter.post('/upload/resume',requireAuth(), upload.single('resume'), uploadResume);
 profileRouter.get('/readiness',requireAuth(), checkReadiness);
