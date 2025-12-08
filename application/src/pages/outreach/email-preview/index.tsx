@@ -27,9 +27,7 @@ const EmailPreviewPage: React.FC = () => {
   useEffect(() => {
     if (!draft) return;
 
-    if (!draft.isMailGenerated) {
-       if (!isPolling) startPolling();
-    } else {
+    if (draft.isMailGenerated) {
        if (isPolling) stopPolling();
        
        // Initialize local state if not set, or if we just finished generating (transition from null/empty to content)
@@ -39,6 +37,8 @@ const EmailPreviewPage: React.FC = () => {
                body: draft.email?.body || "" 
            });
        }
+    } else {
+      startPolling();
     }
   }, [draft, isPolling, startPolling, stopPolling, localEmail]);
 
@@ -114,7 +114,7 @@ const EmailPreviewPage: React.FC = () => {
           onClick={() => navigate(`/outreach/recipient-info?templateId=${draft?.templateId}`)}
           disabled={isUpdating}
         >
-          <ArrowLeft className="w-4 h-4 mr-2" />
+          <ArrowLeft className="w-4 h-4 mr-1 -ml-1" />
           Back
         </Button>
         <Button
@@ -124,7 +124,7 @@ const EmailPreviewPage: React.FC = () => {
         >
           {isUpdating ? <Loader className="mr-2" /> : null}
           Continue
-          <ArrowRight className="w-4 h-4 ml-2" />
+          <ArrowRight className="w-4 h-4 ml-1 -mr-1" />
         </Button>
       </div>
     </div>

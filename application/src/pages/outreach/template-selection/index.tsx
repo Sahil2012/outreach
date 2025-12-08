@@ -62,7 +62,7 @@ const TemplateSelectionPage: React.FC = () => {
           className="w-full sm:w-auto"
         >
           Continue
-          <ArrowRight className="w-4 h-4 ml-2" />
+          <ArrowRight className="w-4 h-4 ml-1 -mr-1" />
         </Button>
       </div>
     </div>

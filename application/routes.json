@@ -7,5 +7,9 @@
   "/outreach/edit": "/outreach_edit",
   "/outreach/send": "/outreach_send",
   "/outreach/drafts": "/outreach_drafts",
-  "/outreach/drafts/*": "/outreach_drafts/$1"
+  "/outreach/drafts/*": "/outreach_drafts/$1",
+  "/outreach/stats": "/outreach_stats",
+  "/outreach/meta*": "/outreach_meta",
+  "/outreach/send/*": "/outreach_send_action",
+  "/outreach/:id": "/outreach_detail/:id"
 }

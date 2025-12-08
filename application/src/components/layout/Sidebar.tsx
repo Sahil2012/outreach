@@ -1,16 +1,14 @@
-import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import {
   LayoutDashboard,
   Send,
-  Search,
-  Clock,
   User,
   Settings,
   LogOut,
   HelpCircle,
-  ChevronsUpDown
+  ChevronsUpDown,
+  FileText
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SignedIn, useClerk, useUser } from '@clerk/clerk-react';
@@ -27,9 +25,7 @@ import {
   AvatarImage,
 } from "@/components/ui/avatar";
 
-interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> { }
-
-export function Sidebar({ className }: SidebarProps) {
+export function Sidebar({ className }: { className?: string }) {
   const location = useLocation();
   const { signOut } = useClerk();
   const { user } = useUser();
@@ -46,6 +42,12 @@ export function Sidebar({ className }: SidebarProps) {
       icon: Send,
       href: '/outreach',
       active: location.pathname === '/outreach',
+    },
+    {
+      label: 'Drafts',
+      icon: FileText,
+      href: '/drafts',
+      active: location.pathname === '/drafts',
     }
   ];
 

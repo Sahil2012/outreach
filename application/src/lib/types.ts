@@ -70,3 +70,41 @@ export interface SendEmail {
   text: string,
   to: string
 }
+
+export type OutreachStatus = 'Generated' | 'Sent' | 'First Follow Up' | 'Second Follow Up' | 'Third Follow Up' | 'Absconded' | 'Responded' | 'Referred';
+
+export interface OutreachStats {
+  reachedOut: number;
+  referred: number;
+  followUps: number;
+  absconded: number;
+}
+
+export interface OutreachListItem {
+  id: string;
+  employeeName: string;
+  employeeEmail: string;
+  companyName: string;
+  status: OutreachStatus;
+  isAutomated: boolean;
+  lastActivity: string;
+}
+
+export interface OutreachMetaResponse {
+    data: OutreachListItem[];
+    meta: {
+      total: number;
+      page: number;
+      limit: number;
+      totalPages: number;
+    }
+}
+
+export interface Draft {
+  id: string;
+  employeeName: string;
+  employeeEmail: string;
+  companyName: string;
+  status: 'Generated' | 'Generating' | 'Sent';
+  createdAt: string;
+}

@@ -96,7 +96,7 @@ const RecipientInfoPage: React.FC = () => {
                     onClick={() => navigate("/outreach/templates")}
                     disabled={isGenerating}
                 >
-                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    <ArrowLeft className="w-4 h-4 mr-1 -ml-1" />
                     Back
                 </Button>
                 <Button
@@ -106,7 +106,7 @@ const RecipientInfoPage: React.FC = () => {
                 >
                     {isGenerating ? <Loader className="mr-2" /> : null}
                     {isGenerating ? "Generating..." : "Generate Email"}
-                    {!isGenerating && <ArrowRight className="w-4 h-4 ml-2" />}
+                    {!isGenerating && <ArrowRight className="w-4 h-4 ml-1 -mr-1" />}
                 </Button>
             </div>
         </div>

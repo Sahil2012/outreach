@@ -129,8 +129,10 @@
       "employeeName": "Himanshu Jaroli",
       "employeeEmail": "jaroli.himanshu@gmail.com",
       "companyName": "Google",
-      "jobDescription": "kjhadf",
-      "templateId": "1"
+      "jobDescription": "test",
+      "templateId": "1",
+      "createdAt": "2024-12-08T10:00:00Z",
+      "status": "Generating"
     },
     {
       "employeeName": "Himanshu Jaroli",
@@ -144,7 +146,9 @@
         "body": "Generated Body"
       },
       "isMailGenerated": true,
-      "isDraftCompleted": false
+      "isDraftCompleted": false,
+      "createdAt": "2024-12-07T14:30:00Z",
+      "status": "Generated"
     },
     {
       "employeeName": "Himanshu Jaroli",
@@ -158,7 +162,9 @@
         "body": "Generated Body"
       },
       "isMailGenerated": true,
-      "isDraftCompleted": false
+      "isDraftCompleted": false,
+      "createdAt": "2024-12-06T09:15:00Z",
+      "status": "Generated"
     },
     {
       "employeeName": "Himanshu Jaroli",
@@ -172,7 +178,9 @@
         "body": "Generated Body"
       },
       "isMailGenerated": true,
-      "isDraftCompleted": false
+      "isDraftCompleted": false,
+      "createdAt": "2024-12-05T16:20:00Z",
+      "status": "Sent"
     },
     {
       "employeeName": "Himanshu Jaroli",
@@ -180,7 +188,9 @@
       "companyName": "Google",
       "jobDescription": "asdf",
       "templateId": "1",
-      "id": "iSKiIc9"
+      "id": "iSKiIc9",
+      "createdAt": "2024-12-08T11:00:00Z",
+      "status": "Generating"
     },
     {
       "employeeName": "Himanshu Jaroli",
@@ -188,7 +198,9 @@
       "companyName": "Google",
       "jobDescription": "qwer",
       "templateId": "1",
-      "id": "pHBcJyV"
+      "id": "pHBcJyV",
+      "createdAt": "2024-12-08T12:00:00Z",
+      "status": "Generating"
     },
     {
       "employeeName": "Himanshu Jaroli",
@@ -202,7 +214,9 @@
         "body": "Generated Body"
       },
       "isMailGenerated": true,
-      "isDraftCompleted": true
+      "isDraftCompleted": true,
+      "createdAt": "2024-12-04T10:00:00Z",
+      "status": "Generated"
     },
     {
       "employeeName": "Himanshu Jaroli",
@@ -217,7 +231,26 @@
         "body": "Generated Body\n\nElse thing this is a very long text. Let's see how it looks laksdjf aksldfj a ;lasjdflk aslkdfjlkasj fdajsldfkj. Else thing this is a very long text. Let's see how it looks laksdjf aksldfj a ;lasjdflk aslkdfjlkasj fdajsldfkj "
       },
       "isMailGenerated": true,
-      "isDraftCompleted": true
+      "isDraftCompleted": true,
+      "createdAt": "2024-12-03T15:45:00Z",
+      "status": "Sent"
+    },
+    {
+      "employeeName": "Himanshu Jaroli",
+      "employeeEmail": "jaroli.himanshu@gmail.com",
+      "companyName": "Google",
+      "jobId": "",
+      "jobDescription": "New JD",
+      "templateId": "1",
+      "id": "zOQekLe",
+      "email": {
+        "subject": "Please refer mee.... PLeaseeeeee",
+        "body": "Generated Body\n\nElse thing this is a very long text. Let's see how it looks laksdjf aksldfj a ;lasjdflk aslkdfjlkasj fdajsldfkj. Else thing this is a very long text. Let's see how it looks laksdjf aksldfj a ;lasjdflk aslkdfjlkasj fdajsldfkj "
+      },
+      "isMailGenerated": true,
+      "isDraftCompleted": false,
+      "createdAt": "2024-12-08T09:30:00Z",
+      "status": "Generated"
     }
   ],
   "resume": {},
@@ -227,6 +260,171 @@
     "body": "Generated Body"
   },
   "sendEmail": {
+    "success": true
+  },
+  "outreach_stats": {
+    "reachedOut": 150,
+    "referred": 45,
+    "followUps": 12,
+    "absconded": 5
+  },
+  "outreach_meta": {
+    "data": [
+      {
+        "id": "1",
+        "employeeName": "Alice Smith",
+        "employeeEmail": "alice@techcorp.com",
+        "companyName": "Tech Corp",
+        "status": "Sent",
+        "isAutomated": true,
+        "lastActivity": "2024-12-06T10:00:00Z"
+      },
+      {
+        "id": "2",
+        "employeeName": "Bob Jones",
+        "employeeEmail": "bob@innovate.com",
+        "companyName": "Innovate Inc",
+        "status": "Responded",
+        "isAutomated": false,
+        "lastActivity": "2024-12-05T14:30:00Z"
+      },
+      {
+        "id": "3",
+        "employeeName": "Charlie Day",
+        "employeeEmail": "charlie@startup.io",
+        "companyName": "Startup IO",
+        "status": "Generated",
+        "isAutomated": true,
+        "lastActivity": "2024-12-07T09:00:00Z"
+      },
+      {
+        "id": "4",
+        "employeeName": "David Lee",
+        "employeeEmail": "david@bigtech.co",
+        "companyName": "Big Tech",
+        "status": "First Follow Up",
+        "isAutomated": true,
+        "lastActivity": "2024-12-04T11:20:00Z"
+      },
+      {
+        "id": "5",
+        "employeeName": "Eva Green",
+        "employeeEmail": "eva@design.studio",
+        "companyName": "Design Studio",
+        "status": "Referred",
+        "isAutomated": false,
+        "lastActivity": "2024-12-03T16:45:00Z"
+      },
+      {
+        "id": "6",
+        "employeeName": "Frank Wright",
+        "employeeEmail": "frank@build.com",
+        "companyName": "Builder Co",
+        "status": "Absconded",
+        "isAutomated": true,
+        "lastActivity": "2024-12-02T09:15:00Z"
+      },
+      {
+        "id": "7",
+        "employeeName": "Grace Liu",
+        "employeeEmail": "grace@tech.io",
+        "companyName": "Tech IO",
+        "status": "Second Follow Up",
+        "isAutomated": true,
+        "lastActivity": "2024-12-01T13:20:00Z"
+      },
+      {
+        "id": "8",
+        "employeeName": "Henry Ford",
+        "employeeEmail": "henry@autos.com",
+        "companyName": "Autos Inc",
+        "status": "Third Follow Up",
+        "isAutomated": false,
+        "lastActivity": "2024-11-30T10:05:00Z"
+      },
+      {
+        "id": "9",
+        "employeeName": "Ivy Chen",
+        "employeeEmail": "ivy@data.ai",
+        "companyName": "Data AI",
+        "status": "Sent",
+        "isAutomated": true,
+        "lastActivity": "2024-11-29T15:40:00Z"
+      },
+      {
+        "id": "10",
+        "employeeName": "Jack Ryan",
+        "employeeEmail": "jack@agency.gov",
+        "companyName": "The Agency",
+        "status": "Generated",
+        "isAutomated": true,
+        "lastActivity": "2024-11-28T08:30:00Z"
+      }
+    ],
+    "meta": {
+      "total": 35,
+      "page": 1,
+      "limit": 10,
+      "totalPages": 4
+    }
+  },
+  "outreach_detail": [
+    {
+      "id": "1",
+      "employeeName": "Alice Smith",
+      "employeeEmail": "alice@techcorp.com",
+      "companyName": "Tech Corp",
+      "status": "Absconded",
+      "isAutomated": true,
+      "lastActivity": "2024-12-06T10:00:00Z",
+      "email": {
+        "subject": "Interest in Senior Engineer role at Tech Corp",
+        "body": "Hi Alice,\n\nI hope this email finds you well. I've been following Tech Corp's work on AI and I'm very impressed. I'm a Senior Engineer with 5 years of experience..."
+      },
+      "thread": [
+        {
+          "id": "e1",
+          "from": "himanshu.jaroli.2000@gmail.com",
+          "to": "alice@techcorp.com",
+          "subject": "Interest in Senior Engineer role at Tech Corp",
+          "body": "Hi Alice,\n\nI hope this email finds you well. I've been following Tech Corp's work on AI and I'm very impressed. I'm a Senior Engineer with 5 years of experience looking for a new challenge.\n\nBest,\nYou",
+          "sentAt": "2024-12-06T10:00:00Z"
+        }
+      ]
+    },
+    {
+      "id": "2",
+      "employeeName": "Bob Jones",
+      "employeeEmail": "bob@innovate.com",
+      "companyName": "Innovate Inc",
+      "status": "Responded",
+      "isAutomated": false,
+      "lastActivity": "2024-12-05T14:30:00Z",
+      "email": {
+        "subject": "Regarding your application",
+        "body": "Hi Bob,\n\nThanks for connecting. I'm interested in the Recruiter role..."
+      },
+      "thread": [
+        {
+          "id": "e2",
+          "from": "himanshu.jaroli.2000@gmail.com",
+          "to": "bob@innovate.com",
+          "subject": "Connecting regarding Recruiter role",
+          "body": "Hi Bob,\n\nThanks for connecting. I'm interested in the Recruiter role. Is there a time we can chat?\n\nBest,\nYou",
+          "sentAt": "2024-12-04T09:00:00Z"
+        },
+        {
+          "id": "e3",
+          "from": "bob@innovate.com",
+          "to": "himanshu.jaroli.2000@gmail.com",
+          "subject": "Re: Connecting regarding Recruiter role",
+          "body": "Hi,\n\nSure, let's chat tomorrow at 2 PM.\n\nBest,\nBob",
+          "sentAt": "2024-12-05T14:30:00Z"
+        }
+      ]
+    }
+  ],
+  "outreach_send_action": {
     "success": true
   }
 }

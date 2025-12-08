@@ -2,6 +2,7 @@ import React from "react";
 import { useUser } from "@clerk/clerk-react";
 import MainLayout from "@/components/layout/MainLayout";
 import OutreachWizard from "@/pages/outreach";
+import OutreachDetailPage from "@/pages/outreach/detail";
 import TemplateSelectionPage from "@/pages/outreach/template-selection";
 import RecipientInfoPage from "@/pages/outreach/recipient-info";
 import EmailPreviewPage from "@/pages/outreach/email-preview";
@@ -11,6 +12,7 @@ import SignupPage from "@/pages/auth/signup";
 import ProfilePage from "@/pages/profile";
 import SettingsPage from "@/pages/settings";
 import DashboardPage from "@/pages/dashboard";
+import DraftsPage from "@/pages/drafts";
 import BasicInfoPage from "@/pages/onboarding/basic-info";
 import ProfessionalInfoPage from "@/pages/onboarding/professional-info";
 
@@ -221,7 +223,27 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/drafts"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <DraftsPage />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
 
+          <Route 
+            path="/outreach/view/:id" 
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <OutreachDetailPage />
+                </MainLayout>
+              </ProtectedRoute>
+            } 
+          />
           <Route
             path="/outreach"
             element={
