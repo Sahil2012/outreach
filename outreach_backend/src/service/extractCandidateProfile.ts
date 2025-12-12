@@ -18,6 +18,7 @@ export async function getCandidateProfile(id: string) {
         id: true,
         userName: true,
         email: true,
+        authUserId: true,
       },
     });
 
@@ -27,7 +28,7 @@ export async function getCandidateProfile(id: string) {
     }
 
     const profileData = await prisma.userProfileData.findUnique({
-      where: { userId: user.id },
+      where: { userId: user.authUserId },
       include: {
         profileSkills: {
           include: {
