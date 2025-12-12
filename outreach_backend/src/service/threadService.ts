@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma, ThreadStatus } from "@prisma/client";
 import { mapEmailTypeToDB } from "../mapper/emailTypeMapper.js";
 import { log } from "console";
 
@@ -63,4 +63,51 @@ export async function getThreadById(
       }
     }
   });
+}
+
+
+export async function getStats(
+  tx: Prisma.TransactionClient,
+  authUserId: string
+) {
+  console.log("Calculating stats for user:", authUserId);
+
+  const statQueries = {
+    followUps: {
+      authUserId,
+      status: {
+        in: [
+          ThreadStatus.FIRST_FOLLOWUP,
+          ThreadStatus.SECOND_FOLLOWUP,
+          ThreadStatus.THIRD_FOLLOWUP,
+        ],
+      },
+    },
+    absonded: {
+      authUserId,
+      status: ThreadStatus.CLOSED,
+    },
+    reachedOut: {
+      authUserId,
+      status: ThreadStatus.SENT,
+    },
+    reffered: {
+      authUserId,
+      status: ThreadStatus.REFFERED,
+    },
+  };
+
+  const [followUps, absonded, reachedOut, reffered] = await Promise.all([
+    tx.thread.count({ where: statQueries.followUps }),
+    tx.thread.count({ where: statQueries.absonded }),
+    tx.thread.count({ where: statQueries.reachedOut }),
+    tx.thread.count({ where: statQueries.reffered }),
+  ]);
+
+  return {
+    followUps,
+    absonded,
+    reachedOut,
+    reffered,
+  };
 }

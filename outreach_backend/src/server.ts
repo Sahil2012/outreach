@@ -12,6 +12,7 @@ import { getAccessToken } from "./controller/auth/google.js";
 import { sendMailUsingClerkToken } from "./controller/test.js";
 import threadRoutes from "./routes/threadRoutes.js";
 import messageRoutes from "./routes/messageRoutes.js";
+import statsRoutes from "./routes/statsRoutes.js";
 configDotenv();
 
 const PORT = process.env.PORT;
@@ -22,9 +23,7 @@ app.use(clerkMiddleware());
 app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
-    origin: [process.env.FRONTEND_URL || "", "http://localhost:5173"],
-    methods: ["GET", "POST", "OPTIONS"],
-    allowedHeaders: ["Content-Type"],
+    
   })
 );
 app.use(express.json());
@@ -40,6 +39,7 @@ app.post("/test",requireAuth(), sendMailUsingClerkToken);
 app.get("/test", getAccessToken);
 app.use("/thread", requireAuth(), threadRoutes);
 app.use("/message", requireAuth(),  messageRoutes);
+app.use("/stats", requireAuth(), statsRoutes);
 
 // Global error handler
 const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
