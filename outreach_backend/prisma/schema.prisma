@@ -86,7 +86,7 @@ model Employee {
 }
 
 model Job {
-  id          Int    @id @default(autoincrement())
+  id          Int     @id @default(autoincrement())
   title       String?
   company     String?
   location    String?
@@ -107,6 +107,7 @@ model Thread {
   createdAt   DateTime     @default(now())
   lastUpdated DateTime
   status      ThreadStatus @default(PENDING)
+  automated   Boolean      @default(false)
 
   Message   Message[]
   UserTable UserTable          @relation(fields: [authUserId], references: [authUserId])

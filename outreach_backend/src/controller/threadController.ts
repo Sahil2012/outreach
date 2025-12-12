@@ -1,11 +1,19 @@
 import { Request, Response } from "express";
-import { getThreadById, getThreadPreview } from "../service/threadService.js";
+import { extractThreadMeta, getThreadById, getThreadPreview } from "../service/threadService.js";
 import prisma from "../apis/prismaClient.js";
 import { getAuth } from "@clerk/express";
 import { ThreadPreviewDTO } from "../dto/reponse/ThreadPreviewDTO.js";
 import { toThreadPreviewDTO } from "../mapper/threadPreviewMapper.js";
 import { log } from "console";
 import { toThreadDTO } from "../mapper/threadDTOMapper.js";
+import { ThreadMetaResponse } from "../dto/reponse/ThreadMetaResponse.js";
+import { ThreadStatus } from "@prisma/client";
+
+function parseCSVQuery(q?: string | string[] | undefined): string[] | undefined {
+  if (!q) return undefined;
+  if (Array.isArray(q)) return q.flatMap(s => s.split(",").map(x => x.trim()).filter(Boolean));
+  return q.split(",").map(x => x.trim()).filter(Boolean);
+}
 
 export const previewThread = async (req: Request, res: Response<ThreadPreviewDTO | {error : string}>) => {
 
@@ -52,3 +60,58 @@ export const getThread = async (req: Request, res: Response) => {
         return res.status(500).json({ error: "Internal server error" });
     }
 }
+
+export const getThreadMeta = async (req: Request, res: Response<ThreadMetaResponse | { error: string }>) => {
+  try {
+    
+    const { userId: clerkUserId } = getAuth(req);
+
+    // parse query params with defaults and limits
+    const page = Math.max(1, Number(req.query.page ?? 1));
+    const pageSizeRequested = Number(req.query.pageSize ?? 10);
+    const MAX_PAGE_SIZE = 100;
+    const pageSize = Math.min(MAX_PAGE_SIZE, Math.max(1, isNaN(pageSizeRequested) ? 10 : pageSizeRequested));
+
+    const companyName = parseCSVQuery(req.query.companyName as any); // string[] | undefined
+    const employeeName = parseCSVQuery(req.query.employeeName as any);
+    const statusRaw = parseCSVQuery(req.query.status as any);
+
+    let status: ThreadStatus[] | undefined = undefined;
+
+    if (statusRaw && statusRaw.length > 0) {
+      status = [];
+
+      for (const s of statusRaw) {
+        const upper = s.toUpperCase();
+        if (upper === "FOLLOWUP") {
+          status.push(ThreadStatus.FIRST_FOLLOWUP, ThreadStatus.SECOND_FOLLOWUP, ThreadStatus.THIRD_FOLLOWUP);
+        } else if ((Object.keys(ThreadStatus) as string[]).includes(upper)) {
+          status.push(upper as ThreadStatus);
+        } else {
+          // invalid status provided, return empty result immediately
+          return res.status(200).json({
+            threads: [],
+            total: 0,
+            page,
+            pageSize,
+          });
+        }
+      }
+    }
+    // call service using prisma client (no explicit transaction needed here)
+    const meta = await extractThreadMeta(
+      prisma,
+      clerkUserId!,
+      page,
+      pageSize,
+      companyName,
+      employeeName,
+      status as any
+    );
+
+    return res.status(200).json(meta);
+  } catch (err) {
+    console.error("Error fetching thread meta:", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
