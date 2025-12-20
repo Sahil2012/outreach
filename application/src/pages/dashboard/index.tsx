@@ -1,265 +1,173 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import { Card, CardContent } from '../../components/ui/card';
-import { Button } from '../../components/ui/button';
-import { Loader } from '../../components/ui/loader';
-import { Input } from '../../components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
-  Mail,
-  Building2,
-  User,
-  Clock,
-  CheckCircle,
-  XCircle,
-} from 'lucide-react';
-import axios from 'axios';
-
-interface Referral {
-  id: string;
-  company_id: string;
-  employee_id: string | null;
-  template_type: string;
-  status: string;
-  sent_at: string | null;
-  created_at: string;
-  companies: {
-    name: string;
-    industry: string | null;
-  };
-  employees: {
-    name: string;
-    position: string | null;
-    is_hr: boolean;
-  } | null;
-}
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Plus, Search, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useOutreachDashboard } from '@/hooks/useOutreachDashboard';
+import { useDebounce } from '@/hooks/useDebounce';
+import { StatsCards } from './StatsCards';
+import { OutreachTable } from './OutreachTable';
+import { OutreachStatus } from '@/lib/types';
 
 export default function DashboardPage() {
-  const [referrals, setReferrals] = useState<Referral[]>([]);
-  const [filteredReferrals, setFilteredReferrals] = useState<Referral[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [filterType, setFilterType] = useState<'all' | 'company' | 'employee' | 'hr'>('all');
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const { getToken } = useAuth();
   const navigate = useNavigate();
+  const [page, setPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('All');
 
-  useEffect(() => {
-    loadReferrals();
-  }, []);
+  const debouncedSearch = useDebounce(searchQuery, 500);
+  const limit = 10;
 
-  useEffect(() => {
-    filterReferrals();
-  }, [referrals, filterType, searchQuery]);
+  const {
+    stats,
+    isLoadingStats,
+    data: listData,
+    isLoadingList,
+    updateOutreach,
+    sendFollowUp
+  } = useOutreachDashboard(page, limit, debouncedSearch, statusFilter);
 
-  const loadReferrals = async () => {
-    try {
-      const token = await getToken();
-      const { data } = await axios.get('http://localhost:3000/referrals', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setReferrals(data);
-    } catch (error) {
-      console.error('Failed to load referrals:', error);
-    } finally {
-      setLoading(false);
+  const handleToggleAutomated = (id: string, current: boolean) => {
+    updateOutreach({ id, payload: { isAutomated: !current } });
+  };
+
+  const handleAction = async (id: string, action: 'follow-up' | 'mark-absconded' | 'mark-referred') => {
+    if (action === 'follow-up') {
+      await sendFollowUp(id);
+    } else if (action === 'mark-absconded') {
+      await updateOutreach({ id, payload: { status: 'Absconded' } });
+    } else if (action === 'mark-referred') {
+      await updateOutreach({ id, payload: { status: 'Referred' } });
     }
   };
 
-  const filterReferrals = () => {
-    let filtered = referrals;
+  const totalPages = listData?.meta.totalPages || 1;
 
-    if (filterType === 'hr') {
-      filtered = filtered.filter(r => r.employees?.is_hr);
-    }
-
-    if (searchQuery) {
-      filtered = filtered.filter(r =>
-        r.companies.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        r.employees?.name.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
-    setFilteredReferrals(filtered);
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'sent':
-        return <Mail className="w-5 h-5 text-slate-600" />;
-      case 'responded':
-        return <CheckCircle className="w-5 h-5 text-green-600" />;
-      case 'rejected':
-        return <XCircle className="w-5 h-5 text-red-600" />;
-      default:
-        return <Clock className="w-5 h-5 text-slate-400" />;
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'sent':
-        return 'bg-slate-100 text-slate-700';
-      case 'responded':
-        return 'bg-green-100 text-green-700';
-      case 'rejected':
-        return 'bg-red-100 text-red-700';
-      default:
-        return 'bg-slate-100 text-slate-500';
-    }
-  };
-
-  const stats = {
-    total: referrals.length,
-    pending: referrals.filter(r => r.status === 'pending').length,
-    sent: referrals.filter(r => r.status === 'sent').length,
-    responded: referrals.filter(r => r.status === 'responded').length,
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
-        <Loader size="lg" text="Loading dashboard..." />
-      </div>
-    );
-  }
+  const STATUS_OPTIONS: OutreachStatus[] = [
+    'Generated', 'Sent', 'First Follow Up', 'Second Follow Up', 'Third Follow Up', 'Absconded', 'Responded', 'Referred'
+  ];
 
   return (
-    <div className="min-h-screen bg-transparent">
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Dashboard</h1>
-          <p className="text-slate-600">Track your referral requests and follow-ups</p>
+    <div className="space-y-8 py-8 px-4 md:px-6 lg:px-8 pb-10">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Dashboard</h1>
+          <p className="text-muted-foreground mt-1">Track your outreach threads and follow-ups</p>
         </div>
+        <Button onClick={() => navigate('/outreach')}>
+          <Plus className="w-4 h-4 mr-1 -ml-1" />
+          New Outreach
+        </Button>
+      </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardContent className="p-6 flex items-center justify-between">
-              <div>
-                <p className="text-slate-600 text-sm">Total Referrals</p>
-                <p className="text-3xl font-bold text-slate-900">{stats.total}</p>
-              </div>
-              <Mail className="w-12 h-12 text-slate-400" />
-            </CardContent>
-          </Card>
+      {/* Stats Grid */}
+      <StatsCards stats={stats} isLoading={isLoadingStats} />
 
-          <Card>
-            <CardContent className="p-6 flex items-center justify-between">
-              <div>
-                <p className="text-slate-600 text-sm">Pending</p>
-                <p className="text-3xl font-bold text-slate-900">{stats.pending}</p>
-              </div>
-              <Clock className="w-12 h-12 text-slate-400" />
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6 flex items-center justify-between">
-              <div>
-                <p className="text-slate-600 text-sm">Sent</p>
-                <p className="text-3xl font-bold text-slate-900">{stats.sent}</p>
-              </div>
-              <Mail className="w-12 h-12 text-slate-600" />
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6 flex items-center justify-between">
-              <div>
-                <p className="text-slate-600 text-sm">Responded</p>
-                <p className="text-3xl font-bold text-green-600">{stats.responded}</p>
-              </div>
-              <CheckCircle className="w-12 h-12 text-green-600" />
-            </CardContent>
-          </Card>
-        </div>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold text-slate-800">Your Referrals</h2>
-              <div className="flex gap-3">
+      {/* Main Content */}
+      <Card className="rounded-3xl shadow-xl border-border/40 backdrop-blur-sm bg-background/95 overflow-hidden">
+        <CardHeader className="border-b border-border/40 px-6 py-6 !pb-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <CardTitle>Outreach List</CardTitle>
+              <CardDescription>Manage your ongoing conversations</CardDescription>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <Search className="absolute left-4 top-3.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="text"
-                  placeholder="Search by company or employee..."
+                  placeholder="Search by name or company..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-64"
+                  className="pl-10 w-64"
                 />
-                <select
-                  value={filterType}
-                  onChange={(e) => setFilterType(e.target.value as any)}
-                  className="px-4 py-2 border border-slate-300 rounded-lg"
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger>
+                  <Button variant="outline" size="icon" className="rounded-full relative">
+                    <Filter className="h-4 w-4" />
+                    {statusFilter !== 'All' && (
+                      <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-primary rounded-full border-2 border-background" />
+                    )}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => setStatusFilter('All')}>
+                    All Statuses
+                    {statusFilter === 'All' && <span className="ml-auto text-primary">✓</span>}
+                  </DropdownMenuItem>
+                  {STATUS_OPTIONS.map((status) => (
+                    <DropdownMenuItem key={status} onClick={() => setStatusFilter(status)}>
+                      {status}
+                      {statusFilter === status && <span className="ml-auto text-primary">✓</span>}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="p-0">
+          <OutreachTable
+            data={listData?.data || []}
+            isLoading={isLoadingList}
+            onToggleAutomated={handleToggleAutomated}
+            onAction={handleAction}
+          />
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between py-4 px-6 border-t border-border/40">
+              <div className="text-sm font-medium">
+                Page {page} of {totalPages}
+              </div>
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={page === 1 || isLoadingList}
                 >
-                  <option value="all">All</option>
-                  <option value="company">By Company</option>
-                  <option value="employee">By Employee</option>
-                  <option value="hr">HR Only</option>
-                </select>
+                  <ChevronLeft className="h-4 w-4" />
+                  Previous
+                </Button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                  <Button
+                    key={p}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage(p)}
+                    disabled={isLoadingList}
+                  >
+                    {p}
+                  </Button>
+                ))}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages || isLoadingList}
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
               </div>
             </div>
-
-            <div className="space-y-4">
-              {filteredReferrals.length === 0 ? (
-                <div className="text-center py-12">
-                  <Mail className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-                  <p className="text-slate-600">No referrals found</p>
-                  <Button onClick={() => navigate('/outreach')} className="mt-4">
-                    Create Your First Referral
-                  </Button>
-                </div>
-              ) : (
-                filteredReferrals.map((referral) => (
-                  <div
-                    key={referral.id}
-                    className="p-4 border border-slate-200 rounded-lg hover:shadow-md transition-shadow"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <Building2 className="w-5 h-5 text-slate-600" />
-                          <h3 className="font-semibold text-slate-800">
-                            {referral.companies.name}
-                          </h3>
-                          {referral.employees && (
-                            <>
-                              <span className="text-slate-400">→</span>
-                              <User className="w-5 h-5 text-slate-600" />
-                              <span className="text-slate-700">{referral.employees.name}</span>
-                              {referral.employees.is_hr && (
-                                <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded">
-                                  HR
-                                </span>
-                              )}
-                            </>
-                          )}
-                        </div>
-                        <p className="text-sm text-slate-600">
-                          Template: {referral.template_type}
-                        </p>
-                        <p className="text-xs text-slate-500 mt-1">
-                          Created: {new Date(referral.created_at).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span
-                          className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(
-                            referral.status
-                          )}`}
-                        >
-                          {getStatusIcon(referral.status)}
-                          <span className="ml-2">{referral.status}</span>
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </main>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

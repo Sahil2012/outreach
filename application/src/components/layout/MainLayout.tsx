@@ -1,58 +1,52 @@
 import React from "react";
-import { Mail } from "lucide-react";
-import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/clerk-react";
+import { Sidebar } from "./Sidebar";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { Menu } from "lucide-react";
 
 interface MainLayoutProps {
   children: React.ReactNode;
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
-  const outreach = "NaukriOutreach";
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50  to-cyan-50 z-50">
-      <header className="border-b border-slate-200 sticky top-0 bg-white/95 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Mail className="h-5 w-5 text-blue-600" />
-            <h1 className="font-medium text-xl text-slate-800">{outreach}</h1>
+    <div className="min-h-screen bg-background font-sans text-foreground flex">
+      {/* Background Pattern */}
+      <div className="fixed top-0 left-0 w-full h-full bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] -z-10 opacity-30 dark:opacity-10 pointer-events-none" />
+
+      {/* Desktop Sidebar */}
+      <aside className="hidden md:flex w-64 flex-col fixed inset-y-0 z-50 border-r border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <Sidebar />
+      </aside>
+
+      {/* Mobile Header & Content */}
+      <div className="flex-1 flex flex-col md:pl-64 min-h-screen transition-all duration-300 ease-in-out">
+        {/* Mobile Header */}
+        <header className="md:hidden sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 h-16 flex items-center px-4 justify-between">
+          <div className="flex items-center gap-2 font-bold text-xl">
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground">
+              O
+            </div>
+            <span>Outreach</span>
           </div>
-          <nav className="hidden sm:block">
-            <SignedOut>
-              <SignInButton />
-            </SignedOut>
-            <SignedIn>
-              <UserButton />
-            </SignedIn>
-          </nav>
-          <button className="block sm:hidden text-slate-600">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            </svg>
-          </button>
-        </div>
-      </header>
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="md:hidden">
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">Toggle menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="p-0 w-64">
+              <Sidebar />
+            </SheetContent>
+          </Sheet>
+        </header>
 
-      <main className="container mx-auto px-4 py-8 max-w-5xl">{children}</main>
-
-      <footer className="bg-transparent py-6 border-t-2 border-neutral-100">
-        <div className="container mx-auto px-4 text-center text-slate-500 text-sm">
-          <p>
-            &copy; {new Date().getFullYear()} {outreach}. All rights reserved.
-          </p>
-        </div>
-      </footer>
+        {/* Main Content */}
+        <main className="flex-1 p-4 md:p-8 max-w-7xl mx-auto w-full">
+          {children}
+        </main>
+      </div>
     </div>
   );
 };

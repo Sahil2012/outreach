@@ -1,134 +1,130 @@
-import React, { useState } from "react";
-import { ArrowLeft, ArrowRight, Copy, Check } from "lucide-react";
-import { useOutreach } from "../../../context/OutreachContext";
-import ProgressBar from "../../../components/ui/ProgressBar";
-import { Button } from "../../../components/ui/button";
-import { Card, CardContent } from "../../../components/ui/card";
-import { Input } from "../../../components/ui/input";
-import { Label } from "../../../components/ui/label";
+import React, { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Loader } from "@/components/ui/loader";
+import { useOutreach } from "@/hooks/useOutreach";
+import { ArrowLeft, ArrowRight } from "lucide-react";
+import { useNavigate, useParams } from "react-router-dom";
+import { EmailEditor } from "./EmailEditor";
+import { toast } from "sonner";
 
 const EmailPreviewPage: React.FC = () => {
-  const { setStep, generatedEmail, emailDistribution, setEmailDistribution } =
-    useOutreach();
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { 
+    draft, 
+    isLoadingDraft, 
+    draftError, 
+    isPolling, 
+    startPolling, 
+    stopPolling, 
+    updateDraft, 
+    isUpdating 
+  } = useOutreach(id);
 
-  const [copied, setCopied] = useState(false);
-  const [showEmail, setShowEmail] = useState(false);
+  const [localEmail, setLocalEmail] = useState<{ subject: string; body: string } | null>(null);
 
-  const handleCopyToClipboard = () => {
-    navigator.clipboard.writeText(generatedEmail.email.body);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
+  // Handle Polling & Initialization
+  useEffect(() => {
+    if (!draft) return;
+
+    if (draft.isMailGenerated) {
+       if (isPolling) stopPolling();
+       
+       // Initialize local state if not set, or if we just finished generating (transition from null/empty to content)
+       if (!localEmail) {
+           setLocalEmail({ 
+               subject: draft.email?.subject || "", 
+               body: draft.email?.body || "" 
+           });
+       }
+    } else {
+      startPolling();
+    }
+  }, [draft, isPolling, startPolling, stopPolling, localEmail]);
+
+  useEffect(() => {
+      // Cleanup polling on unmount
+      return () => {
+          stopPolling();
+      };
+  }, [stopPolling]);
+
 
   const handleContinue = async () => {
-    if (!emailDistribution) {
-      // Validate emails
-      alert("Enter email before proceeding");
-      if (!showEmail) setShowEmail(true);
-      return;
+    if (!id || !localEmail) return;
+    try {
+      await updateDraft({
+        id,
+        payload: {
+          subject: localEmail.subject,
+          body: localEmail.body,
+        }
+      });
+      navigate(`/outreach/send/${id}`);
+    } catch (error) {
+      console.error("Failed to update email", error);
+      toast.error("Failed to save email. Please try again.");
     }
-
-    setStep(4);
   };
 
-  const handleOpenGmail = () => {
-    const gmailUrl  = `https://mail.google.com/mail/?view=cm&fs=1&tf=1&su=${encodeURIComponent(generatedEmail.email.subject)}&body=${encodeURIComponent(generatedEmail.email.body)}`;
-    window.open(gmailUrl, '_blank');
-  };
+  if (!id) return <div>Invalid Draft ID</div>;
+
+  if (isLoadingDraft && !draft) {
+      return (
+          <div className="flex items-center justify-center min-h-[60vh]">
+              <Loader size="lg" />
+          </div>
+      );
+  }
+
+  if (draftError) {
+      return (
+          <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
+              <div className="text-destructive font-medium">Failed to load draft.</div>
+               <Button variant="outline" onClick={() => window.location.reload()}>Retry</Button>
+          </div>
+      );
+  }
+
+  // Still generating
+  if (draft && !draft.isMailGenerated) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
+        <Loader size="lg" />
+        <p className="text-muted-foreground animate-pulse">Generating your email...</p>
+      </div>
+    );
+  }
+
+  if (!localEmail) return null; // Should be initializing
 
   return (
-    <div className="animate-fadeIn">
-      <ProgressBar currentStep={3} totalSteps={4} />
+    <div className="animate-fadeIn space-y-6">
+      <EmailEditor
+          subject={localEmail.subject}
+          body={localEmail.body}
+          onSubjectChange={(val) => setLocalEmail(prev => prev ? ({ ...prev, subject: val }) : null)}
+          onBodyChange={(val) => setLocalEmail(prev => prev ? ({ ...prev, body: val }) : null)}
+      />
 
-      <h1 className="text-3xl font-semibold text-gray-900 mb-2">
-        Preview Your Email
-      </h1>
-      <p className="text-gray-600 mb-8">
-        Review your email before sending or copying it.
-      </p>
-
-      <Card>
-        <CardContent className="p-6 space-y-6">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
-            <h2 className="text-xl font-medium text-gray-800">Email Preview</h2>
-            <div className="mt-2 md:mt-0">
-              <Button
-                variant={copied ? "default" : "outline"}
-                size="sm"
-                onClick={handleCopyToClipboard}
-              >
-                {copied ? (
-                  <Check className="h-4 w-4 mr-2" />
-                ) : (
-                  <Copy className="h-4 w-4 mr-2" />
-                )}
-                {copied ? "Copied!" : "Copy to Clipboard"}
-              </Button>
-            </div>
-          </div>
-
-          <div>
-            <Label>Subject</Label>
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 font-mono text-sm whitespace-pre-wrap mt-2">
-              {generatedEmail.email.subject}
-            </div>
-          </div>
-
-          <div>
-            <Label>Message</Label>
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 font-mono text-sm whitespace-pre-wrap mt-2 max-h-96 overflow-y-auto">
-              {generatedEmail.email.body}
-            </div>
-          </div>
-
-          <div className="flex gap-4">
-            <Button
-              variant={showEmail ? "default" : "outline"}
-              onClick={() => setShowEmail(true)}
-              className="flex-1"
-            >
-              Send via Email
-            </Button>
-            <Button
-              variant={!showEmail ? "default" : "outline"}
-              onClick={() => handleOpenGmail()}
-              className="flex-1"
-            >
-              Open Gmail
-            </Button>
-          </div>
-
-          {showEmail && (
-            <div className="space-y-2">
-              <Label htmlFor="recipient-email">Recipient Email</Label>
-              <Input
-                id="recipient-email"
-                placeholder="e.g. hrEmail@company.com"
-                type="email"
-                value={emailDistribution}
-                onChange={(e) => setEmailDistribution(e.target.value)}
-              />
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      <div className="flex justify-between mt-8">
+      <div className="flex justify-between pt-4">
         <Button
           variant="outline"
           size="lg"
-          onClick={() => setStep(2)}
+          onClick={() => navigate(`/outreach/recipient-info?templateId=${draft?.templateId}`)}
+          disabled={isUpdating}
         >
-          <ArrowLeft className="w-5 h-5 mr-2" />
+          <ArrowLeft className="w-4 h-4 mr-1 -ml-1" />
           Back
         </Button>
         <Button
-          variant="default"
           size="lg"
           onClick={handleContinue}
+          disabled={isUpdating}
         >
+          {isUpdating ? <Loader className="mr-2" /> : null}
           Continue
-          <ArrowRight className="w-5 h-5 ml-2" />
+          <ArrowRight className="w-4 h-4 ml-1 -mr-1" />
         </Button>
       </div>
     </div>
