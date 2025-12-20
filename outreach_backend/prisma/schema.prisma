@@ -9,18 +9,6 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-enum RefStatus {
-  FOLLOWUP
-  CLOSED
-  PENDING
-}
-
-enum ProfileCompletenessStatus {
-  INCOMPLETE
-  PARTIAL
-  COMPLETE
-}
-
 model UserTable {
   id              String           @id @default(uuid()) @db.Uuid
   authUserId      String           @unique
@@ -31,30 +19,30 @@ model UserTable {
   bio             String?
   profilePicture  String?
   templatesUsed   Int              @default(0)
-  messages        ReferralMsg[]
-  jobsAdded       JobPool[]
-  userProfileData UserProfileData?
   profileDataId   Int?             @unique
   createdAt       DateTime         @default(now())
+  thread          Thread[]
+  messages        Message[]
+  userProfileData UserProfileData?
 }
 
 model UserProfileData {
   id               Int                  @id @default(autoincrement())
   summary          String?
   education        Json?
-  userId           String               @unique @db.Uuid
-  User             UserTable            @relation(fields: [userId], references: [id])
-  profileSkills    ProfilSkillMapping[]
+  userId           String               @unique
   experiences      Experience[]
+  profileSkills    ProfilSkillMapping[]
   profileReadiness ProfileReadiness?
+  User             UserTable            @relation(fields: [userId], references: [authUserId])
 }
 
 model ProfilSkillMapping {
   id                Int             @id @default(autoincrement())
   userProfileDataId Int
   skillId           Int
-  UserProfileData   UserProfileData @relation(fields: [userProfileDataId], references: [id])
   Skills            Skills          @relation(fields: [skillId], references: [id])
+  UserProfileData   UserProfileData @relation(fields: [userProfileDataId], references: [id])
 
   @@unique([userProfileDataId, skillId])
 }
@@ -77,53 +65,96 @@ model Experience {
   UserProfileData   UserProfileData @relation(fields: [userProfileDataId], references: [id])
 }
 
-model ReferralMsg {
-  id            Int           @id @default(autoincrement())
-  message       String
-  subject       String?
-  userId        String        @db.Uuid
-  employeeId    Int
-  jobId         Int?
-  date          DateTime      @default(now())
-  status        RefStatus     @default(PENDING)
-  User          UserTable     @relation(fields: [userId], references: [id])
-  Employee      EmpInfo       @relation(fields: [employeeId], references: [id])
-  Job           JobPool?      @relation(fields: [jobId], references: [id])
-  followUps     FollowUpMsg[]
-  replyReceived Boolean       @default(false)
+model Employee {
+  id       Int     @id @default(autoincrement())
+  name     String
+  email    String? @unique
+  position String?
+  company  String?
+
+  threads Thread[]
 }
 
-model FollowUpMsg {
-  id          Int         @id @default(autoincrement())
-  message     String
-  referralId  Int
-  version     Int         @default(1)
-  sentAt      DateTime    @default(now())
-  ReferralMsg ReferralMsg @relation(fields: [referralId], references: [id])
-}
-
-model EmpInfo {
-  id          Int           @id @default(autoincrement())
-  name        String
-  email       String?
-  phoneNo     BigInt?
-  linkedInUrl String?
-  companyName String
-  referrals   ReferralMsg[]
-  createdAt   DateTime      @default(now())
-}
-
-model JobPool {
-  id          Int           @id @default(autoincrement())
-  niche       String
+model Job {
+  id          Int     @id @default(autoincrement())
   title       String?
-  jobUrl      String?
-  jobId       String?
-  companyName String?
-  addedById   String?       @db.Uuid
-  addedBy     UserTable?    @relation(fields: [addedById], references: [id])
-  referrals   ReferralMsg[]
-  createdAt   DateTime      @default(now())
+  company     String?
+  location    String?
+  description String?
+  jobId       String  @unique
+  link        String?
+  niche       String?
+
+  thread ThreadJobMapping[]
+}
+
+model Thread {
+  id          Int          @id @default(autoincrement())
+  authUserId  String
+  employeeId  Int
+  type        EmailType
+  threadId    String?
+  createdAt   DateTime     @default(now())
+  lastUpdated DateTime
+  status      ThreadStatus @default(PENDING)
+  automated   Boolean      @default(false)
+
+  Message   Message[]
+  UserTable UserTable          @relation(fields: [authUserId], references: [authUserId])
+  Employee  Employee           @relation(fields: [employeeId], references: [id])
+  Job       ThreadJobMapping[]
+}
+
+model ThreadJobMapping {
+  id       Int @id @default(autoincrement())
+  threadId Int
+  jobId    Int
+
+  Thread Thread @relation(fields: [threadId], references: [id])
+  Job    Job    @relation(fields: [jobId], references: [id])
+
+  @@unique([threadId, jobId])
+}
+
+model Message {
+  id         Int      @id @default(autoincrement())
+  body       String
+  subject    String?
+  authUserId String
+  threadId   Int
+  date       DateTime @default(now())
+  fromUser   Boolean
+
+  thread Thread    @relation(fields: [threadId], references: [id])
+  User   UserTable @relation(fields: [authUserId], references: [authUserId])
+}
+
+enum RefStatus {
+  FOLLOWUP
+  CLOSED
+  PENDING
+}
+
+enum ProfileCompletenessStatus {
+  INCOMPLETE
+  PARTIAL
+  COMPLETE
+}
+
+enum EmailType {
+  TAILORED
+  COLD
+}
+
+enum ThreadStatus {
+  PENDING
+  FIRST_FOLLOWUP
+  SECOND_FOLLOWUP
+  THIRD_FOLLOWUP
+  CLOSED
+  REFFERED
+  SENT
+  DELETED
 }
 
 model ProfileReadiness {

@@ -4,10 +4,12 @@ import { GenerateMailRequest } from "../types/GenerateMailRequest.js";
 import { emailStrategy } from "../service/email/emailStratergy.js";
 import prisma from "../apis/prismaClient.js";
 import { getAuth } from "@clerk/express";
+import { saveDraftEmail } from "../service/emailService.js";
+import { DraftEmailDTO } from "../dto/reponse/DraftEmailDTO.js";
 
 const mailGeneratorController = async (
   req: Request<{}, {}, GenerateMailRequest>,
-  res: Response,
+  res: Response<DraftEmailDTO | { error: string }>,
   next: NextFunction
 ) => {
   try {
@@ -39,10 +41,17 @@ const mailGeneratorController = async (
     }
 
     const emailContent = await emailGenerator(req.body);
-
     log("Email generated successfully for userId:", req.body.userId);
 
-    res.status(200).json({ emailContent });
+    const draftThread = await saveDraftEmail(
+      clerkUserId,
+      req.body as Extract<GenerateMailRequest, { type: "cold" | "tailored" }>,
+      emailContent.body,
+      emailContent.subject
+    );
+    log("Draft email saved successfully for userId:", req.body.userId);
+
+    res.status(200).json({ threadId: draftThread.id, messageId: draftThread.messageId,...emailContent });
   } catch (error) {
     console.error("Error generating email:", error);
     next(error);

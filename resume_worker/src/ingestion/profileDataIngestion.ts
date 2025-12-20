@@ -13,10 +13,14 @@ export async function ingestUserProfile(
     education: data.education || null,
   };
 
-  const profile = await tx.userProfileData.create({
-    data: {
-      ...profileData,
+  const profile = await tx.userProfileData.upsert({
+    create: {
       userId: userId,
+      ...profileData,
+    },
+    where: { userId: userId },
+    update: {
+      ...profileData,
     },
   });
 

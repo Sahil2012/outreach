@@ -4,12 +4,15 @@ import emailSender from "./controller/emailSender.js";
 import cors from "cors";
 import profileRouter from "./routes/profileRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
-import companyRouter from "./routes/companyRoutes.js";
-import followupRouter from "./routes/followupRoutes.js";
-import referralRouter from "./routes/referralRoutes.js";
-import mailGeneratorController from "./controller/mailGeneratorController.js";
+import mailGeneratorController from "./controller/generatorController.js";
 import { clerkMiddleware, requireAuth } from "@clerk/express"
-
+import { ensureAppUser } from "./middlleware/ensureAppUser.js";
+import { getEmailTypes } from "./controller/emailController.js";
+import { getAccessToken } from "./controller/auth/google.js";
+import { sendMailUsingClerkToken } from "./controller/test.js";
+import threadRoutes from "./routes/threadRoutes.js";
+import messageRoutes from "./routes/messageRoutes.js";
+import statsRoutes from "./routes/statsRoutes.js";
 configDotenv();
 
 const PORT = process.env.PORT;
@@ -20,9 +23,7 @@ app.use(clerkMiddleware());
 app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
-    origin: [process.env.FRONTEND_URL || "", "http://localhost:5173"],
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    
   })
 );
 app.use(express.json());
@@ -34,9 +35,12 @@ app.post("/sendEmail", emailSender);
 app.post("/sendEmailV2", requireAuth(), emailSender);
 app.use("/auth", authRoutes);
 app.use("/profile", profileRouter);
-app.use("/companies", companyRouter);
-app.use("/followups", followupRouter);
-app.use("/referrals", referralRouter);
+app.get("/email/type", getEmailTypes);
+app.post("/test",requireAuth(), sendMailUsingClerkToken);
+app.get("/test", getAccessToken);
+app.use("/thread", requireAuth(), threadRoutes);
+app.use("/message", requireAuth(),  messageRoutes);
+app.use("/stats", requireAuth(), statsRoutes);
 
 // Global error handler
 const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
