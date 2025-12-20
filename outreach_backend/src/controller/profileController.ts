@@ -6,6 +6,7 @@ import { getAuth } from "@clerk/express";
 import { toProfileDTO } from "../mapper/profile.profileDTO.js";
 import { getUserProfile, updateProfile as updateProfileService } from "../service/profileService.js";
 import { ProfileDTO } from "../dto/reponse/ProfileDTO.js";
+import prisma from "../apis/prismaClient.js";
 
 // GET /profile/me
 export const getProfile = async (req: Request, res: Response<ProfileDTO | any>) => {
@@ -84,10 +85,14 @@ export const uploadResume = async (req: Request, res: Response) => {
 
     if (uploadError) throw uploadError;
 
-    await supabase
-      .from("User")
-      .update({ resumeUrl: uploadData.path })
-      .eq("id", clerkUserId);
+    prisma.userProfileData.update({
+      where: {
+        authUserId: clerkUserId,
+      },
+      data: {
+        resumeUrl: uploadData.path,
+      },
+    });
 
     log(`Resume uploaded for user ${clerkUserId} at path ${uploadData.path}`);
     // Enqueue for background processing
