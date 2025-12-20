@@ -8,34 +8,21 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model UserTable {
-  id              String           @id @default(uuid()) @db.Uuid
-  authUserId      String           @unique
-  userName        String?
-  email           String?          @unique
-  firstName       String?
-  lastName        String?
-  phoneNo         BigInt?          @unique
-  resumeUrl       String?
-  bio             String?
-  profilePicture  String?
-  templatesUsed   Int              @default(0)
-  profileDataId   Int?             @unique
-  createdAt       DateTime         @default(now())
-  Message         Message[]
-  Thread          Thread[]
-  userProfileData UserProfileData?
-}
-
 model UserProfileData {
-  id               Int                  @id @default(autoincrement())
-  summary          String?
-  education        Json?
-  userId           String               @unique
-  experiences      Experience[]
-  profileSkills    ProfilSkillMapping[]
-  profileReadiness ProfileReadiness?
-  User             UserTable            @relation(fields: [userId], references: [authUserId])
+  id            Int                       @id @default(autoincrement())
+  summary       String?
+  education     Json?
+  authUserId    String                    @unique
+  email         String?                   @unique
+  firstName     String?
+  lastName      String?
+  phoneNo       BigInt?                   @unique
+  resumeUrl     String?
+  status        ProfileCompletenessStatus @default(INCOMPLETE)
+  experiences   Experience[]
+  Message       Message[]
+  profileSkills ProfilSkillMapping[]
+  Thread        Thread[]
 }
 
 model ProfilSkillMapping {
@@ -66,25 +53,18 @@ model Experience {
   UserProfileData   UserProfileData @relation(fields: [userProfileDataId], references: [id])
 }
 
-model ProfileReadiness {
-  id                 Int                       @id @default(autoincrement())
-  userProfileId      Int                       @unique
-  completenessStatus ProfileCompletenessStatus @default(INCOMPLETE)
-  lastUpdated        DateTime                  @default(now())
-  UserProfileData    UserProfileData           @relation(fields: [userProfileId], references: [id])
-}
-
 model Thread {
   id               Int                @id @default(autoincrement())
+  authUserId       String
+  employeeId       Int
   type             EmailType
   threadId         String?
   createdAt        DateTime           @default(now())
-  status           ThreadStatus       @default(PENDING)
-  authUserId       String
-  employeeId       Int
   lastUpdated      DateTime
+  status           ThreadStatus       @default(PENDING)
+  automated        Boolean            @default(false)
   Message          Message[]
-  UserTable        UserTable          @relation(fields: [authUserId], references: [authUserId])
+  UserTable        UserProfileData    @relation(fields: [authUserId], references: [authUserId])
   Employee         Employee           @relation(fields: [employeeId], references: [id])
   ThreadJobMapping ThreadJobMapping[]
 }
@@ -92,33 +72,34 @@ model Thread {
 model Employee {
   id       Int      @id @default(autoincrement())
   name     String
-  email    String   @unique
-  position String
-  company  String
+  email    String?  @unique
+  position String?
+  company  String?
   Thread   Thread[]
 }
 
 model Job {
   id               Int                @id @default(autoincrement())
-  title            String
-  company          String
-  location         String
-  description      String
-  link             String
-  niche            String
+  title            String?
+  company          String?
+  location         String?
+  description      String?
+  jobId            String             @unique
+  link             String?
+  niche            String?
   ThreadJobMapping ThreadJobMapping[]
 }
 
 model Message {
-  id         Int       @id @default(autoincrement())
+  id         Int             @id @default(autoincrement())
   body       String
   subject    String?
   authUserId String
   threadId   Int
-  date       DateTime  @default(now())
+  date       DateTime        @default(now())
   fromUser   Boolean
-  UserTable  UserTable @relation(fields: [authUserId], references: [authUserId])
-  Thread     Thread    @relation(fields: [threadId], references: [id])
+  UserTable  UserProfileData @relation(fields: [authUserId], references: [authUserId])
+  Thread     Thread          @relation(fields: [threadId], references: [id])
 }
 
 model ThreadJobMapping {
@@ -154,4 +135,7 @@ enum ThreadStatus {
   SECOND_FOLLOWUP
   THIRD_FOLLOWUP
   CLOSED
+  REFFERED
+  SENT
+  DELETED
 }

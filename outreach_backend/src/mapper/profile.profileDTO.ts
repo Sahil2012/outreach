@@ -14,6 +14,8 @@ export const toProfileDTO = (profile: any): ProfileDTO | null => {
       endDate: exp.endDate ? exp.endDate.toISOString() : null,
       description: exp.description
     })),
-    readiness: profile.profileReadiness.completenessStatus || null,
+    status: profile.status,
+    firstName: profile.firstName,
+    lastName: profile.lastName,
   };
 };

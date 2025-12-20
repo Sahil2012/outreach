@@ -2,10 +2,9 @@ import { Request, Response } from "express";
 import { supabase } from "../apis/supabaseClient.js";
 import { enqueueResumeJob } from "../utils/enqueResume.js";
 import { log } from "console";
-import prisma from "../apis/prismaClient.js";
 import { getAuth } from "@clerk/express";
 import { toProfileDTO } from "../mapper/profile.profileDTO.js";
-import { getUserProfile } from "../service/profile.service.js";
+import { getUserProfile, updateProfile as updateProfileService } from "../service/profileService.js";
 import { ProfileDTO } from "../dto/reponse/ProfileDTO.js";
 
 // GET /profile/me
@@ -40,44 +39,12 @@ export const getProfile = async (req: Request, res: Response<ProfileDTO | any>) 
     return res.status(500).json({
       error: "INTERNAL_SERVER_ERROR",
       message: "Something went wrong",
-      details:  error.message,
+      details: error.message,
     });
   }
 };
 
-//GET /profile/readiness
-export const checkReadiness = async (req: Request, res: Response) => {
-  try {
-    const { userId: clerkUserId } = getAuth(req);
-
-    if (!clerkUserId) {
-      log("Unauthorized access attempt to check readiness");
-      return res.status(401).json({ error: "Unauthorized" });
-    }
-
-    const profile = await prisma.userProfileData.findUnique({
-      where: { userId: clerkUserId },
-    });
-
-    if (!profile) {
-      return res.status(404).json({ error: "Profile not found" });
-    }
-
-    const readiness = await prisma.profileReadiness.findUnique({
-      where: { userProfileId: profile.id },
-    });
-
-    if (!readiness) {
-      return res.status(404).json({ error: "Readiness status not found" });
-    }
-
-    res.json({ status: readiness.completenessStatus });
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
-// PUT /profile/update
+// PATCH /profile/update
 export const updateProfile = async (req: Request, res: Response) => {
   try {
     const { userId: clerkUserId } = getAuth(req);
@@ -86,16 +53,8 @@ export const updateProfile = async (req: Request, res: Response) => {
       return res.status(401).json({ error: "Unauthorized" });
     }
 
-    const updates = req.body;
-
-    const { data, error } = await supabase
-      .from("User")
-      .update(updates)
-      .eq("id", clerkUserId)
-      .select();
-
-    if (error) throw error;
-    res.json({ message: "Profile updated", data });
+    const updatedProfile = await updateProfileService(clerkUserId, req.body);
+    res.json({ message: "Profile updated", data: updatedProfile });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }

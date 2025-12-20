@@ -6,7 +6,7 @@ import profileRouter from "./routes/profileRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import mailGeneratorController from "./controller/generatorController.js";
 import { clerkMiddleware, requireAuth } from "@clerk/express"
-import { ensureAppUser } from "./middlleware/ensureAppUser.js";
+import { ensureProfileCreated } from "./middlleware/ensureProfileCreated.js";
 import { getEmailTypes } from "./controller/emailController.js";
 import { getAccessToken } from "./controller/auth/google.js";
 import { sendMailUsingClerkToken } from "./controller/test.js";
@@ -29,9 +29,9 @@ app.use(
 app.use(express.json());
 
 // Routers
-app.post("/generateMail", requireAuth(), ensureAppUser, mailGeneratorController);
+app.post("/generateMail", requireAuth(), ensureProfileCreated, mailGeneratorController);
 app.post("/sendEmail", emailSender);
-app.post("/sendEmailV2", requireAuth(), ensureAppUser, emailSender);
+app.post("/sendEmailV2", requireAuth(), ensureProfileCreated, emailSender);
 app.use("/auth", authRoutes);
 app.use("/profile", profileRouter);
 app.get("/email/type", getEmailTypes);

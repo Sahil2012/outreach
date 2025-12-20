@@ -20,18 +20,7 @@ const mailGeneratorController = async (
       return res.status(401).json({ error: "Unauthorized" });
     }
 
-    const appUser = await prisma.userTable.findUnique({
-      where: { authUserId: clerkUserId },
-      select: { id: true },
-    });
-
-    if (!appUser) {
-      log("User not found for authUserId:", clerkUserId);
-      return res.status(404).json({ error: "User not found" });
-    } else {
-      log("Generating email for userId:", appUser.id);
-      req.body.userId = appUser.id;
-    }
+    req.body.userId = clerkUserId;
 
     const emailGenerator = emailStrategy[req.body.type];
 

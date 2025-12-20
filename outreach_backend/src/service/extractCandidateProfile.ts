@@ -2,33 +2,12 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-export async function getCandidateProfile(id: string) {
+export async function getCandidateProfile(authUserId: string) {
   try {
     await prisma.$connect();
-    if (!id) {
-      throw new Error("id is required");
-    }
-
-    console.log("Fetching candidate profile for:", id);
-
-    // Fetch user
-    const user = await prisma.userTable.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        userName: true,
-        email: true,
-        authUserId: true,
-      },
-    });
-
-    if (!user || !user.id) {
-      console.warn("No user found for authUserId:", id);
-      return { success: false, message: "User not found" };
-    }
-
+    
     const profileData = await prisma.userProfileData.findUnique({
-      where: { userId: user.authUserId },
+      where: { authUserId: authUserId },
       include: {
         profileSkills: {
           include: {
@@ -40,7 +19,7 @@ export async function getCandidateProfile(id: string) {
     });
 
     if (!profileData) {
-      console.warn("User found but profile data is missing:", user.id);
+      console.warn("Profile data is missing");
       return { success: false, message: "Profile data not found for user" };
     }
 
@@ -55,13 +34,13 @@ export async function getCandidateProfile(id: string) {
         )
         .join(", ") || "No experience listed";
 
-    console.log("Profile fetched successfully for:", id);
+    console.log("Profile fetched successfully for:", profileData.authUserId);
 
     return {
       success: true,
-      userId: user.id,
-      userName: user.userName,
-      email: user.email,
+      userId: authUserId,
+      userName: `${profileData.firstName} ${profileData.lastName}`,
+      email: profileData.email,
       summary: profileData.summary,
       education: profileData.education,
       skills,

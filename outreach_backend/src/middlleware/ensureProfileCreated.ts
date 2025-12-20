@@ -3,7 +3,7 @@ import { log } from "console";
 import prisma from "../apis/prismaClient.js";
 import { Request, Response, NextFunction } from "express";
 
-export const ensureAppUser = async (
+export const ensureProfileCreated = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -13,7 +13,7 @@ export const ensureAppUser = async (
 
   const clerkUser = await clerkClient.users.getUser(clerkUserId || "");
 
-  let appUser = await prisma.userTable.findUnique({
+  let appUser = await prisma.userProfileData.findUnique({
     where: { authUserId: clerkUserId || "" },
   });
 
@@ -21,10 +21,9 @@ export const ensureAppUser = async (
     log("User not found, creating new user with ID:", clerkUserId);
 
     try {
-      appUser = await prisma.userTable.create({
+      appUser = await prisma.userProfileData.create({
         data: {
           authUserId: clerkUser.id,
-          userName: clerkUser.emailAddresses[0].emailAddress,
           email: clerkUser.emailAddresses[0].emailAddress,
           firstName: clerkUser.firstName || "",
           lastName: clerkUser.lastName || "",

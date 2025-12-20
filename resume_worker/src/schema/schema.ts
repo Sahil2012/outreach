@@ -1,4 +1,3 @@
-import { endianness } from "os";
 import { z } from "zod";
 
 const userDetailsSchema = z.object({

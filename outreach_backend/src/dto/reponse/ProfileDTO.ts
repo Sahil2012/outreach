@@ -11,5 +11,7 @@ export interface ProfileDTO {
     endDate?: string | null;
     description?: string | null;
   }>;
-  readiness: string | null;
+  status: string | null;
+  firstName: string | null;
+  lastName: string | null;
 }

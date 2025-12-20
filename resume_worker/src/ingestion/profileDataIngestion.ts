@@ -13,13 +13,9 @@ export async function ingestUserProfile(
     education: data.education || null,
   };
 
-  const profile = await tx.userProfileData.upsert({
-    create: {
-      userId: userId,
-      ...profileData,
-    },
-    where: { userId: userId },
-    update: {
+  const profile = await tx.userProfileData.update({
+    where: { authUserId: userId },
+    data: {
       ...profileData,
     },
   });
