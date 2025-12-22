@@ -14,4 +14,5 @@ export interface ProfileDTO {
   status: string | null;
   firstName: string | null;
   lastName: string | null;
+  resumeUrl?: string | null;
 }
