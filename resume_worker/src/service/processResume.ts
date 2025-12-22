@@ -26,6 +26,14 @@ export async function processResume(id: string, extracted: any) {
       //   3. Handle experiences
       await ingestExperience(tx, extracted.experiences || [], profile.id);
 
+      await prisma.userProfileData.update({
+        where: {
+          authUserId: id,
+        },
+        data: {
+          status: ProfileCompletenessStatus.PARTIAL,
+        },
+      });
       return { success: true, profileId: profile.id };
     });
 

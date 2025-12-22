@@ -17,5 +17,6 @@ export const toProfileDTO = (profile: any): ProfileDTO | null => {
     status: profile.status,
     firstName: profile.firstName,
     lastName: profile.lastName,
+    resumeUrl: profile.resumeUrl
   };
 };

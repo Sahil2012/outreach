@@ -3,7 +3,7 @@ import { supabase } from "../apis/supabaseClient.js";
 import { enqueueResumeJob } from "../utils/enqueResume.js";
 import { log } from "console";
 import { getAuth } from "@clerk/express";
-import { toProfileDTO } from "../mapper/profile.profileDTO.js";
+import { toProfileDTO } from "../mapper/profileDTOMapper.js";
 import { getUserProfile, updateProfile as updateProfileService } from "../service/profileService.js";
 import { ProfileDTO } from "../dto/reponse/ProfileDTO.js";
 import prisma from "../apis/prismaClient.js";
@@ -85,7 +85,7 @@ export const uploadResume = async (req: Request, res: Response) => {
 
     if (uploadError) throw uploadError;
 
-    prisma.userProfileData.update({
+    await prisma.userProfileData.update({
       where: {
         authUserId: clerkUserId,
       },
