@@ -85,7 +85,7 @@ export default function HomePage() {
           <div className="grid md:grid-cols-3 gap-6 mt-20">
             <Card className="group p-8 text-center bg-white/80 backdrop-blur-sm hover:bg-white hover:shadow-2xl transition-all duration-300 border-0 hover:-translate-y-1 cursor-pointer">
               <div className="flex justify-center mb-6">
-                <div className="p-4 bg-gradient-to-br from-blue-100 to-blue-100 rounded-2xl group-hover:scale-110 transition-transform duration-300">
+                <div className="p-4 bg-gradient-to-br from-blue-100 to-blue-100 rounded-3xl group-hover:scale-110 transition-transform duration-300">
                   <Users className="w-10 h-10 text-blue-600" />
                 </div>
               </div>
@@ -100,7 +100,7 @@ export default function HomePage() {
 
             <Card className="group p-8 text-center bg-white/80 backdrop-blur-sm hover:bg-white hover:shadow-2xl transition-all duration-300 border-0 hover:-translate-y-1 cursor-pointer">
               <div className="flex justify-center mb-6">
-                <div className="p-4 bg-gradient-to-br from-blue-100 to-blue-100 rounded-2xl group-hover:scale-110 transition-transform duration-300">
+                <div className="p-4 bg-gradient-to-br from-blue-100 to-blue-100 rounded-3xl group-hover:scale-110 transition-transform duration-300">
                   <Zap className="w-10 h-10 text-blue-600" />
                 </div>
               </div>
@@ -115,7 +115,7 @@ export default function HomePage() {
 
             <Card className="group p-8 text-center bg-white/80 backdrop-blur-sm hover:bg-white hover:shadow-2xl transition-all duration-300 border-0 hover:-translate-y-1 cursor-pointer">
               <div className="flex justify-center mb-6">
-                <div className="p-4 bg-gradient-to-br from-blue-100 to-blue-100 rounded-2xl group-hover:scale-110 transition-transform duration-300">
+                <div className="p-4 bg-gradient-to-br from-blue-100 to-blue-100 rounded-3xl group-hover:scale-110 transition-transform duration-300">
                   <Target className="w-10 h-10 text-blue-600" />
                 </div>
               </div>

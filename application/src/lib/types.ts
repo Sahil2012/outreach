@@ -32,12 +32,12 @@ export interface Experience {
 export interface Profile {
   firstName?: string;
   lastName?: string;
-  isResumeUploaded?: boolean;
-  isResumeParsed?: boolean;
-  skills?: string[];
+  status?: "INCOMPLETE" | "PARTIAL" | "COMPLETE";
+  resumeUrl?: string;
+  skills?: { name: string }[];
   projects?: Project[];
   education?: Education[];
-  experience?: Experience[];
+  experiences?: Experience[];
 }
 
 export interface Template {
@@ -50,7 +50,7 @@ export interface RecipientInfo {
   employeeName: string;
   employeeEmail: string;
   companyName: string;
-  jobId: string;
+  role: string;
   jobDescription?: string;
 }
 
@@ -71,7 +71,9 @@ export interface SendEmail {
   to: string
 }
 
-export type OutreachStatus = 'Generated' | 'Sent' | 'First Follow Up' | 'Second Follow Up' | 'Third Follow Up' | 'Absconded' | 'Responded' | 'Referred';
+export const THREAD_STATUS_VALUES = ['PENDING', 'FIRST_FOLLOWUP', 'SECOND_FOLLOWUP', 'THIRD_FOLLOWUP', 'CLOSED', 'SENT', 'REFERRED', 'DELETED'];
+
+export type ThreadStatus = typeof THREAD_STATUS_VALUES[number];
 
 export interface OutreachStats {
   reachedOut: number;
@@ -80,24 +82,33 @@ export interface OutreachStats {
   absconded: number;
 }
 
-export interface OutreachListItem {
-  id: string;
-  employeeName: string;
-  employeeEmail: string;
-  companyName: string;
-  status: OutreachStatus;
-  isAutomated: boolean;
-  lastActivity: string;
+export type EmailType = "TAILORED" | "COLD";
+
+export interface ThreadMessageCount {
+  Message: number;
 }
 
-export interface OutreachMetaResponse {
-    data: OutreachListItem[];
-    meta: {
-      total: number;
-      page: number;
-      limit: number;
-      totalPages: number;
-    }
+export interface ThreadEmployeeInfo {
+  name: string;
+  company: string | null;
+  email: string;
+}
+
+export interface ThreadMetaItem {
+  id: number;
+  status: ThreadStatus;
+  lastUpdated: Date;
+  Employee: ThreadEmployeeInfo;
+  automated: boolean;
+  type: EmailType;
+  _count: ThreadMessageCount;
+}
+
+export interface ThreadMetaResponse {
+  threads: ThreadMetaItem[];
+  total: number;
+  page: number;
+  pageSize: number;
 }
 
 export interface Draft {

@@ -5,7 +5,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Launch Program",
+      "name": "Launch Server",
       "program": "${workspaceFolder}/outreach_backend/dist/src/server.js",
       "request": "launch",
       "skipFiles": ["<node_internals>/**"],

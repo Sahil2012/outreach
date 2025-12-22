@@ -5,11 +5,13 @@ export const useResume = () => {
   const api = useApi();
 
   const uploadResumeMutation = useMutation({
+    throwOnError: true,
     mutationFn: async (file: File) => {
       const formData = new FormData();
       formData.append('resume', file);
+      formData.append('autofill', 'true');
 
-      const response = await api.post('/profile/resume/upload', formData, {
+      const response = await api.post('/profile/upload/resume', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -18,15 +20,8 @@ export const useResume = () => {
     },
   });
 
-  const deleteResumeMutation = useMutation({
-    mutationFn: async () => {
-      await api.delete('/profile/resume/upload');
-    },
-  });
-
   return {
     uploadResume: uploadResumeMutation.mutateAsync,
-    deleteResume: deleteResumeMutation.mutateAsync,
-    isLoading: uploadResumeMutation.isPending || deleteResumeMutation.isPending,
+    isLoading: uploadResumeMutation.isPending,
   };
 };

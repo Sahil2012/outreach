@@ -10,11 +10,13 @@ import { ArrowRight } from 'lucide-react';
 import { useProfile } from '@/hooks/useProfile';
 import { ResumeUpload } from './ResumeUpload';
 import { toast } from 'sonner';
+import { useResume } from '@/hooks/useResume';
 
 export default function BasicInfoPage() {
-  const { user, isLoaded } = useUser();
   const navigate = useNavigate();
+  const { user, isLoaded } = useUser();
   const { updateProfile, isUpdating } = useProfile();
+  const { uploadResume, isLoading } = useResume();
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -34,15 +36,18 @@ export default function BasicInfoPage() {
       if (!user) {
         throw new Error('User not found');
       }
+
+      if (resume) {
+        await uploadResume(resume);
+      }
       await updateProfile({
         firstName,
         lastName,
-        isResumeUploaded: !!resume
       });
       navigate('/onboarding/professional-info');
     } catch (error) {
       console.error("Failed to update basic info", error);
-      toast.error("Failed to update data. Please try again later");
+      toast.error("Some error occurred. Please try again later");
     }
   };
 
@@ -110,8 +115,8 @@ export default function BasicInfoPage() {
               initialResume={resume}
             />
 
-            <Button type="submit" className="w-full rounded-full" disabled={isUpdating}>
-              {isUpdating ? <Loader className="w-4 h-4 mr-2" /> : null}
+            <Button type="submit" className="w-full rounded-full" disabled={isLoading || isUpdating}>
+              {isLoading || isUpdating ? <Loader className="w-4 h-4 mr-2" /> : null}
               Next Step
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>

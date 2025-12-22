@@ -56,12 +56,12 @@ export const RecipientForm: React.FC<RecipientFormProps> = ({ info, onChange, er
                 </div>
 
                 <div className="space-y-2">
-                    <Label htmlFor="job-id">Job ID (Optional)</Label>
+                    <Label htmlFor="role">Role (Optional)</Label>
                     <Input
-                        id="job-id"
-                        placeholder="e.g. JOB-123456"
-                        value={info.jobId || ""}
-                        onChange={(e) => handleChange("jobId", e.target.value)}
+                        id="role"
+                        placeholder="e.g. Software Engineer"
+                        value={info.role || ""}
+                        onChange={(e) => handleChange("role", e.target.value)}
                     />
                 </div>
             </div>

@@ -3,14 +3,36 @@ import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Template } from "@/lib/types";
-import { useOutreach } from "@/hooks/useOutreach";
 import { toast } from "sonner";
 import { TemplateCard } from "./TemplateCard";
-import { Loader } from "@/components/ui/loader";
+
+const templates = [
+  {
+    id: "COLD",
+    name: "Cold",
+    content: "Reach out to new contacts you haven't connected with before",
+  },
+  {
+    id: "TAILORED",
+    name: "Tailored",
+    content: "Personalized outreach based on your profile and their background",
+  },
+  {
+    id: "FOLLOW_UP",
+    name: "Follow Up",
+    content: "Check in with contacts who haven't responded yet",
+  },
+  {
+    id: "THANK_YOU",
+    name: "Thank You",
+    content: "Express gratitude for referrals or positive responses",
+  },
+];
 
 const TemplateSelectionPage: React.FC = () => {
-  const { templates, isLoadingTemplates, templatesError } = useOutreach();
-  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(
+    null
+  );
   const navigate = useNavigate();
 
   const handleSelectTemplate = (template: Template) => {
@@ -24,23 +46,6 @@ const TemplateSelectionPage: React.FC = () => {
     }
     navigate(`/outreach/recipient-info?templateId=${selectedTemplate.id}`);
   };
-
-  if (isLoadingTemplates) {
-      return (
-          <div className="flex items-center justify-center min-h-[400px]">
-              <Loader size="lg" />
-          </div>
-      );
-  }
-
-  if (templatesError) {
-      return (
-          <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
-              <div className="text-destructive font-medium">Failed to load templates.</div>
-              <Button variant="outline" onClick={() => window.location.reload()}>Retry</Button>
-          </div>
-      );
-  }
 
   return (
     <div className="animate-fadeIn space-y-8">
@@ -56,11 +61,7 @@ const TemplateSelectionPage: React.FC = () => {
       </div>
 
       <div className="flex justify-end pt-4">
-        <Button
-          size="lg"
-          onClick={handleContinue}
-          className="w-full sm:w-auto"
-        >
+        <Button size="lg" onClick={handleContinue} className="w-full sm:w-auto">
           Continue
           <ArrowRight className="w-4 h-4 ml-1 -mr-1" />
         </Button>

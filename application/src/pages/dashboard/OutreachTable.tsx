@@ -16,21 +16,21 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { MoreHorizontal, Building2, User, Loader2 } from 'lucide-react';
-import { OutreachListItem, OutreachStatus } from "@/lib/types";
+import { ThreadMetaItem, ThreadStatus } from "@/lib/types";
 import { useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from 'date-fns';
 
 interface OutreachTableProps {
-  data: OutreachListItem[];
+  threads: ThreadMetaItem[];
   isLoading: boolean;
-  onToggleAutomated: (id: string, current: boolean) => void;
-  onAction: (id: string, action: 'follow-up' | 'mark-absconded' | 'mark-referred') => void;
+  onToggleAutomated: (id: number, current: boolean) => void;
+  onAction: (id: number, action: 'follow-up' | 'mark-absconded' | 'mark-referred') => void;
 }
 
-export const OutreachTable = ({ data, isLoading, onToggleAutomated, onAction }: OutreachTableProps) => {
+export const OutreachTable = ({ threads, isLoading, onToggleAutomated, onAction }: OutreachTableProps) => {
   const navigate = useNavigate();
 
-  const getStatusBadge = (status: OutreachStatus) => {
+  const getStatusBadge = (status: ThreadStatus) => {
     const variants: Record<string, string> = {
       'Generated': 'bg-gray-100 text-gray-700 hover:bg-gray-100',
       'Sent': 'bg-blue-100 text-blue-700 hover:bg-blue-100',
@@ -61,18 +61,18 @@ export const OutreachTable = ({ data, isLoading, onToggleAutomated, onAction }: 
         </TableRow>
       </TableHeader>
       <TableBody>
-        {data.length === 0 ? (
+        {threads.length === 0 ? (
           <TableRow>
             <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
               No outreach records found.
             </TableCell>
           </TableRow>
         ) : (
-          data.map((item) => (
+          threads.map((thread) => (
             <TableRow
-              key={item.id}
+              key={thread.id}
               className="group hover:bg-muted/30 border-border/40 cursor-pointer"
-              onClick={() => navigate(`/outreach/view/${item.id}`)}
+              onClick={() => navigate(`/outreach/view/${thread.id}`)}
             >
               <TableCell className="pl-6">
                 <div className="flex items-center gap-3">
@@ -80,19 +80,19 @@ export const OutreachTable = ({ data, isLoading, onToggleAutomated, onAction }: 
                     <User className="w-4 h-4" />
                   </div>
                   <div className="flex flex-col">
-                    <span className="font-medium text-sm">{item.employeeName}</span>
-                    <span className="text-xs text-muted-foreground">{item.employeeEmail}</span>
+                    <span className="font-medium text-sm">{thread.Employee.name}</span>
+                    <span className="text-xs text-muted-foreground">{thread.Employee.email}</span>
                   </div>
                 </div>
               </TableCell>
               <TableCell>
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Building2 className="w-4 h-4" />
-                  <span className="text-sm">{item.companyName}</span>
+                  <span className="text-sm">{thread.Employee.company}</span>
                 </div>
               </TableCell>
               <TableCell>
-                {getStatusBadge(item.status)}
+                {getStatusBadge(thread.status)}
               </TableCell>
               <TableCell>
                 <button
@@ -102,14 +102,14 @@ export const OutreachTable = ({ data, isLoading, onToggleAutomated, onAction }: 
                   className="cursor-default"
                 >
                   <Switch
-                    checked={item.isAutomated}
-                    onCheckedChange={(checked: boolean) => onToggleAutomated(item.id, checked)}
+                    checked={thread.automated}
+                    onCheckedChange={(checked: boolean) => onToggleAutomated(thread.id, checked)}
                   />
                 </button>
               </TableCell>
               <TableCell>
                 <span className="text-sm text-muted-foreground">
-                  {item.lastActivity ? formatDistanceToNow(new Date(item.lastActivity), { addSuffix: true }) : '-'}
+                  {thread.lastUpdated ? formatDistanceToNow(new Date(thread.lastUpdated), { addSuffix: true }) : '-'}
                 </span>
               </TableCell>
               <TableCell className="text-center pr-6">
@@ -125,13 +125,13 @@ export const OutreachTable = ({ data, isLoading, onToggleAutomated, onAction }: 
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => onAction(item.id, 'follow-up')}>
+                      <DropdownMenuItem onClick={() => onAction(thread.id, 'follow-up')}>
                         Send Follow Up
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => onAction(item.id, 'mark-referred')}>
+                      <DropdownMenuItem onClick={() => onAction(thread.id, 'mark-referred')}>
                         Mark as Referred
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => onAction(item.id, 'mark-absconded')} className="text-destructive">
+                      <DropdownMenuItem onClick={() => onAction(thread.id, 'mark-absconded')} className="text-destructive">
                         Mark as Absconded
                       </DropdownMenuItem>
                     </DropdownMenuContent>

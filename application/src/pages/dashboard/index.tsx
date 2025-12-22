@@ -1,8 +1,14 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,21 +17,21 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Plus, Search, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useOutreachDashboard } from '@/hooks/useOutreachDashboard';
-import { useDebounce } from '@/hooks/useDebounce';
-import { StatsCards } from './StatsCards';
-import { OutreachTable } from './OutreachTable';
-import { OutreachStatus } from '@/lib/types';
+import { Plus, Search, Filter, ChevronLeft, ChevronRight } from "lucide-react";
+import { useOutreachDashboard } from "@/hooks/useOutreachDashboard";
+import { useDebounce } from "@/hooks/useDebounce";
+import { StatsCards } from "./StatsCards";
+import { OutreachTable } from "./OutreachTable";
+import { THREAD_STATUS_VALUES } from "@/lib/types";
 
 export default function DashboardPage() {
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('All');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("All");
 
   const debouncedSearch = useDebounce(searchQuery, 500);
-  const limit = 10;
+  const pageSize = 10;
 
   const {
     stats,
@@ -33,38 +39,42 @@ export default function DashboardPage() {
     data: listData,
     isLoadingList,
     updateOutreach,
-    sendFollowUp
-  } = useOutreachDashboard(page, limit, debouncedSearch, statusFilter);
+    sendFollowUp,
+  } = useOutreachDashboard(page, pageSize, debouncedSearch, statusFilter);
 
-  const handleToggleAutomated = (id: string, current: boolean) => {
-    updateOutreach({ id, payload: { isAutomated: !current } });
+  const handleToggleAutomated = (id: number, current: boolean) => {
+    updateOutreach({ id, payload: { automated: !current } });
   };
 
-  const handleAction = async (id: string, action: 'follow-up' | 'mark-absconded' | 'mark-referred') => {
-    if (action === 'follow-up') {
+  const handleAction = async (
+    id: number,
+    action: "follow-up" | "mark-absconded" | "mark-referred"
+  ) => {
+    if (action === "follow-up") {
       await sendFollowUp(id);
-    } else if (action === 'mark-absconded') {
-      await updateOutreach({ id, payload: { status: 'Absconded' } });
-    } else if (action === 'mark-referred') {
-      await updateOutreach({ id, payload: { status: 'Referred' } });
+    } else if (action === "mark-absconded") {
+      await updateOutreach({ id, payload: { status: "Absconded" } });
+    } else if (action === "mark-referred") {
+      await updateOutreach({ id, payload: { status: "Referred" } });
     }
   };
 
-  const totalPages = listData?.meta.totalPages || 1;
-
-  const STATUS_OPTIONS: OutreachStatus[] = [
-    'Generated', 'Sent', 'First Follow Up', 'Second Follow Up', 'Third Follow Up', 'Absconded', 'Responded', 'Referred'
-  ];
+  const totalPages = listData?.total || 1;
+  const STATUS_OPTIONS = THREAD_STATUS_VALUES;
 
   return (
     <div className="space-y-8 py-8 px-4 md:px-6 lg:px-8 pb-10">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Dashboard</h1>
-          <p className="text-muted-foreground mt-1">Track your outreach threads and follow-ups</p>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+            Dashboard
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Track your outreach threads and follow-ups
+          </p>
         </div>
-        <Button onClick={() => navigate('/outreach')}>
+        <Button onClick={() => navigate("/outreach")}>
           <Plus className="w-4 h-4 mr-1 -ml-1" />
           New Outreach
         </Button>
@@ -79,7 +89,9 @@ export default function DashboardPage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <CardTitle>Outreach List</CardTitle>
-              <CardDescription>Manage your ongoing conversations</CardDescription>
+              <CardDescription>
+                Manage your ongoing conversations
+              </CardDescription>
             </div>
             <div className="flex items-center gap-3">
               <div className="relative">
@@ -94,9 +106,13 @@ export default function DashboardPage() {
               </div>
               <DropdownMenu>
                 <DropdownMenuTrigger>
-                  <Button variant="outline" size="icon" className="rounded-full relative">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="rounded-full relative"
+                  >
                     <Filter className="h-4 w-4" />
-                    {statusFilter !== 'All' && (
+                    {statusFilter !== "All" && (
                       <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-primary rounded-full border-2 border-background" />
                     )}
                   </Button>
@@ -104,14 +120,21 @@ export default function DashboardPage() {
                 <DropdownMenuContent align="end" className="w-48">
                   <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => setStatusFilter('All')}>
+                  <DropdownMenuItem onClick={() => setStatusFilter("All")}>
                     All Statuses
-                    {statusFilter === 'All' && <span className="ml-auto text-primary">✓</span>}
+                    {statusFilter === "All" && (
+                      <span className="ml-auto text-primary">✓</span>
+                    )}
                   </DropdownMenuItem>
                   {STATUS_OPTIONS.map((status) => (
-                    <DropdownMenuItem key={status} onClick={() => setStatusFilter(status)}>
+                    <DropdownMenuItem
+                      key={status}
+                      onClick={() => setStatusFilter(status)}
+                    >
                       {status}
-                      {statusFilter === status && <span className="ml-auto text-primary">✓</span>}
+                      {statusFilter === status && (
+                        <span className="ml-auto text-primary">✓</span>
+                      )}
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
@@ -121,7 +144,7 @@ export default function DashboardPage() {
         </CardHeader>
         <CardContent className="p-0">
           <OutreachTable
-            data={listData?.data || []}
+            threads={listData?.threads || []}
             isLoading={isLoadingList}
             onToggleAutomated={handleToggleAutomated}
             onAction={handleAction}
@@ -137,27 +160,29 @@ export default function DashboardPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page === 1 || isLoadingList}
                 >
                   <ChevronLeft className="h-4 w-4" />
                   Previous
                 </Button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                  <Button
-                    key={p}
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setPage(p)}
-                    disabled={isLoadingList}
-                  >
-                    {p}
-                  </Button>
-                ))}
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                  (p) => (
+                    <Button
+                      key={p}
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPage(p)}
+                      disabled={isLoadingList}
+                    >
+                      {p}
+                    </Button>
+                  )
+                )}
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   disabled={page === totalPages || isLoadingList}
                 >
                   Next

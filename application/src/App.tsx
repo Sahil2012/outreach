@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useUser } from "@clerk/clerk-react";
 import MainLayout from "@/components/layout/MainLayout";
 import OutreachWizard from "@/pages/outreach";
@@ -27,42 +27,24 @@ import {
 } from "react-router-dom";
 import NotFound from "@/pages/not-found";
 import SSOCallbackPage from "@/pages/auth/sso-callback";
-import { useOnboarding } from "@/hooks/useOnboarding";
 import { Toaster } from "@/components/ui/sonner";
 import "@/index.css";
 import OnboardingLayout from "@/components/layout/OnboardingLayout";
-
-const getRedirectPath = (
-  onboardingStep: string,
-  currentPath: string
-): string | null => {
-  const allowed = {
-    "basic-info": ["/onboarding/basic-info"],
-    "professional-info": [
-      "/onboarding/basic-info",
-      "/onboarding/professional-info",
-    ],
-  };
-
-  const allowedPaths = allowed[onboardingStep as keyof typeof allowed] || [];
-
-  if (allowedPaths.includes(currentPath)) {
-    return null; // No redirect needed
-  }
-
-  return `/onboarding/${onboardingStep}`;
-};
+import { useProfile } from "./hooks/useProfile";
 
 function ProtectedRoute({ children }: { readonly children: React.ReactNode }) {
   const { user, isLoaded: isUserLoaded } = useUser();
-  const {
-    isOnboarded,
-    onboardingStep,
-    isLoading: isOnboardingLoading,
-  } = useOnboarding();
+  const { profile, isLoading, error } = useProfile();
   const location = useLocation();
+  const [firstLoad, setFirstLoad] = useState(true);
 
-  const loading = !isUserLoaded || isOnboardingLoading;
+  if (error) {
+    const err = new Error("Failed to fetch profile. Please try again later");
+    err.name = "Unable to reach servers";
+    throw err;
+  }
+
+  const loading = !isUserLoaded || isLoading || !profile;
 
   if (loading) {
     return (
@@ -76,24 +58,26 @@ function ProtectedRoute({ children }: { readonly children: React.ReactNode }) {
     return <Navigate to="/login" />;
   }
 
-  if (!isOnboarded) {
-    const redirectPath = getRedirectPath(onboardingStep, location.pathname);
-    if (redirectPath) {
-      return <Navigate to={redirectPath} replace />;
+  const navigateToOnboarding = () => {
+    if (profile.resumeUrl) {
+      return <Navigate to="/professional-info" />;
+    } else {
+      return <Navigate to="/onboarding/basic-info" />;
     }
-    // Fallback/loading state for transitions
-    if (onboardingStep === "checking") {
-      return (
-        <div className="min-h-screen flex items-center justify-center">
-          <Loader size="lg" />
-        </div>
-      );
-    }
-    return <>{children}</>;
+  };
+
+  // If app is loaded for the first time, evaluate which onboarding step to show
+  if (firstLoad) {
+    setFirstLoad(false);
+    navigateToOnboarding();
   }
 
-  // If user IS onboarded and tries to access onboarding, redirect to dashboard
-  if (isOnboarded && location.pathname.startsWith("/onboarding")) {
+  if ((profile.status === "INCOMPLETE" || profile.status === "PARTIAL") && (firstLoad || !location.pathname.startsWith("/onboarding"))) {
+    return navigateToOnboarding();
+  }
+
+  // If user is onboarded and tries to access onboarding, redirect to dashboard
+  if (profile.status === "COMPLETE" && location.pathname.startsWith("/onboarding")) {
     return <Navigate to="/dashboard" replace />;
   }
 
@@ -102,13 +86,15 @@ function ProtectedRoute({ children }: { readonly children: React.ReactNode }) {
 
 function PublicRoute({ children }: { readonly children: React.ReactNode }) {
   const { user, isLoaded: isUserLoaded } = useUser();
-  const {
-    isOnboarded,
-    onboardingStep,
-    isLoading: isOnboardingLoading,
-  } = useOnboarding();
+  const { profile, isLoading, error } = useProfile();
 
-  const loading = !isUserLoaded || isOnboardingLoading;
+  if (error) {
+    const err = new Error("Failed to fetch profile. Please try again later");
+    err.name = "Unable to reach servers";
+    throw err;
+  }
+
+  const loading = !isUserLoaded || isLoading || !profile;
 
   if (loading) {
     return (
@@ -119,10 +105,10 @@ function PublicRoute({ children }: { readonly children: React.ReactNode }) {
   }
 
   if (user) {
-    if (isOnboarded) {
+    if (profile.status === "COMPLETE") {
       return <Navigate to="/dashboard" replace />;
     } else {
-      if (onboardingStep === "professional-info") {
+      if (profile.resumeUrl) {
         return <Navigate to="/onboarding/professional-info" replace />;
       }
       return <Navigate to="/onboarding/basic-info" replace />;
@@ -234,15 +220,15 @@ function App() {
             }
           />
 
-          <Route 
-            path="/outreach/view/:id" 
+          <Route
+            path="/outreach/view/:id"
             element={
               <ProtectedRoute>
                 <MainLayout>
                   <OutreachDetailPage />
                 </MainLayout>
               </ProtectedRoute>
-            } 
+            }
           />
           <Route
             path="/outreach"

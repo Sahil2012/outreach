@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from './useApi';
 import { Profile } from '@/lib/types';
 import { useUser } from '@clerk/clerk-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 export const useProfile = () => {
   const { user } = useUser();
@@ -35,8 +35,8 @@ export const useProfile = () => {
       throw new Error('User not found');
     }
     await user.update({
-      firstName: data.firstName,
-      lastName: data.lastName,
+      firstName: data.firstName ? data.firstName : user.firstName,
+      lastName: data.lastName ? data.lastName : user.lastName,
     });
     const response = await api.patch('/profile', data);
     return response.data;
@@ -46,6 +46,7 @@ export const useProfile = () => {
     queryKey: ['profile'],
     queryFn: fetchProfile,
     retry: false,
+    staleTime: 5 * 60 * 1000,
   });
 
   const updateProfileMutation = useMutation({

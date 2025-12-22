@@ -7,7 +7,7 @@ export interface GenerateEmailPayload {
   employeeName: string;
   employeeEmail: string;
   companyName: string;
-  jobId?: string;
+  role?: string;
   jobDescription: string;
   templateId: string;
 }
@@ -24,14 +24,14 @@ export const useOutreach = (draftId?: string) => {
   const [isPolling, setIsPolling] = useState(false);
 
   // Queries
-  const templatesQuery = useQuery({
-    queryKey: ['outreach', 'templates'],
-    queryFn: async (): Promise<Template[]> => {
-      const response = await api.get<Template[]>('/outreach/types');
-      return response.data;
-    },
-    staleTime: 1000 * 60 * 5, // 5 minutes
-  });
+  // const templatesQuery = useQuery({
+  //   queryKey: ['outreach', 'templates'],
+  //   queryFn: async (): Promise<Template[]> => {
+  //     const response = await api.get<Template[]>('/email/type');
+  //     return response.data;
+  //   },
+  //   staleTime: 1000 * 60 * 5, // 5 minutes
+  // });
 
   const draftQuery = useQuery({
     queryKey: ['outreach', 'draft', draftId],
@@ -87,18 +87,18 @@ export const useOutreach = (draftId?: string) => {
 
   return {
     // Data
-    templates: templatesQuery.data,
+    // templates: templatesQuery.data,
     draft: draftQuery.data,
 
     // Loading States
-    isLoadingTemplates: templatesQuery.isLoading,
+    // isLoadingTemplates: templatesQuery.isLoading,
     isLoadingDraft: draftQuery.isLoading,
     isGenerating: generateEmailMutation.isPending,
     isUpdating: updateDraftMutation.isPending,
     isSending: sendEmailMutation.isPending,
 
     // Errors
-    templatesError: templatesQuery.error,
+    // templatesError: templatesQuery.error,
     draftError: draftQuery.error,
 
     // Actions

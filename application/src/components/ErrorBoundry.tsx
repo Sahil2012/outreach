@@ -45,7 +45,7 @@ export class ErrorBoundary extends Component<Props, State> {
             {/* Icon / Graphic */}
             <div className="relative">
               <div className="absolute inset-0 bg-red-100 rounded-full blur-2xl opacity-50 animate-pulse" />
-              <div className="relative bg-background p-4 rounded-2xl border shadow-sm ring-1 ring-border/50">
+              <div className="relative bg-background p-5 rounded-3xl border shadow-sm ring-1 ring-border/50">
                 <AlertTriangle className="h-10 w-10 text-gray-900" />
               </div>
             </div>
@@ -67,7 +67,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 size="lg"
                 className="w-full sm:w-auto min-w-[140px] shadow-md hover:shadow-lg transition-all"
               >
-                <RotateCcw className="mr-2 h-4 w-4" />
+                <RotateCcw className="mr-1 -ml-1 h-4 w-4" />
                 Try Again
               </Button>
               <Button
@@ -76,7 +76,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 size="lg"
                 className="w-full sm:w-auto min-w-[140px] bg-background/50 hover:bg-accent hover:text-accent-foreground backdrop-blur-sm transition-all"
               >
-                <Home className="mr-2 h-4 w-4" />
+                <Home className="mr-1 -ml-1 h-4 w-4" />
                 Back to Home
               </Button>
             </div>

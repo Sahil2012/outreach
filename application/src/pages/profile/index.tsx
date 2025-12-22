@@ -300,7 +300,7 @@ export default function ProfilePage() {
           </CardHeader>
           <CardContent className="p-6 space-y-6">
             {projects.map((project, index) => (
-              <div key={index} className="p-4 border border-border/40 rounded-2xl space-y-4 bg-muted/10">
+              <div key={index} className="p-4 border border-border/40 rounded-3xl space-y-4 bg-muted/10">
                 <div className="flex justify-between items-start gap-4">
                   <div className="flex-1 space-y-4">
                     <Input
@@ -373,7 +373,7 @@ export default function ProfilePage() {
           </CardHeader>
           <CardContent className="p-6 space-y-6">
             {education.map((edu, index) => (
-              <div key={index} className="p-4 border border-border/40 rounded-2xl space-y-4 bg-muted/10">
+              <div key={index} className="p-4 border border-border/40 rounded-3xl space-y-4 bg-muted/10">
                 <div className="flex justify-between items-start gap-4">
                   <div className="flex-1 space-y-4">
                     <Input

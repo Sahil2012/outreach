@@ -19,7 +19,7 @@ const RecipientInfoPage: React.FC = () => {
         employeeName: "",
         employeeEmail: "",
         companyName: "",
-        jobId: "",
+        role: "",
         jobDescription: "",
     });
 
@@ -69,7 +69,7 @@ const RecipientInfoPage: React.FC = () => {
                 employeeName: recipientInfo.employeeName,
                 employeeEmail: recipientInfo.employeeEmail,
                 companyName: recipientInfo.companyName,
-                jobId: recipientInfo.jobId, // Was jobIds[0] in previous code but type is string
+                role: recipientInfo.role,
                 jobDescription: recipientInfo.jobDescription || "",
                 templateId: templateId,
             });

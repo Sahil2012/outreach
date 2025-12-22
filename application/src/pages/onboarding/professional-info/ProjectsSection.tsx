@@ -96,7 +96,7 @@ export function ProjectsSection({ projects, setProjects }: ProjectsSectionProps)
 
                     {/* Add Project Form */}
                     {isAddingProject ? (
-                        <div className="p-4 border border-border/40 rounded-2xl space-y-4 bg-muted/5 animate-in fade-in slide-in-from-top-2">
+                        <div className="p-4 border border-border/40 rounded-3xl space-y-4 bg-muted/5 animate-in fade-in slide-in-from-top-2">
                             <Input
                                 value={currentProject.title}
                                 onChange={(e) => setCurrentProject({ ...currentProject, title: e.target.value })}
