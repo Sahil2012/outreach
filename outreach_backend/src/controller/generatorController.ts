@@ -6,6 +6,7 @@ import prisma from "../apis/prismaClient.js";
 import { getAuth } from "@clerk/express";
 import { saveDraftEmail } from "../service/emailService.js";
 import { DraftEmailDTO } from "../dto/reponse/DraftEmailDTO.js";
+import EmailType from "../types/EmailType.js";
 
 const mailGeneratorController = async (
   req: Request<{}, {}, GenerateMailRequest>,
@@ -22,7 +23,7 @@ const mailGeneratorController = async (
 
     req.body.userId = clerkUserId;
 
-    const emailGenerator = emailStrategy[req.body.type];
+    const emailGenerator = emailStrategy[req.body.type.toLowerCase()];
 
     if (!emailGenerator) {
       log("No email strategy found for type:", req.body.type);
@@ -34,13 +35,13 @@ const mailGeneratorController = async (
 
     const draftThread = await saveDraftEmail(
       clerkUserId,
-      req.body as Extract<GenerateMailRequest, { type: "cold" | "tailored" }>,
+      req.body as Extract<GenerateMailRequest, { type: EmailType.COLD | EmailType.TAILORED }>,
       emailContent.body,
       emailContent.subject
     );
     log("Draft email saved successfully for userId:", req.body.userId);
 
-    res.status(200).json({ threadId: draftThread.id, messageId: draftThread.messageId,...emailContent });
+    res.status(200).json({ threadId: draftThread.id, messageId: draftThread.messageId, ...emailContent });
   } catch (error) {
     console.error("Error generating email:", error);
     next(error);

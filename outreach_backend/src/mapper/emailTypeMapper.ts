@@ -1,7 +1,9 @@
-export const mapEmailTypeToDB = (type: "cold" | "tailored") => {
+import EmailType from "../types/EmailType.js";
+
+export const mapEmailTypeToDB = (type: EmailType.COLD | EmailType.TAILORED) => {
   const map = {
-    cold: "COLD",
-    tailored: "TAILORED",
+    [EmailType.COLD]: "COLD",
+    [EmailType.TAILORED]: "TAILORED",
   } as const;
 
   return map[type];

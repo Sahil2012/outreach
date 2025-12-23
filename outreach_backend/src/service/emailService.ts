@@ -5,11 +5,12 @@ import { upsertEmployee } from "./employeeService.js";
 import { handleTailoredJobs } from "./jobService.js";
 import { saveMessage } from "./messageService.js";
 import { createThread } from "./threadService.js";
+import EmailType from "../types/EmailType.js";
 
 
 export async function saveDraftEmail(
   authUserId: string,
-  req: Extract<GenerateMailRequest, { type: "cold" | "tailored" }>,
+  req: Extract<GenerateMailRequest, { type: EmailType.COLD | EmailType.TAILORED }>,
   body: string,
   subject: string
 ) {
@@ -24,12 +25,12 @@ export async function saveDraftEmail(
 
     const thread = await createThread(tx, authUserId, employee.id, req.type);
 
-    if (req.type === "tailored") {
+    if (req.type === EmailType.TAILORED) {
       await handleTailoredJobs(tx, thread.id, req.jobs, req.jobDescription);
     }
 
     const message = await saveMessage(tx, thread.id, authUserId, subject, body);
 
-    return {messageId : message.id, ...thread};
+    return { messageId: message.id, ...thread };
   });
 }

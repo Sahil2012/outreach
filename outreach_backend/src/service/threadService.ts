@@ -1,12 +1,13 @@
 import { Prisma, ThreadStatus } from "@prisma/client";
 import { mapEmailTypeToDB } from "../mapper/emailTypeMapper.js";
 import { log } from "console";
+import EmailType from "../types/EmailType.js";
 
 export async function createThread(
   tx: Prisma.TransactionClient,
   authUserId: string,
   employeeId: number,
-  type: "cold" | "tailored"
+  type: EmailType.COLD | EmailType.TAILORED
 ) {
   log(
     "Creating thread for user:",
@@ -203,4 +204,4 @@ function buildEmployeeFilter(
   }
 
   return employeeFilter;
- }
+}
