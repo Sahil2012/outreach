@@ -60,7 +60,7 @@ function ProtectedRoute({ children }: { readonly children: React.ReactNode }) {
 
   const navigateToOnboarding = () => {
     if (profile.resumeUrl) {
-      return <Navigate to="/professional-info" />;
+      return <Navigate to="/onboarding/professional-info" />;
     } else {
       return <Navigate to="/onboarding/basic-info" />;
     }

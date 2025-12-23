@@ -6,7 +6,7 @@ export const toProfileDTO = (profile: any): ProfileDTO | null => {
   return {
     summary: profile.summary,
     education: profile.education,
-    skills: profile.profileSkills.map((ps: any) => (ps.Skills?.name)),
+    skills: profile.profileSkills.map((ps: any) => ({ name: ps.Skills?.name })),
     experiences: profile.experiences.map((exp: any) => ({
       title: exp.role,
       company: exp.companyName,

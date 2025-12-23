@@ -8,7 +8,7 @@ import { getUserProfile, updateProfile as updateProfileService } from "../servic
 import { ProfileDTO } from "../dto/reponse/ProfileDTO.js";
 import prisma from "../apis/prismaClient.js";
 
-// GET /profile/me
+// GET /profile
 export const getProfile = async (req: Request, res: Response<ProfileDTO | any>) => {
   try {
     const { userId } = getAuth(req);
@@ -45,8 +45,8 @@ export const getProfile = async (req: Request, res: Response<ProfileDTO | any>) 
   }
 };
 
-// PATCH /profile/update
-export const updateProfile = async (req: Request, res: Response) => {
+// PATCH /profile
+export const updateProfile = async (req: Request<{}, {}, ProfileDTO>, res: Response) => {
   try {
     const { userId: clerkUserId } = getAuth(req);
     if (!clerkUserId) {
@@ -57,6 +57,7 @@ export const updateProfile = async (req: Request, res: Response) => {
     const updatedProfile = await updateProfileService(clerkUserId, req.body);
     res.json({ message: "Profile updated", data: updatedProfile });
   } catch (err: any) {
+    console.error("[updateProfile] Internal Error:", err);
     res.status(500).json({ error: err.message });
   }
 };

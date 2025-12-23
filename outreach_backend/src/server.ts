@@ -20,6 +20,8 @@ const app = express();
 // Use Middlewares
 app.use(clerkMiddleware());
 app.use(express.urlencoded({ extended: true }));
+
+// TODO : update cors 
 app.use(
   cors({
     
