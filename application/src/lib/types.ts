@@ -65,6 +65,13 @@ export interface GeneratedEmail {
   isDraftCompleted?: boolean;
 }
 
+export interface GenerateEmailResponse {
+  threadId: number;
+  messageId: number;
+  subject: string;
+  body: string;
+}
+
 export interface SendEmail {
   subject: string,
   text: string,

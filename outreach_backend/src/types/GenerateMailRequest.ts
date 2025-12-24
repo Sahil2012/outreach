@@ -1,9 +1,5 @@
+import EmailType from "./EmailType.js";
 
-export type EmailType =
-  | "tailored"
-  | "followup"
-  | "cold"
-  | "thankyou";
 
 export interface EmailRequestBase {
   userId?: string;
@@ -15,23 +11,23 @@ export interface EmailRequestBase {
 }
 
 export interface TailoredEmailRequest extends EmailRequestBase {
-  type: "tailored";
+  type: EmailType.TAILORED;
   jobs: [string];
   jobDescription: string;
 }
 
 export interface FollowupEmailRequest extends EmailRequestBase {
-  type: "followup";
+  type: EmailType.FOLLOWUP;
   threadId: string;
 }
 
 export interface ColdEmailRequest extends EmailRequestBase {
-  type: "cold";
+  type: EmailType.COLD;
   templateId?: string;
 }
 
 export interface ThankYouEmailRequest extends EmailRequestBase {
-  type: "thankyou";
+  type: EmailType.THANKYOU;
 }
 
 export type GenerateMailRequest =

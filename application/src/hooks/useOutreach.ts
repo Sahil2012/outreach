@@ -1,24 +1,28 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from './useApi';
-import { Template, GeneratedEmail } from '@/lib/types';
+import { GeneratedEmail, GenerateEmailResponse } from '@/lib/types';
 import { useState, useCallback } from 'react';
 
 export interface GenerateEmailPayload {
-  employeeName: string;
-  employeeEmail: string;
+  contactName: string;
+  contactEmail: string;
   companyName: string;
   role?: string;
   jobDescription: string;
-  templateId: string;
+  jobs: string[];
+  type: string;
 }
-
 export interface UpdateEmailPayload {
   subject?: string;
   body?: string;
   isDraftCompleted?: boolean;
 }
 
-export const useOutreach = (draftId?: string) => {
+export interface UseOutreachOptions {
+  skipFetch?: boolean;
+}
+
+export const useOutreach = (messageId?: string | number, options?: UseOutreachOptions) => {
   const api = useApi();
   const queryClient = useQueryClient();
   const [isPolling, setIsPolling] = useState(false);
@@ -34,13 +38,22 @@ export const useOutreach = (draftId?: string) => {
   // });
 
   const draftQuery = useQuery({
-    queryKey: ['outreach', 'draft', draftId],
+    queryKey: ['outreach', 'message', messageId],
     queryFn: async (): Promise<{ id: string } & GenerateEmailPayload & GeneratedEmail> => {
-      if (!draftId) throw new Error('Draft ID is required');
-      const response = await api.get(`/outreach/drafts/${draftId}`);
-      return response.data;
+      if (!messageId) throw new Error('Message ID is required');
+      const response = await api.get(`/message/${messageId}`);
+      // Mapping backend response to frontend expected structure
+      const data = response.data;
+      return {
+        ...data,
+        email: {
+          subject: data.subject,
+          body: data.body
+        },
+        isMailGenerated: true
+      };
     },
-    enabled: !!draftId,
+    enabled: !!messageId && !options?.skipFetch,
     refetchInterval: isPolling ? 2000 : false,
   });
 
@@ -51,7 +64,14 @@ export const useOutreach = (draftId?: string) => {
   // Mutations
   const generateEmailMutation = useMutation({
     mutationFn: async (payload: GenerateEmailPayload) => {
-      const response = await api.post<{ id: string; email: GeneratedEmail }>('/outreach/drafts', payload);
+      const response = await api.post<GenerateEmailResponse>('/generateMail', payload);
+      return response.data;
+    }
+  });
+
+  const updateMessageMutation = useMutation({
+    mutationFn: async ({ messageId, subject, body }: { messageId: string | number, subject: string, body: string }) => {
+      const response = await api.patch(`/message/edit/${messageId}`, { subject, body });
       return response.data;
     }
   });
@@ -94,7 +114,7 @@ export const useOutreach = (draftId?: string) => {
     // isLoadingTemplates: templatesQuery.isLoading,
     isLoadingDraft: draftQuery.isLoading,
     isGenerating: generateEmailMutation.isPending,
-    isUpdating: updateDraftMutation.isPending,
+    isUpdating: updateDraftMutation.isPending || updateMessageMutation.isPending,
     isSending: sendEmailMutation.isPending,
 
     // Errors
@@ -104,6 +124,7 @@ export const useOutreach = (draftId?: string) => {
     // Actions
     generateEmail: generateEmailMutation.mutateAsync,
     updateDraft: updateDraftMutation.mutateAsync,
+    updateMessage: updateMessageMutation.mutateAsync,
     sendEmail: sendEmailMutation.mutateAsync,
 
     // Polling

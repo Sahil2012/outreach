@@ -13,6 +13,7 @@ const RecipientInfoPage: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const [searchParams] = useSearchParams();
+    // TODO: change templateId to type
     const templateId = searchParams.get("templateId");
 
     const [recipientInfo, setRecipientInfo] = useState<RecipientInfo>({
@@ -48,7 +49,7 @@ const RecipientInfoPage: React.FC = () => {
         if (!recipientInfo.employeeEmail) newErrors.employeeEmail = "Employee email is required";
         if (!recipientInfo.companyName) newErrors.companyName = "Company name is required";
         if (!recipientInfo.jobDescription) newErrors.jobDescription = "Job description is required";
-        
+
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -66,15 +67,16 @@ const RecipientInfoPage: React.FC = () => {
 
         try {
             const res = await generateEmail({
-                employeeName: recipientInfo.employeeName,
-                employeeEmail: recipientInfo.employeeEmail,
-                companyName: recipientInfo.companyName,
+                companyName: recipientInfo.employeeName,
+                contactEmail: recipientInfo.employeeEmail,
+                contactName: recipientInfo.companyName,
                 role: recipientInfo.role,
+                jobs: ["123", "456"], // TODO : add job ids on the screen
                 jobDescription: recipientInfo.jobDescription || "",
-                templateId: templateId,
+                type: templateId,
             });
 
-            navigate(`/outreach/preview/${res.id}`);
+            navigate(`/outreach/preview/${res.messageId}`, { state: res });
         } catch (error) {
             console.error("Error generating mail:", error);
             toast.error("Failed to generate email. Please try again.");
@@ -83,9 +85,9 @@ const RecipientInfoPage: React.FC = () => {
 
     return (
         <div className="animate-fadeIn space-y-6">
-            <RecipientForm 
-                info={recipientInfo} 
-                onChange={setRecipientInfo} 
+            <RecipientForm
+                info={recipientInfo}
+                onChange={setRecipientInfo}
                 errors={errors}
             />
 
