@@ -8,17 +8,19 @@ export interface ThreadMetaResponse {
 }
 
 export interface ThreadMetaItem {
-  status: ThreadStatus;        
-  lastUpdated: Date;         
+  status: ThreadStatus;
+  lastUpdated: Date;
   Employee: ThreadEmployeeInfo;
   automated: boolean;
-  type: EmailType;             
+  type: EmailType;
+  id: number;
   _count: ThreadMessageCount;
 }
 
 export interface ThreadEmployeeInfo {
   name: string;
   company: string | null;
+  email: string | null;
 }
 
 export interface ThreadMessageCount {

@@ -159,10 +159,12 @@ export async function extractThreadMeta(
           select: {
             name: true,
             company: true,
+            email: true,
           },
         },
         automated: true,
         type: true,
+        id: true,
         _count: {
           select: { Message: true },
         },
