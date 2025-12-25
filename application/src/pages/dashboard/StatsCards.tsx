@@ -12,28 +12,28 @@ export const StatsCards = ({ stats, isLoading }: StatsCardsProps) => {
   const data = [
     {
       label: "Reached Out",
-      value: stats?.reachedOut || "N/A",
+      value: stats?.reachedOut,
       icon: Mail,
       color: "text-blue-600",
       bgColor: "bg-blue-50",
     },
     {
       label: "Referred",
-      value: stats?.referred || "N/A",
+      value: stats?.reffered,
       icon: MessageCircle,
       color: "text-green-600",
       bgColor: "bg-green-50",
     },
     {
       label: "Follow Ups",
-      value: stats?.followUps || "N/A",
+      value: stats?.followUps,
       icon: Clock,
       color: "text-orange-600",
       bgColor: "bg-orange-50",
     },
     {
       label: "Absconded",
-      value: stats?.absconded || "N/A",
+      value: stats?.absonded,
       icon: UserX,
       color: "text-red-600",
       bgColor: "bg-red-50",

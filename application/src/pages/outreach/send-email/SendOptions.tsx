@@ -66,7 +66,7 @@ export const SendOptions: React.FC<SendOptionsProps> = ({
         {!isGmailConnected ? (
           <Button
             size="lg"
-            className="w-full bg-[#EA4335] hover:bg-[#D93025] text-white border-0"
+            className="w-full text-white border-0"
             onClick={onConnectGmail}
             disabled={isGmailAuthLoading || isSending}
           >

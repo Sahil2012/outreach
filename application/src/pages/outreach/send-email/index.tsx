@@ -2,11 +2,16 @@ import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader } from "@/components/ui/loader";
 import { useOutreach } from "@/hooks/useOutreach";
-import { useUser } from "@clerk/clerk-react";
+import { useUser, useReverification } from "@clerk/clerk-react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { EmailPreviewStatic } from "./EmailPreviewStatic";
 import { SendOptions } from "./SendOptions";
+import { ReverificationDialog } from "./ReverificationDialog";
+import {
+  isClerkRuntimeError,
+  isReverificationCancelledError,
+} from "@clerk/clerk-react/errors";
 
 const SendEmailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -20,18 +25,25 @@ const SendEmailPage: React.FC = () => {
     draftError,
     sendEmail,
     updateDraft,
-    isSending
+    isSending,
   } = useOutreach(id);
 
   const [isGmailAuthLoading, setIsGmailAuthLoading] = useState(false);
   const [manageThread, setManageThread] = useState(true);
   const [alreadySent, setAlreadySent] = useState(false);
+  const [showReverificationDialog, setShowReverificationDialog] = useState(false);
+  const [reverificationHandlers, setReverificationHandlers] = useState<{
+    complete: () => void;
+    cancel: () => void;
+  } | null>(null);
 
   // Check if Gmail scope is present
   const hasGmailScope = user?.externalAccounts.some(
     (account) =>
       account.provider === "google" &&
-      account.approvedScopes?.includes("https://www.googleapis.com/auth/gmail.modify")
+      account.approvedScopes?.includes(
+        "https://www.googleapis.com/auth/gmail.modify"
+      )
   );
 
   // Auto-redirect if already completed
@@ -54,15 +66,8 @@ const SendEmailPage: React.FC = () => {
     }
   }, [searchParams]);
 
-  const handleConnectGmail = async () => {
-    setIsGmailAuthLoading(true);
-    try {
-      if (hasGmailScope) {
-        // Should not happen as button is hidden, but safe check
-        setIsGmailAuthLoading(false);
-        return;
-      }
-
+  const connectToGmail = useReverification(
+    async () => {
       const res = await user?.createExternalAccount({
         strategy: "oauth_google",
         redirectUrl: globalThis.location.href,
@@ -70,11 +75,31 @@ const SendEmailPage: React.FC = () => {
       });
 
       if (res?.verification?.externalVerificationRedirectURL) {
-        globalThis.location.href = res.verification.externalVerificationRedirectURL.href;
+        globalThis.location.href =
+          res.verification.externalVerificationRedirectURL.href;
       }
+    },
+    {
+      onNeedsReverification: ({ complete, cancel }) => {
+        setReverificationHandlers({ complete, cancel });
+        setShowReverificationDialog(true);
+      },
+    }
+  );
+
+  const handleConnectGmail = async () => {
+    setIsGmailAuthLoading(true);
+    try {
+      await connectToGmail();
     } catch (error) {
-      console.error("Gmail Auth Error:", error);
-      toast.error("Could not connect to Gmail.");
+      if (isClerkRuntimeError(error) && isReverificationCancelledError(error)) {
+        console.error("User cancelled reverification");
+        toast.error("Please verify to connect to Gmail.");
+      } else {
+        console.error("Gmail Auth Error:", error);
+        console.log("Gmail Auth error details: ", (error as any).errors);
+        toast.error("Could not connect to Gmail.");
+      }
     } finally {
       setIsGmailAuthLoading(false);
     }
@@ -90,7 +115,7 @@ const SendEmailPage: React.FC = () => {
       await updateDraft({ id, payload: { isDraftCompleted: true } });
 
       setAlreadySent(true);
-      setTimeout(() => navigate('/dashboard'), 3000);
+      setTimeout(() => navigate("/dashboard"), 3000);
     } catch (error) {
       console.error("Failed to send email", error);
       toast.error("Failed to send email. Please check your connection.");
@@ -101,7 +126,19 @@ const SendEmailPage: React.FC = () => {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-6">
         <div className="p-4 rounded-full bg-green-100 text-green-600">
-          <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+          <svg
+            className="w-12 h-12"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M5 13l4 4L19 7"
+            />
+          </svg>
         </div>
         <h2 className="text-2xl font-semibold">Email Sent!</h2>
         <p className="text-muted-foreground">Redirecting to dashboard...</p>
@@ -120,8 +157,12 @@ const SendEmailPage: React.FC = () => {
   if (draftError) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
-        <div className="text-destructive font-medium">Failed to load draft.</div>
-        <Button variant="outline" onClick={() => globalThis.location.reload()}>Retry</Button>
+        <div className="text-destructive font-medium">
+          Failed to load draft.
+        </div>
+        <Button variant="outline" onClick={() => globalThis.location.reload()}>
+          Retry
+        </Button>
       </div>
     );
   }
@@ -129,33 +170,48 @@ const SendEmailPage: React.FC = () => {
   if (!draft) return null;
 
   return (
-    <div className="animate-fadeIn">
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-        {/* Left Side: Preview */}
-        <div className="lg:col-span-3">
-          <EmailPreviewStatic
-            subject={draft.email.subject}
-            body={draft.email.body}
-          />
-        </div>
+    <>
+      <div className="animate-fadeIn">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+          {/* Left Side: Preview */}
+          <div className="lg:col-span-3">
+            <EmailPreviewStatic
+              subject={draft.email.subject}
+              body={draft.email.body}
+            />
+          </div>
 
-        {/* Right Side: Actions */}
-        <div className="lg:col-span-2">
-          <SendOptions
-            isGmailConnected={!!hasGmailScope}
-            isGmailAuthLoading={isGmailAuthLoading}
-            emailBody={draft.email.body}
-            isSending={isSending}
-            manageThread={manageThread}
-            setManageThread={setManageThread}
-            onConnectGmail={handleConnectGmail}
-            onSend={handleSendEmail}
-            onEdit={() => navigate(`/outreach/preview/${id}`)}
-            onDashboard={() => navigate('/dashboard')}
-          />
+          {/* Right Side: Actions */}
+          <div className="lg:col-span-2">
+            <SendOptions
+              isGmailConnected={!!hasGmailScope}
+              isGmailAuthLoading={isGmailAuthLoading}
+              emailBody={draft.email.body}
+              isSending={isSending}
+              manageThread={manageThread}
+              setManageThread={setManageThread}
+              onConnectGmail={handleConnectGmail}
+              onSend={handleSendEmail}
+              onEdit={() => navigate(`/outreach/preview/${id}`)}
+              onDashboard={() => navigate("/dashboard")}
+            />
+          </div>
         </div>
       </div>
-    </div>
+
+      {/* Reverification Dialog */}
+      <ReverificationDialog
+        open={showReverificationDialog}
+        onComplete={() => {
+          reverificationHandlers?.complete();
+          setShowReverificationDialog(false);
+        }}
+        onCancel={() => {
+          reverificationHandlers?.cancel();
+          setShowReverificationDialog(false);
+        }}
+      />
+    </>
   );
 };
 

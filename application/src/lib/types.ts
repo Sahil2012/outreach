@@ -51,6 +51,7 @@ export interface RecipientInfo {
   employeeEmail: string;
   companyName: string;
   role: string;
+  jobIds: string[];
   jobDescription?: string;
 }
 
@@ -84,9 +85,9 @@ export type ThreadStatus = typeof THREAD_STATUS_VALUES[number];
 
 export interface OutreachStats {
   reachedOut: number;
-  referred: number;
+  reffered: number;
   followUps: number;
-  absconded: number;
+  absonded: number;
 }
 
 export type EmailType = "TAILORED" | "COLD";
