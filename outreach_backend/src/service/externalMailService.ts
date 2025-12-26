@@ -4,6 +4,7 @@ import { clerkClient } from "@clerk/express";
 import { log } from "console";
 import { parseBase64DataUrl } from "@langchain/core/messages";
 import { populateMessagesForThread } from "./messageService.js";
+import * as cheerio from "cheerio";
 
 
 export class ExternalMailService {
@@ -52,14 +53,15 @@ export class ExternalMailService {
         if (!payload) return "";
         console.log("Extracting body from payload MIME type:", payload.mimeType);
 
+        let body = "";
+
         // 1. If there is body data directly (usually text/plain or text/html non-multipart)
         if (payload.body && payload.body.data) {
             console.log("Found body data directly");
-            return Buffer.from(payload.body.data, 'base64').toString('utf-8');
+            body = Buffer.from(payload.body.data, 'base64').toString('utf-8');
         }
-
         // 2. If there are parts (multipart)
-        if (payload.parts && payload.parts.length > 0) {
+        else if (payload.parts && payload.parts.length > 0) {
             console.log("Found parts:", payload.parts.length);
             // Find HTML part
             let part = payload.parts.find((p: any) => p.mimeType === 'text/html');
@@ -68,17 +70,26 @@ export class ExternalMailService {
                 part = payload.parts.find((p: any) => p.mimeType === 'text/plain');
             }
 
-            // If still no part found (maybe nested multipart/related or mixed), just take the first part?
-            // Or recurse on the first part if it has parts
+            // If still no part found (maybe nested multipart/related or mixed)
             if (!part) {
                 // Try to find a part that has parts
                 part = payload.parts.find((p: any) => p.parts && p.parts.length > 0);
             }
 
             if (part) {
-                return this.extractMessageBody(part);
+                body = this.extractMessageBody(part);
             }
         }
+
+        // Logic to cleanup html
+        if (body) {
+            const $ = cheerio.load(body);
+            $(".gmail_quote").remove();
+            $("div.gmail_quote").remove();
+            $("blockquote.gmail_quote").remove();
+            return $.html();
+        }
+
         return "";
     }
 

@@ -1,5 +1,6 @@
 import React from "react";
 import { formatDistanceToNow } from "date-fns";
+import DOMPurify from "dompurify";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Message } from "@/hooks/useOutreachDetail";
 import { useUser } from "@clerk/clerk-react";
@@ -55,9 +56,10 @@ export const EmailThread: React.FC<EmailThreadProps> = ({ thread }) => {
 
                 <div className="space-y-1">
                   <div className="prose prose-sm dark:prose-invert max-w-none">
-                    <div className="whitespace-pre-wrap text-foreground/90">
-                      {email.body}
-                    </div>
+                    <div
+                      className="text-foreground/90 break-words"
+                      dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(email.body) }}
+                    />
                   </div>
                 </div>
               </div>

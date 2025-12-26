@@ -89,9 +89,9 @@ export async function getStats(
       authUserId,
       status: {
         in: [
-          ThreadStatus.FIRST_FOLLOWUP,
-          ThreadStatus.SECOND_FOLLOWUP,
-          ThreadStatus.THIRD_FOLLOWUP,
+          ThreadStatus.FIRST_FOLLOW_UP,
+          ThreadStatus.SECOND_FOLLOW_UP,
+          ThreadStatus.THIRD_FOLLOW_UP,
         ],
       },
     },
@@ -205,6 +205,16 @@ export async function linkToExternalThread(tx: Prisma.TransactionClient, threadI
           }
         }
       }
+    }
+  })
+}
+
+export async function updateStatus(tx: Prisma.TransactionClient, threadId: number, status: ThreadStatus) {
+  log("Updating status of thread", threadId, "to", status);
+  return tx.thread.update({
+    where: { id: threadId },
+    data: {
+      status,
     }
   })
 }

@@ -86,6 +86,7 @@ function ProtectedRoute({ children }: { readonly children: React.ReactNode }) {
 
 function PublicRoute({ children }: { readonly children: React.ReactNode }) {
   const { user, isLoaded: isUserLoaded } = useUser();
+  // QUEST: i doubt this will work
   const { profile, isLoading, error } = useProfile();
 
   if (error) {

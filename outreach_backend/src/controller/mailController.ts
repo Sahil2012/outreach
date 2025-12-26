@@ -3,8 +3,9 @@ import { getAuth } from "@clerk/express";
 import { log } from "console";
 import { SendMailDto, SendMailSchema } from "../dto/request/SendMailDto.js";
 import { mailService } from "../service/mailService.js";
-import { linkToExternalThread } from "../service/threadService.js";
+import { linkToExternalThread, updateStatus } from "../service/threadService.js";
 import prisma from "../apis/prismaClient.js";
+import { ThreadStatus } from "@prisma/client";
 
 export const sendMailUsingClerkToken = async (req: Request, res: Response) => {
   try {
@@ -29,6 +30,8 @@ export const sendMailUsingClerkToken = async (req: Request, res: Response) => {
     await linkToExternalThread(prisma, req.body.threadId, response.threadId);
     console.log("Linked thread to external thread");
 
+    await updateStatus(prisma, req.body.threadId, ThreadStatus.SENT);
+    console.log("Updated thread status to SENT");
     return res.json({ success: true });
 
   } catch (error: any) {
