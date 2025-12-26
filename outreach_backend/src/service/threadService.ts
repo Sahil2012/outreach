@@ -2,6 +2,8 @@ import { Prisma, ThreadStatus } from "@prisma/client";
 import { mapEmailTypeToDB } from "../mapper/emailTypeMapper.js";
 import { log } from "console";
 import EmailType from "../types/EmailType.js";
+import externalMailService from "./externalMailService.js";
+import { populateMessagesForThread } from "./messageService.js";
 
 export async function createThread(
   tx: Prisma.TransactionClient,
@@ -51,6 +53,12 @@ export async function getThreadById(
   authUserId: string,
   threadId: number
 ) {
+  log("Fetching thread messages for thread ID from external source:", threadId);
+  const messages = await externalMailService.getThreadMessage(threadId, authUserId);
+
+  log("Populating messages for thread ID:", threadId);
+  await populateMessagesForThread(tx, threadId, authUserId, messages);
+
   log("Fetching full thread for thread ID:", threadId);
   return tx.thread.findUnique({
     where: { id: threadId, AND: { authUserId: authUserId } },

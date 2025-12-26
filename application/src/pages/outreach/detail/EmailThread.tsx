@@ -1,11 +1,11 @@
 import React from "react";
 import { formatDistanceToNow } from "date-fns";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { EmailItem } from "@/hooks/useOutreachDetail";
+import { Message } from "@/hooks/useOutreachDetail";
 import { useUser } from "@clerk/clerk-react";
 
 interface EmailThreadProps {
-  thread: EmailItem[];
+  thread: Message[];
 }
 
 export const EmailThread: React.FC<EmailThreadProps> = ({ thread }) => {
@@ -21,11 +21,11 @@ export const EmailThread: React.FC<EmailThreadProps> = ({ thread }) => {
   return (
     <div className="space-y-6 h-full overflow-y-auto">
       {thread.map((email) => {
-        const isMe = email.from === user?.emailAddresses[0].emailAddress;
-        const avatarFallback = isMe ? user?.firstName?.charAt(0).toUpperCase() : email.from.charAt(0).toUpperCase();
+        const isMe = email.fromUser;
+        const avatarFallback = "";
 
         return (
-          <div key={email.id} className="bg-muted/30 p-8 rounded-3xl border">
+          <div key={email.messageId} className="bg-muted/30 p-8 rounded-3xl border">
             <div className="space-y-6 max-w-2xl mx-auto">
               <div className="flex items-start justify-between border-b pb-4">
                 <div className="flex items-center gap-4">
@@ -36,15 +36,15 @@ export const EmailThread: React.FC<EmailThreadProps> = ({ thread }) => {
                   </Avatar>
                   <div>
                     <div className="font-semibold text-foreground">
-                      {isMe ? user?.firstName : email.from}
+                      {isMe ? user?.firstName : email.fromUser}
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      To: {email.to}
+                      To: {email.fromUser ? "You" : "Replied"}
                     </div>
                   </div>
                 </div>
                 <div className="text-xs text-muted-foreground whitespace-nowrap mt-1">
-                  {formatDistanceToNow(new Date(email.sentAt), { addSuffix: true })}
+                  {formatDistanceToNow(new Date(email.dateSent), { addSuffix: true })}
                 </div>
               </div>
 

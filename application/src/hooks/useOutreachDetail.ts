@@ -2,21 +2,34 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from './useApi';
 import { OutreachListItem } from '@/lib/types';
 
-export interface EmailItem {
-    id: string;
-    from: string;
-    to: string;
+export interface Message {
+
     subject: string;
     body: string;
-    sentAt: string;
+    dateSent: string;
+    fromUser: boolean;
+    messageId: string;
+}
+
+export interface Employee {
+    id: string;
+    name: string;
+    email: string;
+    company: string;
+    position: string;
 }
 
 export interface OutreachDetail extends OutreachListItem {
-    email: { // Keeping for backward compatibility or initial preview if needed, but thread is primary
-        subject: string;
-        body: string;
-    };
-    thread: EmailItem[];
+    threadId: string;
+    status: string;
+    type: string;
+    isAutomated: boolean;
+    externalThreadId: string;
+    createdAt: string;
+    lastUpdated: string;
+    jobs: any[];
+    employee: Employee
+    messages: Message[];
 }
 
 export const useOutreachDetail = (id?: string) => {
@@ -27,7 +40,7 @@ export const useOutreachDetail = (id?: string) => {
         queryKey: ['outreach', 'detail', id],
         queryFn: async (): Promise<OutreachDetail> => {
             if (!id) throw new Error('ID is required');
-            const response = await api.get<OutreachDetail>(`/outreach/${id}`);
+            const response = await api.get<OutreachDetail>(`/thread/${id}`);
             return response.data;
         },
         enabled: !!id,
@@ -47,12 +60,12 @@ export const useOutreachDetail = (id?: string) => {
 
     const toggleAutomatedMutation = useMutation({
         mutationFn: async (isAutomated: boolean) => {
-             if (!id) return;
-             await api.patch(`/outreach/${id}`, { isAutomated });
+            if (!id) return;
+            await api.patch(`/thread/${id}`, { isAutomated });
         },
         onSuccess: () => {
-             queryClient.invalidateQueries({ queryKey: ['outreach', 'detail', id] });
-             queryClient.invalidateQueries({ queryKey: ['outreach', 'list'] });
+            queryClient.invalidateQueries({ queryKey: ['outreach', 'detail', id] });
+            queryClient.invalidateQueries({ queryKey: ['outreach', 'list'] });
         }
     });
 
@@ -63,7 +76,7 @@ export const useOutreachDetail = (id?: string) => {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['outreach', 'detail', id] });
-            queryClient.invalidateQueries({ queryKey: ['outreach', 'stats'] }); 
+            queryClient.invalidateQueries({ queryKey: ['outreach', 'stats'] });
         }
     });
 
@@ -71,7 +84,7 @@ export const useOutreachDetail = (id?: string) => {
         data: detailQuery.data,
         isLoading: detailQuery.isLoading,
         error: detailQuery.error,
-        
+
         updateStatus: updateStatusMutation.mutateAsync,
         isUpdatingStatus: updateStatusMutation.isPending,
 

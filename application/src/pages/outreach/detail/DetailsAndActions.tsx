@@ -57,11 +57,11 @@ export const DetailsAndActions: React.FC<DetailsAndActionsProps> = ({
         {/* Candidate Details */}
         <div className="space-y-4">
           <div className="space-y-1">
-            <h3 className="text-2xl font-semibold tracking-tight">{data.employeeName}</h3>
+            <h3 className="text-2xl font-semibold tracking-tight">{data.employee.name}</h3>
             <div className="flex items-center gap-2 text-muted-foreground">
-              <p className="text-sm">{data.employeeEmail}</p>
+              <p className="text-sm">{data.employee.email}</p>
               <span>•</span>
-              <p className="text-sm">{data.companyName}</p>
+              <p className="text-sm">{data.employee.company}</p>
             </div>
           </div>
 
@@ -69,7 +69,7 @@ export const DetailsAndActions: React.FC<DetailsAndActionsProps> = ({
             <div className="flex flex-col">
               <span className="text-xs text-muted-foreground font-semibold">Last activity</span>
               <span className="text-xs text-muted-foreground">
-                {data.lastActivity ? formatDistanceToNow(new Date(data.lastActivity), { addSuffix: true }) : 'N/A'}
+                {data.lastUpdated ? formatDistanceToNow(new Date(data.lastUpdated), { addSuffix: true }) : 'N/A'}
               </span>
             </div>
             {getStatusBadge(data.status)}

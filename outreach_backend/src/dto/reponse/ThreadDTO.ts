@@ -6,6 +6,7 @@ export interface ThreadDTO {
   threadId: number;
   status: string;
   type: string;
+  isAutomated: boolean;
   externalId?: string | null;
   createdAt: Date;
   lastUpdated: Date;

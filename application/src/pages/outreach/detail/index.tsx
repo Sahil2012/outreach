@@ -101,7 +101,7 @@ const OutreachDetailPage: React.FC = () => {
         {/* Right Side: Thread */}
         <div className="lg:col-span-8 h-full overflow-hidden bg-muted/10">
           <EmailThread
-            thread={data.thread || []}
+            thread={data.messages || []}
           />
         </div>
       </div>
