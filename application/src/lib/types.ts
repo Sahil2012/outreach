@@ -64,6 +64,8 @@ export interface GeneratedEmail {
   email: Email;
   isMailGenerated?: boolean;
   isDraftCompleted?: boolean;
+  threadId?: number;
+  messageId?: number;
 }
 
 export interface GenerateEmailResponse {
@@ -74,9 +76,8 @@ export interface GenerateEmailResponse {
 }
 
 export interface SendEmail {
-  subject: string,
-  text: string,
-  to: string
+  threadId: number;
+  messageId: number;
 }
 
 export const THREAD_STATUS_VALUES = ['PENDING', 'FIRST_FOLLOWUP', 'SECOND_FOLLOWUP', 'THIRD_FOLLOWUP', 'CLOSED', 'SENT', 'REFERRED', 'DELETED'];

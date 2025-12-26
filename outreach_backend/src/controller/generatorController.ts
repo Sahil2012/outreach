@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from "express";
 import { log } from "console";
 import { GenerateMailRequest } from "../types/GenerateMailRequest.js";
 import { emailStrategy } from "../service/email/emailStratergy.js";
-import prisma from "../apis/prismaClient.js";
 import { getAuth } from "@clerk/express";
 import { saveDraftEmail } from "../service/emailService.js";
 import { DraftEmailDTO } from "../dto/reponse/DraftEmailDTO.js";

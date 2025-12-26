@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from './useApi';
+import { useMail } from './useMail';
 import { GeneratedEmail, GenerateEmailResponse } from '@/lib/types';
 import { useState, useCallback } from 'react';
 
@@ -24,6 +25,7 @@ export interface UseOutreachOptions {
 
 export const useOutreach = (messageId?: string | number, options?: UseOutreachOptions) => {
   const api = useApi();
+  const { sendMail: sendMailApi } = useMail();
   const queryClient = useQueryClient();
   const [isPolling, setIsPolling] = useState(false);
 
@@ -45,7 +47,8 @@ export const useOutreach = (messageId?: string | number, options?: UseOutreachOp
       // Mapping backend response to frontend expected structure
       const data = response.data;
       return {
-        ...data,
+        threadId: data.threadId,
+        messageId: data.messageId,
         email: {
           subject: data.subject,
           body: data.body
@@ -96,12 +99,14 @@ export const useOutreach = (messageId?: string | number, options?: UseOutreachOp
   });
 
   const sendEmailMutation = useMutation({
-    mutationFn: async ({ id, manageThread }: { id: string; manageThread: boolean }) => {
-      await api.post('/outreach/send', { id, manageThread });
+    mutationFn: async ({ threadId, messageId }: { threadId: number; messageId: number }) => {
+      await sendMailApi({ threadId, messageId });
     },
-    onSuccess: (_, { id }) => {
+    onSuccess: () => {
       // Maybe update draft status locally
-      queryClient.invalidateQueries({ queryKey: ['outreach', 'draft', id] });
+      // Invalidating using a broader key since we don't have the specific ID easily if we wanted to
+      // But typically we probably want to invalidate 'outreach' queries or specific message
+      queryClient.invalidateQueries({ queryKey: ['outreach'] });
     }
   });
 

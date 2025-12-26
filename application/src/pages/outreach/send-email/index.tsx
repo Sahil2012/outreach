@@ -107,8 +107,12 @@ const SendEmailPage: React.FC = () => {
 
   const handleSendEmail = async () => {
     if (!id) return;
+    if (!draft || !draft.threadId || !draft.messageId) {
+      toast.error("Missing thread or message ID. Cannot send email.");
+      return;
+    }
     try {
-      await sendEmail({ id, manageThread });
+      await sendEmail({ threadId: draft.threadId, messageId: draft.messageId });
       toast.success("Email sent successfully!");
 
       // Mark as completed

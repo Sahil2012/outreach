@@ -9,7 +9,7 @@ export const useMail = () => {
   };
 
   const sendMail = async (data: object) => {
-    const response = await api.post('/sendEmail', data);
+    const response = await api.post('/mail/send', data);
     return response.data;
   };
 
