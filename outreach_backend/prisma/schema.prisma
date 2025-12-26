@@ -80,7 +80,7 @@ model Thread {
   authUserId      String
   employeeId      Int
   type            EmailType
-  threadId        String?
+  externalThreadId String?
   createdAt       DateTime           @default(now())
   lastUpdated     DateTime
   status          ThreadStatus       @default(PENDING)

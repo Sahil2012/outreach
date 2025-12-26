@@ -1,30 +1,17 @@
-import { Request, Response } from "express";
-import { getAuthUrl, getTokens } from "../../apis/googleOAuth2Client.js";
+import { clerkClient, getAuth } from "@clerk/express";
+import { log } from "console";
 
-export const sendAuthUrl = (req: Request, res: Response) => {
+export const getAccessToken = async (req: any) => {
   try {
-    const authUrl = getAuthUrl();
-    res.send({ url: authUrl });
-  } catch (error) {
-    res.status(500).send({ error: "Failed to generate auth URL" });
-  }
-};
-
-export const getAccessToken = async (req: Request, res: Response) => {
-  try {
-    const code = req.query.code as string;
-    if (!code) {
-      return res.status(400).send({ error: "Authorization code is required" });
-    }
-
-    const tokens = await getTokens(code);
+    const {userId} = getAuth(req);
+    log("User ID from Clerk:", userId);
+    const refreshToken = await clerkClient.users.getUserOauthAccessToken(userId!, "google");
+    log("Existing refresh token from Clerk:", refreshToken);
 
     // Store in DB or session as needed
-    res.send({
-      user: tokens?.user,
-      tokens: { accessToken: tokens?.tokens.access_token },
-    });
+    return refreshToken;
   } catch (error) {
-    res.status(500).send({ error: "Failed to generate auth URL" });
+    log("Error retrieving access token:", error);
+    throw error;
   }
 };

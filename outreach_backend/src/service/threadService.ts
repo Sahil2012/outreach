@@ -181,6 +181,13 @@ export async function extractThreadMeta(
   };
 }
 
+export async function linkToExternalThread(tx: Prisma.TransactionClient, threadId: number, externalThreadId: string) {
+  log("Linking thread", threadId, "to external thread", externalThreadId);
+  return tx.thread.update({
+    where: { id: threadId },
+    data: { externalThreadId }
+  })
+}
 function buildEmployeeFilter(
   companyName?: string[],
   employeeName?: string[]

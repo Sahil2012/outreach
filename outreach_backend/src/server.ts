@@ -12,6 +12,8 @@ import { getAccessToken } from "./controller/auth/google.js";
 import threadRoutes from "./routes/threadRoutes.js";
 import messageRoutes from "./routes/messageRoutes.js";
 import statsRoutes from "./routes/statsRoutes.js";
+import { sendMailUsingClerkToken } from "./controller/mailController.js";
+import mailRoutes from "./routes/mailRoutes.js";
 configDotenv();
 
 const PORT = process.env.PORT;
@@ -24,7 +26,7 @@ app.use(express.urlencoded({ extended: true }));
 // TODO : update cors 
 app.use(
   cors({
-    
+
   })
 );
 app.use(express.json());
@@ -38,8 +40,9 @@ app.use("/profile", profileRouter);
 app.get("/email/type", getEmailTypes);
 app.get("/test", getAccessToken);
 app.use("/thread", requireAuth(), threadRoutes);
-app.use("/message", requireAuth(),  messageRoutes);
+app.use("/message", requireAuth(), messageRoutes);
 app.use("/stats", requireAuth(), statsRoutes);
+app.use("/mail", requireAuth(), mailRoutes);
 
 // Global error handler
 const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
