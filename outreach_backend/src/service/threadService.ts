@@ -185,9 +185,22 @@ export async function linkToExternalThread(tx: Prisma.TransactionClient, threadI
   log("Linking thread", threadId, "to external thread", externalThreadId);
   return tx.thread.update({
     where: { id: threadId },
-    data: { externalThreadId }
+    data: {
+      externalThreadId,
+      Message: {
+        updateMany: {
+          where: {
+            threadId: threadId
+          },
+          data: {
+            externalMessageId: externalThreadId
+          }
+        }
+      }
+    }
   })
 }
+
 function buildEmployeeFilter(
   companyName?: string[],
   employeeName?: string[]

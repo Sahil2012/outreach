@@ -8,7 +8,7 @@ export async function saveMessage(
   subject: string,
   body: string
 ) {
-    log("Saving message for thread:", threadId, "by user:", authUserId);
+  log("Saving message for thread:", threadId, "by user:", authUserId);
   return tx.message.create({
     data: {
       threadId,
@@ -57,5 +57,45 @@ export async function getMessageById(
       id: messageId,
       authUserId: authUserId,
     },
+  });
+}
+
+export async function populateMessagesForThread(tx: Prisma.TransactionClient, threadId: number, authUserId: string, messages: any[]) {
+
+  // Get all existing messages for this thread
+  const existingMessages = await tx.message.findMany({
+    where: {
+      threadId,
+      externalMessageId: {
+        in: messages.map((m) => m.id),
+      },
+    },
+    select: {
+      externalMessageId: true,
+    },
+  });
+
+  const existingIds = new Set(existingMessages.map((m: any) => m.externalMessageId));
+
+  // Filter out messages that already exist
+  const newMessages = messages.filter((m: any) => !existingIds.has(m.id));
+
+  if (newMessages.length === 0) {
+    log("No new messages to save for thread:", threadId);
+    return;
+  }
+
+  log("Saving", newMessages.length, "new messages for thread:", threadId);
+
+  // Bulk insert new messages
+  await tx.message.createMany({
+    data: newMessages.map((message: any) => ({
+      threadId,
+      authUserId,
+      subject: message.subject || "",
+      body: message.body || "",
+      fromUser: message.fromUser || false,
+      externalMessageId: message.id,
+    })),
   });
 }

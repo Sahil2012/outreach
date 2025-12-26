@@ -14,6 +14,7 @@ import messageRoutes from "./routes/messageRoutes.js";
 import statsRoutes from "./routes/statsRoutes.js";
 import { sendMailUsingClerkToken } from "./controller/mailController.js";
 import mailRoutes from "./routes/mailRoutes.js";
+import { testController } from "./controller/test.js";
 configDotenv();
 
 const PORT = process.env.PORT;
@@ -38,11 +39,11 @@ app.post("/sendEmailV2", requireAuth(), ensureProfileCreated, emailSender);
 app.use("/auth", authRoutes);
 app.use("/profile", profileRouter);
 app.get("/email/type", getEmailTypes);
-app.get("/test", getAccessToken);
 app.use("/thread", requireAuth(), threadRoutes);
 app.use("/message", requireAuth(), messageRoutes);
 app.use("/stats", requireAuth(), statsRoutes);
 app.use("/mail", requireAuth(), mailRoutes);
+app.post("/test", requireAuth(), testController);
 
 // Global error handler
 const errorHandler: ErrorRequestHandler = (err, req, res, next) => {

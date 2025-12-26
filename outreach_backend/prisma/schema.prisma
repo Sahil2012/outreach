@@ -10,20 +10,20 @@ datasource db {
 }
 
 model UserProfileData {
-  id               Int                  @id @default(autoincrement())
-  summary          String?
-  education        Json?
-  authUserId       String               @unique
-  email            String?              @unique
-  firstName        String?
-  lastName         String?
-  phoneNo          BigInt?              @unique
-  resumeUrl        String?
-  status           ProfileCompletenessStatus @default(INCOMPLETE)
-  experiences      Experience[]
-  messages         Message[]
-  profileSkills    ProfilSkillMapping[]
-  threads          Thread[]
+  id            Int                       @id @default(autoincrement())
+  summary       String?
+  education     Json?
+  authUserId    String                    @unique
+  email         String?                   @unique
+  firstName     String?
+  lastName      String?
+  phoneNo       BigInt?                   @unique
+  resumeUrl     String?
+  status        ProfileCompletenessStatus @default(INCOMPLETE)
+  experiences   Experience[]
+  messages      Message[]
+  profileSkills ProfilSkillMapping[]
+  threads       Thread[]
 }
 
 model ProfilSkillMapping {
@@ -76,19 +76,19 @@ model Job {
 }
 
 model Thread {
-  id              Int                @id @default(autoincrement())
-  authUserId      String
-  employeeId      Int
-  type            EmailType
+  id               Int                @id @default(autoincrement())
+  authUserId       String
+  employeeId       Int
+  type             EmailType
+  createdAt        DateTime           @default(now())
+  lastUpdated      DateTime
+  status           ThreadStatus       @default(PENDING)
+  automated        Boolean            @default(false)
   externalThreadId String?
-  createdAt       DateTime           @default(now())
-  lastUpdated     DateTime
-  status          ThreadStatus       @default(PENDING)
-  automated       Boolean            @default(false)
-  Message         Message[]
-  UserProfileData UserProfileData    @relation(fields: [authUserId], references: [authUserId])
-  Employee        Employee           @relation(fields: [employeeId], references: [id])
-  Job             ThreadJobMapping[]
+  Message          Message[]
+  UserProfileData  UserProfileData    @relation(fields: [authUserId], references: [authUserId])
+  Employee         Employee           @relation(fields: [employeeId], references: [id])
+  Job              ThreadJobMapping[]
 }
 
 model ThreadJobMapping {
@@ -102,15 +102,16 @@ model ThreadJobMapping {
 }
 
 model Message {
-  id              Int             @id @default(autoincrement())
-  body            String
-  subject         String?
-  authUserId      String
-  threadId        Int
-  date            DateTime        @default(now())
-  fromUser        Boolean
-  UserProfileData UserProfileData @relation(fields: [authUserId], references: [authUserId])
-  thread          Thread          @relation(fields: [threadId], references: [id])
+  id                Int             @id @default(autoincrement())
+  body              String
+  subject           String?
+  authUserId        String
+  threadId          Int
+  date              DateTime        @default(now())
+  fromUser          Boolean
+  externalMessageId String?
+  UserProfileData   UserProfileData @relation(fields: [authUserId], references: [authUserId])
+  thread            Thread          @relation(fields: [threadId], references: [id])
 }
 
 enum RefStatus {

@@ -58,11 +58,11 @@ model Thread {
   authUserId       String
   employeeId       Int
   type             EmailType
-  threadId         String?
   createdAt        DateTime           @default(now())
   lastUpdated      DateTime
   status           ThreadStatus       @default(PENDING)
   automated        Boolean            @default(false)
+  externalThreadId String?
   Message          Message[]
   UserTable        UserProfileData    @relation(fields: [authUserId], references: [authUserId])
   Employee         Employee           @relation(fields: [employeeId], references: [id])
@@ -91,15 +91,16 @@ model Job {
 }
 
 model Message {
-  id         Int             @id @default(autoincrement())
-  body       String
-  subject    String?
-  authUserId String
-  threadId   Int
-  date       DateTime        @default(now())
-  fromUser   Boolean
-  UserTable  UserProfileData @relation(fields: [authUserId], references: [authUserId])
-  Thread     Thread          @relation(fields: [threadId], references: [id])
+  id                Int             @id @default(autoincrement())
+  body              String
+  subject           String?
+  authUserId        String
+  threadId          Int
+  date              DateTime        @default(now())
+  fromUser          Boolean
+  externalMessageId String?
+  UserTable         UserProfileData @relation(fields: [authUserId], references: [authUserId])
+  Thread            Thread          @relation(fields: [threadId], references: [id])
 }
 
 model ThreadJobMapping {
