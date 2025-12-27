@@ -1,4 +1,4 @@
-import { Prisma, ThreadStatus } from "@prisma/client";
+import { MessageState, Prisma, ThreadStatus } from "@prisma/client";
 import { mapEmailTypeToDB } from "../mapper/emailTypeMapper.js";
 import { log } from "console";
 import EmailType from "../types/EmailType.js";
@@ -189,7 +189,7 @@ export async function extractThreadMeta(
   };
 }
 
-export async function linkToExternalThread(tx: Prisma.TransactionClient, threadId: number, externalThreadId: string) {
+export async function linkToExternalThread(tx: Prisma.TransactionClient, threadId: number, externalThreadId: string, externalMessageId: string) {
   log("Linking thread", threadId, "to external thread", externalThreadId);
   return tx.thread.update({
     where: { id: threadId },
@@ -201,7 +201,7 @@ export async function linkToExternalThread(tx: Prisma.TransactionClient, threadI
             threadId: threadId
           },
           data: {
-            externalMessageId: externalThreadId
+            externalMessageId: externalMessageId
           }
         }
       }
@@ -215,6 +215,16 @@ export async function updateStatus(tx: Prisma.TransactionClient, threadId: numbe
     where: { id: threadId },
     data: {
       status,
+      Message: {
+        updateMany: {
+          where: {
+            threadId: threadId
+          },
+          data: {
+            state: MessageState.SENT
+          }
+        }
+      }
     }
   })
 }

@@ -1,8 +1,9 @@
 import { Router } from "express";
-import { sendMailUsingClerkToken } from "../controller/mailController.js";
+import { generateNewMailTrail, sendMailUsingClerkToken } from "../controller/mailController.js";
 
 const mailRoutes = Router();
 
 mailRoutes.post("/send", sendMailUsingClerkToken);
+mailRoutes.post("/generate", generateNewMailTrail);
 
 export default mailRoutes;

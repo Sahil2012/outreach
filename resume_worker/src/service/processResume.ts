@@ -1,6 +1,6 @@
 import { PrismaClient, ProfileCompletenessStatus } from "@prisma/client";
 import { log } from "console";
-import { ingestSkills } from "../ingestion/skillsIngestion";
+import { ensureSkillsExist, linkSkills } from "../ingestion/skillsIngestion";
 import { ingestUserProfile } from "../ingestion/profileDataIngestion";
 import { ingestExperience } from "../ingestion/experinceIngestion";
 
@@ -13,32 +13,30 @@ export async function processResume(id: string, extracted: any) {
     await prisma.$connect();
     log("Connected to DB");
 
-    const result = await prisma.$transaction(async (tx) => {
-      log("Transaction started for user:", id);
+    // Pre-process skills outside of transaction to avoid timeouts
+    const skillNames = extracted.skills?.map((s: any) => s.name) || [];
+    await ensureSkillsExist(prisma, skillNames);
 
-      // 1. Create profile
-      const profile = await ingestUserProfile(tx, id, extracted);
+    // 1. Create profile
+    const profile = await ingestUserProfile(prisma, id, extracted);
 
-      // 2. Handle skills
-      const skillNames = extracted.skills?.map((s: any) => s.name) || [];
-      await ingestSkills(tx, skillNames, profile.id);
+    // 2. Handle skills (link existing skills to profile)
+    await linkSkills(prisma, skillNames, profile.id);
 
-      //   3. Handle experiences
-      await ingestExperience(tx, extracted.experiences || [], profile.id);
+    // 3. Handle experiences
+    await ingestExperience(prisma, extracted.experiences || [], profile.id);
 
-      await prisma.userProfileData.update({
-        where: {
-          authUserId: id,
-        },
-        data: {
-          status: ProfileCompletenessStatus.PARTIAL,
-        },
-      });
-      return { success: true, profileId: profile.id };
+    await prisma.userProfileData.update({
+      where: {
+        authUserId: id,
+      },
+      data: {
+        status: ProfileCompletenessStatus.PARTIAL,
+      },
     });
 
-    log("Transaction committed:", result);
-    return result;
+    log("Resume processing completed for user:", id);
+    return { success: true, profileId: profile.id };
   } catch (err) {
     log("Transaction failed:", err);
     throw err;

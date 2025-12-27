@@ -1,10 +1,10 @@
 import { Prisma } from "@prisma/client";
-import { ColdEmailRequest, TailoredEmailRequest } from "../types/GenerateMailRequest.js";
+import { GenerateMailRequest } from "../types/GenerateMailRequest.js";
 import { log } from "console";
 
 export async function upsertEmployee(
   tx: Prisma.TransactionClient,
-  req: TailoredEmailRequest | ColdEmailRequest
+  req: GenerateMailRequest
 ) {
   if (req.contactEmail?.trim()) {
     log("Upserting employee with email:", req.contactEmail);

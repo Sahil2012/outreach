@@ -110,6 +110,7 @@ model Message {
   date              DateTime        @default(now())
   fromUser          Boolean
   externalMessageId String?
+  state             MessageState    @default(DRAFT)
   UserProfileData   UserProfileData @relation(fields: [authUserId], references: [authUserId])
   thread            Thread          @relation(fields: [threadId], references: [id])
 }
@@ -140,4 +141,9 @@ enum ThreadStatus {
   REFFERED
   SENT
   DELETED
+}
+
+enum MessageState {
+  SENT
+  DRAFT
 }

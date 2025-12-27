@@ -2,7 +2,7 @@ import EmailType from "./EmailType.js";
 
 
 export interface EmailRequestBase {
-  userId?: string;
+  userId: string;
   type: EmailType;
   contactName: string;
   contactEmail?: string;
@@ -18,7 +18,7 @@ export interface TailoredEmailRequest extends EmailRequestBase {
 
 export interface FollowupEmailRequest extends EmailRequestBase {
   type: EmailType.FOLLOWUP;
-  threadId: string;
+  threadId: number;
 }
 
 export interface ColdEmailRequest extends EmailRequestBase {
