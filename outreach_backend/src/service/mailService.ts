@@ -5,7 +5,9 @@ import nodemailer from "nodemailer";
 import { SendMailDto } from "../dto/request/SendMailDto.js";
 import prisma from "../apis/prismaClient.js";
 import { getThreadById } from "./threadService.js";
-import { supabase } from "../apis/supabaseClient.js";
+
+import { storageService } from "./storageService.js";
+import { Readable } from "stream";
 
 export class MailService {
   async sendMail(userId: string, mailData: SendMailDto) {
@@ -32,7 +34,7 @@ export class MailService {
     // 2. Fetch Resume if requested
     let attachments: any[] = [];
     if (attachResume) {
-      await this.getResume(userId, attachments);
+      await this.getResumeStream(userId, attachments);
     }
 
     // 3. Authenticate & Setup
@@ -43,8 +45,8 @@ export class MailService {
     // 4. Get User Info (From address)
     const fromEmail = await this.getGmailAddress(auth);
 
-    // 5. Construct MIME Message using Nodemailer
-    const rawMessage = await this.generateRawMimeMessage({
+    // 5. Construct MIME Stream using Nodemailer
+    const mimeStream = await this.getMimeStream({
       from: fromEmail,
       to,
       subject,
@@ -52,11 +54,11 @@ export class MailService {
       attachments
     });
 
-    // 6. Send
-    return this.sendViaGmail(auth, rawMessage);
+    // 6. Send via Gmail Media Upload
+    return this.sendViaGmail(auth, mimeStream);
   }
 
-  private async getResume(userId: string, attachments: any[]) {
+  private async getResumeStream(userId: string, attachments: any[]) {
     const userProfile = await prisma.userProfileData.findUnique({
       where: { authUserId: userId },
       select: { resumeUrl: true },
@@ -64,39 +66,29 @@ export class MailService {
 
     if (userProfile?.resumeUrl) {
       try {
-        const { data, error } = await supabase.storage
-          .from("resumes")
-          .download(userProfile.resumeUrl);
-
-        if (error) throw error;
-
-        const buffer = Buffer.from(await data.arrayBuffer());
+        const stream = await storageService.getFileStream(userProfile.resumeUrl);
         attachments.push({
           filename: "Resume.pdf",
-          content: buffer,
+          content: stream,
         });
-        log("Resume attached successfully");
+        log("Resume attachment stream prepared successfully");
       } catch (error) {
-        log("Failed to download resume:", error);
+        log("Failed to prepare resume stream:", error);
       }
     } else {
       log("Attach resume requested but no resume URL found for user");
     }
   }
 
-  private async generateRawMimeMessage(mailOptions: any): Promise<string> {
+  private async getMimeStream(mailOptions: any): Promise<Readable> {
     const transporter = nodemailer.createTransport({
       streamTransport: true,
       newline: 'unix',
-      buffer: true
+      buffer: false // Disable buffering
     });
 
     const info = await transporter.sendMail(mailOptions);
-    // info.message is the Buffer of the raw message
-    return info.message.toString('base64')
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_')
-      .replace(/=+$/, '');
+    return info.message as Readable;
   }
 
   private async getGoogleAccessToken(userId: string): Promise<string> {
@@ -121,12 +113,15 @@ export class MailService {
     return email;
   }
 
-  private async sendViaGmail(auth: any, encodedMessage: string): Promise<any> {
+  private async sendViaGmail(auth: any, mimeStream: Readable): Promise<any> {
     const gmail = google.gmail({ version: "v1", auth });
     try {
       const response = await gmail.users.messages.send({
         userId: "me",
-        requestBody: { raw: encodedMessage }
+        media: {
+          mimeType: 'message/rfc822',
+          body: mimeStream
+        }
       });
       return response.data;
     } catch (error: any) {
