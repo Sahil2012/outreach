@@ -1,13 +1,15 @@
 import { clerkClient } from "@clerk/express";
 import { google } from "googleapis";
 import { log } from "console";
+import nodemailer from "nodemailer";
 import { SendMailDto } from "../dto/request/SendMailDto.js";
 import prisma from "../apis/prismaClient.js";
 import { getThreadById } from "./threadService.js";
+import { supabase } from "../apis/supabaseClient.js";
 
 export class MailService {
   async sendMail(userId: string, mailData: SendMailDto) {
-    const { threadId, messageId } = mailData;
+    const { threadId, messageId, attachResume } = mailData;
 
     // 1. Fetch & Validate Data
     const thread = await getThreadById(prisma, userId, threadId);
@@ -27,17 +29,74 @@ export class MailService {
       throw new Error("Incomplete email data (missing recipient, subject, or body)");
     }
 
-    // 2. Authenticate & Setup
+    // 2. Fetch Resume if requested
+    let attachments: any[] = [];
+    if (attachResume) {
+      await this.getResume(userId, attachments);
+    }
+
+    // 3. Authenticate & Setup
     const accessToken = await this.getGoogleAccessToken(userId);
     const auth = new google.auth.OAuth2();
     auth.setCredentials({ access_token: accessToken });
 
-    // 3. Get User Info
+    // 4. Get User Info (From address)
     const fromEmail = await this.getGmailAddress(auth);
 
-    // 4. Construct & Send
-    const encodedMessage = this.createMimeMessage(to, fromEmail, subject, text);
-    return this.sendViaGmail(auth, encodedMessage);
+    // 5. Construct MIME Message using Nodemailer
+    const rawMessage = await this.generateRawMimeMessage({
+      from: fromEmail,
+      to,
+      subject,
+      html: text.replace(/\n/g, "<br>"), // Preserve formatting
+      attachments
+    });
+
+    // 6. Send
+    return this.sendViaGmail(auth, rawMessage);
+  }
+
+  private async getResume(userId: string, attachments: any[]) {
+    const userProfile = await prisma.userProfileData.findUnique({
+      where: { authUserId: userId },
+      select: { resumeUrl: true },
+    });
+
+    if (userProfile?.resumeUrl) {
+      try {
+        const { data, error } = await supabase.storage
+          .from("resumes")
+          .download(userProfile.resumeUrl);
+
+        if (error) throw error;
+
+        const buffer = Buffer.from(await data.arrayBuffer());
+        attachments.push({
+          filename: "Resume.pdf",
+          content: buffer,
+        });
+        log("Resume attached successfully");
+      } catch (error) {
+        log("Failed to download resume:", error);
+      }
+    } else {
+      log("Attach resume requested but no resume URL found for user");
+    }
+  }
+
+  private async generateRawMimeMessage(mailOptions: any): Promise<string> {
+    const transporter = nodemailer.createTransport({
+      streamTransport: true,
+      newline: 'unix',
+      buffer: true
+    });
+
+    const info = await transporter.sendMail(mailOptions);
+    // info.message is the Buffer of the raw message
+    return info.message.toString('base64')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
   }
 
   private async getGoogleAccessToken(userId: string): Promise<string> {
@@ -60,24 +119,6 @@ export class MailService {
       throw new Error("Could not retrieve user email from Google");
     }
     return email;
-  }
-
-  private createMimeMessage(to: string, from: string, subject: string, text: string): string {
-    const rawMessage = [
-      `From: ${from}`,
-      `To: ${to}`,
-      `Subject: ${subject}`,
-      "MIME-Version: 1.0",
-      "Content-Type: text/html; charset=utf-8",
-      "",
-      text
-    ].join("\n");
-
-    return Buffer.from(rawMessage)
-      .toString("base64")
-      .replace(/\+/g, "-")
-      .replace(/\//g, "_")
-      .replace(/=+$/, "");
   }
 
   private async sendViaGmail(auth: any, encodedMessage: string): Promise<any> {
