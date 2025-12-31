@@ -170,6 +170,14 @@ export async function extractThreadMeta(
             email: true,
           },
         },
+        Message: {
+          orderBy: { date: "desc" },
+          take: 1,
+          select: {
+            id: true,
+            state: true,
+          },
+        },
         automated: true,
         type: true,
         id: true,
@@ -226,7 +234,17 @@ export async function updateStatus(tx: Prisma.TransactionClient, threadId: numbe
         }
       }
     }
-  })
+  });
+}
+
+export async function updateAutomated(tx: Prisma.TransactionClient, threadId: number, automated: boolean) {
+  log("Updating automated status of thread", threadId, "to", automated);
+  return tx.thread.update({
+    where: { id: threadId },
+    data: {
+      automated,
+    }
+  });
 }
 
 function buildEmployeeFilter(
