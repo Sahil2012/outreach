@@ -51,25 +51,49 @@ export const DetailsAndActions: React.FC<DetailsAndActionsProps> = ({
             <h3 className="text-2xl font-semibold tracking-tight">
               {data.employee.name}
             </h3>
-            <div className="flex items-center gap-2 text-muted-foreground">
+            <div className="-mt-1.5 flex items-center gap-2 text-muted-foreground/70">
               <p className="text-sm">{data.employee.email}</p>
-              <span>•</span>
-              <p className="text-sm">{data.employee.company}</p>
             </div>
+            {data.employee.position && (
+              <div className="mt-2 flex items-center gap-2 text-muted-foreground">
+                <p className="text-sm font-medium">{data.employee.position}</p>
+                <span>•</span>
+                <p className="text-sm font-medium">{data.employee.company}</p>
+              </div>
+            )}
+            {!data.employee.position && (
+              <div className="mt-2 flex items-center gap-2 text-muted-foreground">
+                <p className="text-sm font-medium">{data.employee.company}</p>
+              </div>
+            )}
           </div>
 
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex flex-col">
-              <span className="text-xs text-muted-foreground font-semibold">
-                Last activity
-              </span>
-              <span className="text-xs text-muted-foreground">
-                {data.lastUpdated
-                  ? formatDistanceToNow(new Date(data.lastUpdated), {
-                      addSuffix: true,
-                    })
-                  : "N/A"}
-              </span>
+          <div className="-mt-1.5 flex items-center justify-between gap-2">
+            <div className="flex gap-4">
+              <div className="flex flex-col">
+                <span className="text-xs text-muted-foreground font-semibold">
+                  Created
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  {data.createdAt
+                    ? formatDistanceToNow(new Date(data.createdAt), {
+                        addSuffix: true,
+                      })
+                    : "N/A"}
+                </span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xs text-muted-foreground font-semibold">
+                  Last activity
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  {data.lastUpdated
+                    ? formatDistanceToNow(new Date(data.lastUpdated), {
+                        addSuffix: true,
+                      })
+                    : "N/A"}
+                </span>
+              </div>
             </div>
             <ThreadStatusBadge status={data.status} />
           </div>
