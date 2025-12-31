@@ -5,13 +5,20 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Launch Server",
-      "program": "${workspaceFolder}/outreach_backend/dist/src/server.js",
-      "request": "launch",
-      "skipFiles": ["<node_internals>/**"],
       "type": "node",
+      "name": "Launch Server",
+      "request": "launch",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "cwd": "${workspaceFolder}/outreach_backend",
       "envFile": "${workspaceFolder}/outreach_backend/.env",
-      "preLaunchTask": "Build Backend"
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
+      "console": "integratedTerminal"
     }
   ]
 }

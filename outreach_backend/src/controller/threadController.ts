@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { extractThreadMeta, getThreadById, getThreadPreview, updateStatus } from "../service/threadService.js";
+import { extractThreadMeta, getThreadById, getThreadPreview, updateAutomated, updateStatus } from "../service/threadService.js";
 import prisma from "../apis/prismaClient.js";
 import { getAuth } from "@clerk/express";
 import { ThreadPreviewDTO } from "../dto/reponse/ThreadPreviewDTO.js";
@@ -116,10 +116,16 @@ export const getThreadMeta = async (req: Request, res: Response<ThreadMetaRespon
   }
 };
 
-export const updateThreadStatus = async (req: Request, res: Response) => {
+export const updateThread = async (req: Request, res: Response) => {
   try {
-    const { status } = req.body;
-    const updatedThread = await updateStatus(prisma, parseInt(req.params.threadId), status);
+    const { status, isAutomated } = req.body;
+    let updatedThread;
+    if (status) {
+      updatedThread = await updateStatus(prisma, parseInt(req.params.threadId), status);
+    }
+    if (isAutomated !== undefined && isAutomated !== null) {
+      updatedThread = await updateAutomated(prisma, parseInt(req.params.threadId), isAutomated);
+    }
     return res.status(200).json(updatedThread);
   } catch (error) {
     console.error("Error updating thread status:", error);

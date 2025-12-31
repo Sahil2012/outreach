@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { MessageState, Prisma } from "@prisma/client";
 import { log } from "console";
 
 export async function saveMessage(
@@ -43,6 +43,23 @@ export async function updateMessage(
       authUserId: authUserId,
     },
     data: updateData,
+  });
+}
+
+export async function updateState(
+  tx: Prisma.TransactionClient,
+  messageId: number,
+  state: MessageState
+) {
+  console.log("Updating message ID:", messageId, "to state:", state);
+
+  return tx.message.update({
+    where: {
+      id: messageId,
+    },
+    data: {
+      state,
+    },
   });
 }
 
