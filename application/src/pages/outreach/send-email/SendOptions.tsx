@@ -1,10 +1,10 @@
-import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Loader } from "@/components/ui/loader";
-import { ArrowLeft, Home, Send, Mail, Check, Copy, ArrowRight } from "lucide-react";
-import { SiGmail } from "react-icons/si";
-import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Loader } from "@/components/ui/loader";
+import { Check, Copy, Mail, Send } from "lucide-react";
+import React, { useState } from "react";
+import { SiGmail } from "react-icons/si";
 
 interface SendOptionsProps {
   isGmailConnected: boolean;

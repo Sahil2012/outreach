@@ -12,47 +12,56 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { MoreHorizontal, Building2, User, Loader2 } from 'lucide-react';
-import { ThreadMetaItem, ThreadStatus } from "@/lib/types";
+import { MoreHorizontal, Building2, User, Loader2 } from "lucide-react";
+import { ThreadMetaItem } from "@/lib/types";
 import { useNavigate } from "react-router-dom";
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow } from "date-fns";
+import { cn } from "@/lib/utils";
+import ThreadStatusBadge from "@/components/function/ThreadStatusBadge";
+import MessageStateBadge from "@/components/function/MessageStateBadge";
+
+const needsAttention = (lastUpdated: string) => {
+  const now = new Date();
+  const lastUpdatedDate = new Date(lastUpdated);
+  const diffInHours =
+    (now.getTime() - lastUpdatedDate.getTime()) / (1000 * 60 * 60);
+  return diffInHours > 24 * 4;
+};
 
 interface OutreachTableProps {
   threads: ThreadMetaItem[];
   isLoading: boolean;
   onToggleAutomated: (id: number, current: boolean) => void;
-  onAction: (id: number, action: 'follow-up' | 'mark-absconded' | 'mark-referred') => void;
+  onAction: (
+    id: number,
+    action: "follow-up" | "mark-absconded" | "mark-referred"
+  ) => void;
 }
 
-export const OutreachTable = ({ threads, isLoading, onToggleAutomated, onAction }: OutreachTableProps) => {
+export const OutreachTable = ({
+  threads,
+  isLoading,
+  onToggleAutomated,
+  onAction,
+}: OutreachTableProps) => {
   const navigate = useNavigate();
 
-  const getStatusBadge = (status: ThreadStatus) => {
-    const variants: Record<string, string> = {
-      'PENDING': 'bg-gray-100 text-gray-700 hover:bg-gray-100',
-      'SENT': 'bg-blue-100 text-blue-700 hover:bg-blue-100',
-      'FIRST_FOLLOW_UP': 'bg-purple-100 text-purple-700 hover:bg-purple-100',
-      'SECOND_FOLLOW_UP': 'bg-purple-100 text-purple-700 hover:bg-purple-100',
-      'THIRD_FOLLOW_UP': 'bg-purple-100 text-purple-700 hover:bg-purple-100',
-      'DELETED': 'bg-red-100 text-red-700 hover:bg-red-100',
-      'CLOSED': 'bg-yellow-100 text-yellow-700 hover:bg-yellow-100',
-      'REFFERED': 'bg-green-100 text-green-700 hover:bg-green-100',
-    };
-    return <Badge className={`${variants[status] || 'bg-gray-100'} border-0`}>{status}</Badge>;
-  };
-
   if (isLoading) {
-    return <div className="flex justify-center p-8"><Loader2 className="animate-spin" /></div>;
+    return (
+      <div className="flex justify-center p-8">
+        <Loader2 className="animate-spin" />
+      </div>
+    );
   }
 
   return (
     <Table>
       <TableHeader>
         <TableRow className="hover:bg-transparent border-border/40">
-          <TableHead className="pl-6">Name</TableHead>
+          <TableHead></TableHead>
+          <TableHead>Name</TableHead>
           <TableHead>Company</TableHead>
           <TableHead>Status</TableHead>
           <TableHead>Automated</TableHead>
@@ -63,7 +72,10 @@ export const OutreachTable = ({ threads, isLoading, onToggleAutomated, onAction 
       <TableBody>
         {threads.length === 0 ? (
           <TableRow>
-            <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
+            <TableCell
+              colSpan={6}
+              className="h-24 text-center text-muted-foreground"
+            >
               No outreach records found.
             </TableCell>
           </TableRow>
@@ -71,17 +83,37 @@ export const OutreachTable = ({ threads, isLoading, onToggleAutomated, onAction 
           threads.map((thread) => (
             <TableRow
               key={thread.id}
-              className="group hover:bg-muted/30 border-border/40 cursor-pointer"
+              className={cn(
+                "relative group hover:bg-muted/30 border-border/40 cursor-pointer",
+                { "bg-green-100": needsAttention(thread.lastUpdated) }
+              )}
               onClick={() => navigate(`/outreach/view/${thread.id}`)}
             >
-              <TableCell className="pl-6">
+              <TableCell className="relative w-min">
+                <div
+                  className={cn(
+                    "absolute ml-0.5 xl:ml-2 top-1/2 -translate-y-1/2 rounded-full h-2 w-2 bg-green-500",
+                    {
+                      hidden: !needsAttention(thread.lastUpdated),
+                    }
+                  )}
+                />
+              </TableCell>
+              <TableCell>
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                     <User className="w-4 h-4" />
                   </div>
                   <div className="flex flex-col">
-                    <span className="font-medium text-sm">{thread.Employee.name}</span>
-                    <span className="text-xs text-muted-foreground">{thread.Employee.email}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-sm">
+                        {thread.Employee.name}
+                      </span>
+                      <MessageStateBadge state={thread.Message[0].state} />
+                    </div>
+                    <span className="text-xs text-muted-foreground">
+                      {thread.Employee.email}
+                    </span>
                   </div>
                 </div>
               </TableCell>
@@ -92,7 +124,7 @@ export const OutreachTable = ({ threads, isLoading, onToggleAutomated, onAction 
                 </div>
               </TableCell>
               <TableCell>
-                {getStatusBadge(thread.status)}
+                <ThreadStatusBadge status={thread.status} />
               </TableCell>
               <TableCell>
                 <button
@@ -103,13 +135,19 @@ export const OutreachTable = ({ threads, isLoading, onToggleAutomated, onAction 
                 >
                   <Switch
                     checked={thread.automated}
-                    onCheckedChange={(checked: boolean) => onToggleAutomated(thread.id, checked)}
+                    onCheckedChange={(checked: boolean) =>
+                      onToggleAutomated(thread.id, checked)
+                    }
                   />
                 </button>
               </TableCell>
               <TableCell>
                 <span className="text-sm text-muted-foreground">
-                  {thread.lastUpdated ? formatDistanceToNow(new Date(thread.lastUpdated), { addSuffix: true }) : '-'}
+                  {thread.lastUpdated
+                    ? formatDistanceToNow(new Date(thread.lastUpdated), {
+                        addSuffix: true,
+                      })
+                    : "-"}
                 </span>
               </TableCell>
               <TableCell className="text-center pr-6">
@@ -120,18 +158,29 @@ export const OutreachTable = ({ threads, isLoading, onToggleAutomated, onAction 
                 >
                   <DropdownMenu>
                     <DropdownMenuTrigger>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full transition-opacity">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 rounded-full transition-opacity"
+                      >
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => onAction(thread.id, 'follow-up')}>
+                      <DropdownMenuItem
+                        onClick={() => onAction(thread.id, "follow-up")}
+                      >
                         Send Follow Up
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => onAction(thread.id, 'mark-referred')}>
+                      <DropdownMenuItem
+                        onClick={() => onAction(thread.id, "mark-referred")}
+                      >
                         Mark as Referred
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => onAction(thread.id, 'mark-absconded')} className="text-destructive">
+                      <DropdownMenuItem
+                        onClick={() => onAction(thread.id, "mark-absconded")}
+                        className="text-destructive"
+                      >
                         Mark as Absconded
                       </DropdownMenuItem>
                     </DropdownMenuContent>

@@ -86,17 +86,8 @@ function ProtectedRoute({ children }: { readonly children: React.ReactNode }) {
 
 function PublicRoute({ children }: { readonly children: React.ReactNode }) {
   const { user, isLoaded: isUserLoaded } = useUser();
-  // QUEST: i doubt this will work
-  const { profile, isLoading, error } = useProfile();
 
-  if (error) {
-    const err = new Error("Failed to fetch profile. Please try again later");
-    err.name = "Unable to reach servers";
-    throw err;
-  }
-
-  const loading = !isUserLoaded || isLoading || !profile;
-
+  const loading = !isUserLoaded;
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -106,14 +97,7 @@ function PublicRoute({ children }: { readonly children: React.ReactNode }) {
   }
 
   if (user) {
-    if (profile.status === "COMPLETE") {
-      return <Navigate to="/dashboard" replace />;
-    } else {
-      if (profile.resumeUrl) {
-        return <Navigate to="/onboarding/professional-info" replace />;
-      }
-      return <Navigate to="/onboarding/basic-info" replace />;
-    }
+    return <Navigate to="/dashboard" />;
   }
 
   return <>{children}</>;

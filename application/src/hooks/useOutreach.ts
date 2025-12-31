@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from './useApi';
 import { useMail } from './useMail';
-import { GeneratedEmail, GenerateEmailResponse } from '@/lib/types';
+import { GeneratedEmail, GenerateEmailResponse, MessageResponse } from '@/lib/types';
 import { useState, useCallback } from 'react';
 
 export interface GenerateEmailPayload {
@@ -41,9 +41,9 @@ export const useOutreach = (messageId?: string | number, options?: UseOutreachOp
 
   const draftQuery = useQuery({
     queryKey: ['outreach', 'message', messageId],
-    queryFn: async (): Promise<{ id: string } & GenerateEmailPayload & GeneratedEmail> => {
+    queryFn: async (): Promise<GeneratedEmail> => {
       if (!messageId) throw new Error('Message ID is required');
-      const response = await api.get(`/message/${messageId}`);
+      const response = await api.get<MessageResponse>(`/message/${messageId}`);
       // Mapping backend response to frontend expected structure
       const data = response.data;
       return {
@@ -53,6 +53,7 @@ export const useOutreach = (messageId?: string | number, options?: UseOutreachOp
           subject: data.subject,
           body: data.body
         },
+        isMailSent: data.state === 'SENT',
         isMailGenerated: true
       };
     },

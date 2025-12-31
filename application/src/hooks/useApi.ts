@@ -26,6 +26,8 @@ export const useApi = (): AxiosInstance => {
         const token = await getToken();
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
+        } else {
+          navigate('/login');
         }
         return config;
       },
@@ -40,7 +42,7 @@ export const useApi = (): AxiosInstance => {
         // Example: Handle global 401 Unauthorized errors
         if (error?.response?.status === 401) {
           console.error("Authentication expired or invalid. Prompting re-sign-in...");
-          navigate('/sign-in');
+          navigate('/login');
         }
         return Promise.reject(error);
       }

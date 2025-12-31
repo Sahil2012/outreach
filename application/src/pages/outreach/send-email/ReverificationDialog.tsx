@@ -140,7 +140,7 @@ export const ReverificationDialog: React.FC<ReverificationDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && handleCancel()}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md rounded-3xl">
         <DialogHeader>
           <DialogTitle>Verify Your Identity</DialogTitle>
           <DialogDescription>
@@ -158,7 +158,7 @@ export const ReverificationDialog: React.FC<ReverificationDialogProps> = ({
             </div>
           )}
 
-          <div className="flex justify-center">
+          <div className="flex justify-center py-2">
             <InputOTP 
               maxLength={6} 
               value={code} 
@@ -186,7 +186,7 @@ export const ReverificationDialog: React.FC<ReverificationDialogProps> = ({
               Verify
             </Button>
 
-            <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center justify-between text-sm mt-3">
               <Button
                 type="button"
                 variant="link"

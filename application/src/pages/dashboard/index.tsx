@@ -53,13 +53,13 @@ export default function DashboardPage() {
     if (action === "follow-up") {
       await sendFollowUp(id);
     } else if (action === "mark-absconded") {
-      await updateOutreach({ id, payload: { status: "Absconded" } });
+      await updateOutreach({ id, payload: { status: "CLOSED" } });
     } else if (action === "mark-referred") {
-      await updateOutreach({ id, payload: { status: "Referred" } });
+      await updateOutreach({ id, payload: { status: "REFERRED" } });
     }
   };
 
-  const totalPages = listData?.total || 1;
+  const totalPages = Math.ceil((listData?.total || 0) / pageSize) || 1;
   const STATUS_OPTIONS = THREAD_STATUS_VALUES;
 
   return (

@@ -55,6 +55,16 @@ export interface RecipientInfo {
   jobDescription?: string;
 }
 
+export interface MessageResponse {
+  threadId: number;
+  messageId: number;
+  subject: string;
+  body: string;
+  dateSent: string;
+  fromUser: boolean;
+  state: "DRAFT" | "SENT";
+}
+
 interface Email {
   subject: string;
   body: string;
@@ -63,7 +73,7 @@ interface Email {
 export interface GeneratedEmail {
   email: Email;
   isMailGenerated?: boolean;
-  isDraftCompleted?: boolean;
+  isMailSent?: boolean;
   threadId?: number;
   messageId?: number;
 }
@@ -80,7 +90,7 @@ export interface SendEmail {
   messageId: number;
 }
 
-export const THREAD_STATUS_VALUES = ['PENDING', 'FIRST_FOLLOWUP', 'SECOND_FOLLOWUP', 'THIRD_FOLLOWUP', 'CLOSED', 'SENT', 'REFERRED', 'DELETED'];
+export const THREAD_STATUS_VALUES = ['PENDING', 'FIRST_FOLLOWUP', 'SECOND_FOLLOWUP', 'THIRD_FOLLOWUP', 'CLOSED', 'SENT', 'REFERRED', 'DELETED'] as const;
 
 export type ThreadStatus = typeof THREAD_STATUS_VALUES[number];
 
@@ -106,10 +116,13 @@ export interface ThreadEmployeeInfo {
 export interface ThreadMetaItem {
   id: number;
   status: ThreadStatus;
-  lastUpdated: Date;
+  lastUpdated: string;
   Employee: ThreadEmployeeInfo;
   automated: boolean;
   type: EmailType;
+  Message: {
+    state: "DRAFT" | "SENT";
+  }[];
   _count: ThreadMessageCount;
 }
 

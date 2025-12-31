@@ -19,25 +19,24 @@ const SendEmailPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const { user } = useUser();
 
-  const {
-    draft,
-    isLoadingDraft,
-    draftError,
-    sendEmail,
-    updateDraft,
-    isSending,
-  } = useOutreach(id);
+  const { draft, isLoadingDraft, draftError, sendEmail, isSending } =
+    useOutreach(id);
 
   const [isGmailAuthLoading, setIsGmailAuthLoading] = useState(false);
   const [manageThread, setManageThread] = useState(true);
   const [alreadySent, setAlreadySent] = useState(false);
-  const [showReverificationDialog, setShowReverificationDialog] = useState(false);
+  const [showReverificationDialog, setShowReverificationDialog] =
+    useState(false);
   const [reverificationHandlers, setReverificationHandlers] = useState<{
     complete: () => void;
     cancel: () => void;
   } | null>(null);
 
   // Check if Gmail scope is present
+  const isConnectedToGoogle = user?.externalAccounts.some(
+    (account) => account.provider === "google"
+  );
+
   const hasGmailScope = user?.externalAccounts.some(
     (account) =>
       account.provider === "google" &&
@@ -48,7 +47,7 @@ const SendEmailPage: React.FC = () => {
 
   // Auto-redirect if already completed
   useEffect(() => {
-    if (draft?.isDraftCompleted && !alreadySent) {
+    if (draft?.isMailSent && !alreadySent) {
       setAlreadySent(true);
       toast.success("Email Already Sent!");
       setTimeout(() => {
@@ -68,11 +67,28 @@ const SendEmailPage: React.FC = () => {
 
   const connectToGmail = useReverification(
     async () => {
-      const res = await user?.createExternalAccount({
-        strategy: "oauth_google",
-        redirectUrl: globalThis.location.href,
-        additionalScopes: ["https://www.googleapis.com/auth/gmail.modify"],
-      });
+      let res;
+      if (!isConnectedToGoogle) {
+        res = await user?.createExternalAccount({
+          strategy: "oauth_google",
+          redirectUrl: globalThis.location.href,
+          additionalScopes: ["https://www.googleapis.com/auth/gmail.modify"],
+          oidcPrompt: "consent",
+          // @ts-ignore
+          access_type: "offline",
+        });
+      } else {
+        const googleAccount = user?.externalAccounts.find(
+          (acc) => acc.provider === "google"
+        );
+        res = await googleAccount?.reauthorize({
+          redirectUrl: globalThis.location.href,
+          additionalScopes: ["https://www.googleapis.com/auth/gmail.modify"],
+          oidcPrompt: "consent",
+          // @ts-ignore
+          access_type: "offline",
+        });
+      }
 
       if (res?.verification?.externalVerificationRedirectURL) {
         globalThis.location.href =
@@ -114,13 +130,28 @@ const SendEmailPage: React.FC = () => {
     try {
       await sendEmail({ threadId: draft.threadId, messageId: draft.messageId });
       toast.success("Email sent successfully!");
-
-      // Mark as completed
-      await updateDraft({ id, payload: { isDraftCompleted: true } });
-
       setAlreadySent(true);
       setTimeout(() => navigate("/dashboard"), 3000);
-    } catch (error) {
+    } catch (error: any) {
+      if (
+        (error?.response?.status === 400 &&
+          error?.response.data.error === "User not connected with Google") ||
+        (error?.response?.status === 422 &&
+          error?.response?.data?.error?.code === "oauth_missing_refresh_token")
+      ) {
+        const externalAccount = user?.externalAccounts.find(
+          (acc) => acc.provider === "google"
+        );
+        const res = await externalAccount?.reauthorize({
+          oidcPrompt: "consent",
+          redirectUrl: globalThis.location.href,
+          additionalScopes: ["https://www.googleapis.com/auth/gmail.modify"],
+        });
+        if (res?.verification?.externalVerificationRedirectURL) {
+          globalThis.location.href =
+            res.verification.externalVerificationRedirectURL.href;
+        }
+      }
       console.error("Failed to send email", error);
       toast.error("Failed to send email. Please check your connection.");
     }

@@ -104,7 +104,7 @@ export default function SignupPage() {
         subtitle={`We sent a verification code to ${email}`}
       >
         <Card className="border-border shadow-sm !py-0">
-          <CardContent className="pt-6">
+          <CardContent className="pt-6 pb-6">
             <form onSubmit={handleVerify} className="space-y-6">
               {error && (
                 <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md flex items-center gap-2">
@@ -134,7 +134,7 @@ export default function SignupPage() {
               </Button>
             </form>
           </CardContent>
-          <CardFooter className="flex justify-center border-t border-border pt-4 pb-4">
+          <CardFooter className="flex justify-center border-t border-border !pt-4 pb-4">
             <Button variant="link" onClick={() => setPendingVerification(false)} className="text-sm text-muted-foreground">
               Back to sign up
             </Button>

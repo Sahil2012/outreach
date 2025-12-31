@@ -4,6 +4,9 @@ import DOMPurify from "dompurify";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Message } from "@/hooks/useOutreachDetail";
 import { useUser } from "@clerk/clerk-react";
+import MessageStateBadge from "@/components/function/MessageStateBadge";
+import { useNavigate } from "react-router-dom";
+import { cn } from "@/lib/utils";
 
 interface EmailThreadProps {
   thread: Message[];
@@ -11,6 +14,8 @@ interface EmailThreadProps {
 
 export const EmailThread: React.FC<EmailThreadProps> = ({ thread }) => {
   const { user } = useUser();
+  const navigate = useNavigate();
+
   if (!thread || thread.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-8 rounded-lg border border-dashed">
@@ -24,14 +29,29 @@ export const EmailThread: React.FC<EmailThreadProps> = ({ thread }) => {
       {thread.map((email) => {
         const isMe = email.fromUser;
         const avatarFallback = "";
+        const isDraft = email.state === "DRAFT";
 
         return (
-          <div key={email.messageId} className="bg-muted/30 p-8 rounded-3xl border">
+          <div
+            key={email.messageId}
+            className={cn("bg-muted/30 p-8 rounded-3xl border", {
+              "cursor-pointer hover:bg-muted/70": isDraft,
+            })}
+            onClick={() => {
+              if (isDraft) {
+                navigate(`/outreach/preview/${email.messageId}`);
+              }
+            }}
+          >
             <div className="space-y-6 max-w-2xl mx-auto">
               <div className="flex items-start justify-between border-b pb-4">
                 <div className="flex items-center gap-4">
                   <Avatar className="h-10 w-10 border border-background">
-                    <AvatarFallback className={isMe ? "bg-primary text-primary-foreground" : ""}>
+                    <AvatarFallback
+                      className={
+                        isMe ? "bg-primary text-primary-foreground" : ""
+                      }
+                    >
                       {avatarFallback}
                     </AvatarFallback>
                   </Avatar>
@@ -44,21 +64,30 @@ export const EmailThread: React.FC<EmailThreadProps> = ({ thread }) => {
                     </div>
                   </div>
                 </div>
-                <div className="text-xs text-muted-foreground whitespace-nowrap mt-1">
-                  {formatDistanceToNow(new Date(email.dateSent), { addSuffix: true })}
+                <div className="flex items-center gap-2">
+                  <div className="text-xs text-muted-foreground whitespace-nowrap mt-1">
+                    {formatDistanceToNow(new Date(email.dateSent), {
+                      addSuffix: true,
+                    })}
+                  </div>
+                  <MessageStateBadge state={email.state} />
                 </div>
               </div>
 
               <div className="space-y-4">
                 <div className="space-y-1">
-                  <div className="text-lg font-semibold text-foreground">{email.subject}</div>
+                  <div className="text-lg font-semibold text-foreground">
+                    {email.subject}
+                  </div>
                 </div>
 
                 <div className="space-y-1">
                   <div className="prose prose-sm dark:prose-invert max-w-none">
                     <div
-                      className="text-foreground/90 break-words"
-                      dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(email.body) }}
+                      className="text-foreground/90 whitespace-pre-wrap"
+                      dangerouslySetInnerHTML={{
+                        __html: DOMPurify.sanitize(email.body),
+                      }}
                     />
                   </div>
                 </div>
