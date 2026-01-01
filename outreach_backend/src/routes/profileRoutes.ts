@@ -4,9 +4,9 @@ import { getProfile, updateProfile, uploadResume } from '../controller/profileCo
 import { requireAuth } from '../middlleware/requireAuth.js';
 
 const profileRouter = express.Router();
-const upload = multer();
+
 profileRouter.get('/', requireAuth, getProfile);
 profileRouter.patch('/', requireAuth, updateProfile);
-profileRouter.post('/upload/resume', requireAuth, upload.single('resume'), uploadResume);
+profileRouter.post('/upload/resume', requireAuth, uploadResume);
 
 export default profileRouter;
