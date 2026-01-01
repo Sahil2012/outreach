@@ -1,17 +1,18 @@
+import { configDotenv } from "dotenv";
 import { google } from "googleapis";
-import fs from "fs";
-import { fileURLToPath } from "node:url";
-import { dirname } from "node:path";
-import path from "path";
 import { Auth } from "googleapis";
 
 const clientMap: Record<string, Auth.OAuth2Client> = {};
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+configDotenv();
 
-const credentialsPath = path.resolve(__dirname, "../../../credentials.json");
-const credentials = JSON.parse(fs.readFileSync(credentialsPath, "utf8"));
+const credentials = {
+  web: {
+    client_id: process.env.CLIENT_ID,
+    client_secret: process.env.CLIENT_SECRET,
+    redirect_uris: [process.env.REDIRECT_URI],
+  },
+};
 // The web object contains your client ID, secret, and redirect URIs
 const { client_id, client_secret, redirect_uris } = credentials.web;
 
