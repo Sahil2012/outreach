@@ -74,7 +74,7 @@ export const uploadResume = async (req: Request, res: Response) => {
 
   const bb = busboy({ headers: req.headers });
   let autofill = false;
-  let fileUploaded = false;
+  let fileUploadPromise: Promise<void> | null = null;
 
   bb.on("field", (name, val) => {
     if (name === "autofill") {
@@ -82,41 +82,52 @@ export const uploadResume = async (req: Request, res: Response) => {
     }
   });
 
-  bb.on("file", async (name, file, info) => {
+  bb.on("file", (name, file, info) => {
     const { filename, mimeType } = info;
     const filePath = `user_${clerkUserId}/${filename}`;
 
-    try {
-      const uploadPath = await storageService.uploadFileStream(filePath, file, mimeType);
+    // Store the promise so we can wait for it in 'close'
+    fileUploadPromise = (async () => {
+      try {
+        const uploadPath = await storageService.uploadFileStream(filePath, file, mimeType);
 
-      await prisma.userProfileData.update({
-        where: { authUserId: clerkUserId },
-        data: { resumeUrl: uploadPath },
-      });
+        await prisma.userProfileData.update({
+          where: { authUserId: clerkUserId },
+          data: { resumeUrl: uploadPath },
+        });
 
-      log(`Resume uploaded for user ${clerkUserId} at path ${uploadPath}`);
-      fileUploaded = true;
+        log(`Resume uploaded for user ${clerkUserId} at path ${uploadPath}`);
 
-      if (autofill) {
-        await enqueueResumeJob(clerkUserId, uploadPath);
+        if (autofill) {
+          await enqueueResumeJob(clerkUserId, uploadPath);
+        }
+      } catch (err) {
+        console.error("Stream upload error:", err);
+        throw err; // Propagate error
       }
-
-    } catch (err) {
-      console.error("Stream upload error:", err);
-    }
+    })();
   });
 
-  bb.on("close", () => {
-    if (fileUploaded) {
-      res.json({
-        message: autofill
-          ? "Resume uploaded and sent for parsing"
-          : "Resume uploaded successfully",
-      });
-    } else {
-      // If no file was processed (or error occurred preventing upload)
-      // Ideally we track errors better, but strictly:
-      res.status(400).json({ message: "File processing completed, but check logs for success." });
+  bb.on("close", async () => {
+    try {
+      if (fileUploadPromise) {
+        // Wait for the file processing to complete
+        await fileUploadPromise;
+
+        res.json({
+          message: autofill
+            ? "Resume uploaded and sent for parsing"
+            : "Resume uploaded successfully",
+        });
+      } else {
+        // No file found in request
+        res.status(400).json({ message: "No file uploaded or file processing failed." });
+      }
+    } catch (error) {
+      log("Upload failed in close handler:", error);
+      if (!res.headersSent) {
+        res.status(500).json({ error: "Upload failed during processing." });
+      }
     }
   });
 
