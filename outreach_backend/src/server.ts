@@ -8,11 +8,9 @@ import mailGeneratorController from "./controller/generatorController.js";
 import { clerkMiddleware } from "@clerk/express"
 import { ensureProfileCreated } from "./middlleware/ensureProfileCreated.js";
 import { getEmailTypes } from "./controller/emailController.js";
-import { getAccessToken } from "./controller/auth/google.js";
 import threadRoutes from "./routes/threadRoutes.js";
 import messageRoutes from "./routes/messageRoutes.js";
 import statsRoutes from "./routes/statsRoutes.js";
-import { sendMailUsingClerkToken } from "./controller/mailController.js";
 import mailRoutes from "./routes/mailRoutes.js";
 import { testController } from "./controller/test.js";
 import { requireAuth } from "./middlleware/requireAuth.js";

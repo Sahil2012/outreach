@@ -15,4 +15,5 @@ export interface ProfileDTO {
   firstName: string | null;
   lastName: string | null;
   resumeUrl?: string | null;
+  credits?: number;
 }
