@@ -5,7 +5,7 @@ import { enqueueResumeJob } from "../utils/enqueResume.js";
 import { log } from "console";
 import { getAuth } from "@clerk/express";
 import { toProfileDTO } from "../mapper/profileDTOMapper.js";
-import { getUserProfile, updateProfile as updateProfileService } from "../service/profileService.js";
+import { getUserProfile, updateCredits, updateProfile as updateProfileService } from "../service/profileService.js";
 import { ProfileDTO } from "../dto/reponse/ProfileDTO.js";
 import prisma from "../apis/prismaClient.js";
 
@@ -133,3 +133,18 @@ export const uploadResume = async (req: Request, res: Response) => {
 
   req.pipe(bb);
 };
+
+// PATCH /profile/rechargeCredits (Temporary Endpoint)
+export const rechargeCredits = async (req: Request, res: Response) => {
+  const { userId: clerkUserId } = getAuth(req);
+
+  const amount = req.body.amount;
+
+  try {
+    await updateCredits(clerkUserId!, - amount * 20);
+    res.json({ message: "Credits recharged successfully" });
+  } catch (e) {
+    console.error("Error recharging credits:", e);
+    res.status(500).json({ error: "Failed to recharge credits" });
+  }
+}

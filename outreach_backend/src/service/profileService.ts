@@ -16,7 +16,6 @@ export const getUserProfile = async (userId: string) => {
   });
 };
 
-
 export const updateProfile = async (authUserId: string, profile: ProfileDTO) => {
   const {
     summary,

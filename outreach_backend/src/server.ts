@@ -38,7 +38,7 @@ app.post("/generateMail", requireAuth, ensureProfileCreated, mailGeneratorContro
 app.post("/sendEmail", emailSender);
 app.post("/sendEmailV2", requireAuth, ensureProfileCreated, emailSender);
 app.use("/auth", authRoutes);
-app.use("/profile", profileRouter);
+app.use("/profile", requireAuth, profileRouter);
 app.get("/email/type", getEmailTypes);
 app.use("/thread", requireAuth, threadRoutes);
 app.use("/message", requireAuth, messageRoutes);
