@@ -116,3 +116,28 @@ export async function populateMessagesForThread(tx: Prisma.TransactionClient, th
     })),
   });
 }
+
+export async function deleteMessage(tx: Prisma.TransactionClient, messageId: number, authUserId: string) {
+  console.log("Deleting message ID:", messageId, "for user:", authUserId);
+
+  const message = await tx.message.findFirst({
+    where: {
+      id: messageId,
+      authUserId: authUserId,
+    },
+  });
+
+  if (!message) {
+    return null;
+  }
+
+  if (message.state !== MessageState.DRAFT) {
+    throw new Error("Message cannot be deleted unless it is in DRAFT state");
+  }
+
+  return tx.message.delete({
+    where: {
+      id: messageId,
+    },
+  });
+}
