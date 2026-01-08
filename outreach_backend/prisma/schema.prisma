@@ -20,6 +20,7 @@ model UserProfileData {
   phoneNo       BigInt?                   @unique
   resumeUrl     String?
   status        ProfileCompletenessStatus @default(INCOMPLETE)
+  credits       Int                       @default(5)
   experiences   Experience[]
   messages      Message[]
   profileSkills ProfilSkillMapping[]

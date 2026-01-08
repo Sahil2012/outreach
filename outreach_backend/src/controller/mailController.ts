@@ -17,6 +17,7 @@ import { generateAndSaveEmail } from "../service/emailService.js";
 import { DraftEmailDTO } from "../dto/reponse/DraftEmailDTO.js";
 import EmailType from "../types/EmailType.js";
 import { updateState } from "../service/messageService.js";
+import { getUserCredits, updateCredits } from "../service/profileService.js";
 
 export const generateNewMailTrail = async (
   req: Request<
@@ -40,8 +41,16 @@ export const generateNewMailTrail = async (
 
     req.body.userId = clerkUserId;
 
+    const profile = await getUserCredits(clerkUserId);
+    if (!profile || profile.credits <= 0) {
+      log("User has no credits");
+      return res.status(429).json({ error: "No credits available" });
+    }
+    log("User has credits:", profile.credits);
+
     const result = await generateAndSaveEmail(clerkUserId, req.body);
 
+    await updateCredits(clerkUserId, 1);
     res.status(200).json(result);
   } catch (error: any) {
     console.error("Error generating email:", error);

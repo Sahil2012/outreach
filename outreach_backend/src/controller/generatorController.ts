@@ -6,6 +6,7 @@ import { getAuth } from "@clerk/express";
 import { saveDraftEmail } from "../service/emailService.js";
 import { DraftEmailDTO } from "../dto/reponse/DraftEmailDTO.js";
 import EmailType from "../types/EmailType.js";
+import { getUserCredits, updateCredits } from "../service/profileService.js";
 
 const mailGeneratorController = async (
   req: Request<{}, {}, GenerateMailRequest>,
@@ -19,6 +20,13 @@ const mailGeneratorController = async (
       log("Unauthorized access attempt to mail generator");
       return res.status(401).json({ error: "Unauthorized" });
     }
+
+    const profile = await getUserCredits(clerkUserId);
+    if (!profile || profile.credits <= 0) {
+      log("User has no credits");
+      return res.status(400).json({ error: "No credits available" });
+    }
+    log("User has credits:", profile.credits);
     log("Generating email for user:", clerkUserId);
     req.body.userId = clerkUserId;
 
@@ -41,6 +49,7 @@ const mailGeneratorController = async (
     );
     log("Draft email saved successfully for userId:", req.body.userId);
 
+    await updateCredits(clerkUserId, 1);
     res.status(200).json({ threadId: draftThread.id, messageId: draftThread.messageId, ...emailContent });
   } catch (error) {
     console.error("Error generating email:", error);

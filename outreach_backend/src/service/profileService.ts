@@ -17,8 +17,6 @@ export const getUserProfile = async (userId: string) => {
 };
 
 
-
-
 export const updateProfile = async (authUserId: string, profile: ProfileDTO) => {
   const {
     summary,
@@ -75,5 +73,23 @@ export const updateProfile = async (authUserId: string, profile: ProfileDTO) => 
       },
       experiences: true,
     },
+  });
+};
+
+export const updateCredits = async (authUserId: string, deltaCredits: number) => {
+  return await prisma.userProfileData.update({
+    where: { authUserId },
+    data: {
+      credits: {
+        decrement: deltaCredits,
+      },
+    },
+  });
+};
+
+export const getUserCredits = async (authUserId: string) => {
+  return await prisma.userProfileData.findUnique({
+    where: { authUserId },
+    select: { credits: true },
   });
 };
