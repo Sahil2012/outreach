@@ -122,6 +122,7 @@ export interface ThreadMetaItem {
   type: EmailType;
   Message: {
     state: "DRAFT" | "SENT";
+    id: number;
   }[];
   _count: ThreadMessageCount;
 }
@@ -131,13 +132,4 @@ export interface ThreadMetaResponse {
   total: number;
   page: number;
   pageSize: number;
-}
-
-export interface Draft {
-  id: string;
-  employeeName: string;
-  employeeEmail: string;
-  companyName: string;
-  status: 'Generated' | 'Generating' | 'Sent';
-  createdAt: string;
 }

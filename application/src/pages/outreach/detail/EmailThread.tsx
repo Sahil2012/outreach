@@ -34,9 +34,18 @@ export const EmailThread: React.FC<EmailThreadProps> = ({ thread }) => {
         return (
           <div
             key={email.messageId}
-            className={cn("bg-muted/30 p-8 rounded-3xl border", {
-              "cursor-pointer hover:bg-muted/70": isDraft,
-            })}
+            className={cn(
+              "p-8 rounded-3xl border transition-colors",
+              {
+                // User message styling
+                "bg-primary/5 border-primary/20": isMe,
+                // Recipient message styling
+                "bg-muted/30 border-muted-foreground/20": !isMe,
+                // Draft hover state
+                "cursor-pointer hover:bg-primary/10": isDraft && isMe,
+                "cursor-pointer hover:bg-muted/70": isDraft && !isMe,
+              }
+            )}
             onClick={() => {
               if (isDraft) {
                 navigate(`/outreach/preview/${email.messageId}`);
@@ -48,9 +57,10 @@ export const EmailThread: React.FC<EmailThreadProps> = ({ thread }) => {
                 <div className="flex items-center gap-4">
                   <Avatar className="h-10 w-10 border border-background">
                     <AvatarFallback
-                      className={
-                        isMe ? "bg-primary text-primary-foreground" : ""
-                      }
+                      className={cn({
+                        "bg-primary text-primary-foreground": isMe,
+                        "bg-muted text-muted-foreground": !isMe,
+                      })}
                     >
                       {avatarFallback}
                     </AvatarFallback>

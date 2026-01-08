@@ -7,6 +7,7 @@ import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { RecipientForm } from "./RecipientForm";
 import { Loader } from "@/components/ui/loader";
+import { templates } from "../template-selection";
 
 const RecipientInfoPage: React.FC = () => {
   const { generateEmail, isGenerating } = useOutreach();
@@ -54,7 +55,8 @@ const RecipientInfoPage: React.FC = () => {
       newErrors.employeeEmail = "Employee email is required";
     if (!recipientInfo.companyName)
       newErrors.companyName = "Company name is required";
-    if (!recipientInfo.jobDescription)
+    // Job description is only required for non-COLD templates
+    if (templateId !== "COLD" && !recipientInfo.jobDescription)
       newErrors.jobDescription = "Job description is required";
 
     setErrors(newErrors);
@@ -83,12 +85,23 @@ const RecipientInfoPage: React.FC = () => {
         type: templateId,
       });
 
-      navigate(`/outreach/preview/${res.messageId}`, { state: res });
+      navigate(`/outreach/preview/${res?.messageId}`, { state: res });
     } catch (error) {
       console.error("Error generating mail:", error);
       toast.error("Failed to generate email. Please try again.");
     }
   };
+
+  useEffect(() => {
+    if (!templateId || !templates.some((t) => t.id === templateId)) {
+      toast.error("Template ID is missing. Please start over.");
+      navigate("/outreach/templates");
+    }
+  }, [navigate, templateId]);
+
+  if (!templateId || !templates.some((t) => t.id === templateId)) {
+    return null;
+  }
 
   return (
     <div className="animate-fadeIn space-y-6">
@@ -96,6 +109,7 @@ const RecipientInfoPage: React.FC = () => {
         info={recipientInfo}
         onChange={setRecipientInfo}
         errors={errors}
+        templateId={templateId}
       />
 
       <div className="flex justify-between pt-4">

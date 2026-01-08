@@ -11,12 +11,14 @@ interface RecipientFormProps {
   info: RecipientInfo;
   onChange: (info: RecipientInfo) => void;
   errors?: Partial<Record<keyof RecipientInfo, string>>;
+  templateId?: string | null;
 }
 
 export const RecipientForm: React.FC<RecipientFormProps> = ({
   info,
   onChange,
   errors,
+  templateId,
 }) => {
   const [currentJobId, setCurrentJobId] = useState("");
 
@@ -102,68 +104,72 @@ export const RecipientForm: React.FC<RecipientFormProps> = ({
         </div>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="job-ids">Job IDs</Label>
-        <div className="flex gap-2">
-          <Input
-            id="job-ids"
-            value={currentJobId}
-            onChange={(e) => setCurrentJobId(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Type a job ID and press Enter..."
-            className="flex-1"
-          />
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={handleAddJobId}
-            disabled={!currentJobId.trim()}
-          >
-            <Plus className="w-4 h-4 mr-1" />
-            Add
-          </Button>
-        </div>
-        <div className="flex flex-wrap gap-2 mt-2">
-          {info.jobIds.map((jobId, index) => (
-            <Badge
-              key={index}
+      {templateId !== "COLD" && (
+        <div className="space-y-2">
+          <Label htmlFor="job-ids">Job IDs</Label>
+          <div className="flex gap-2">
+            <Input
+              id="job-ids"
+              value={currentJobId}
+              onChange={(e) => setCurrentJobId(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Type a job ID and press Enter..."
+              className="flex-1"
+            />
+            <Button
+              type="button"
               variant="secondary"
-              className="px-3 py-1 text-sm font-medium flex items-center gap-1"
+              onClick={handleAddJobId}
+              disabled={!currentJobId.trim()}
             >
-              {jobId}
-              <button
-                type="button"
-                onClick={() => handleRemoveJobId(jobId)}
-                className="ml-1 hover:text-destructive focus:outline-none"
+              <Plus className="w-4 h-4 mr-1" />
+              Add
+            </Button>
+          </div>
+          <div className="flex flex-wrap gap-2 mt-2">
+            {info.jobIds.map((jobId, index) => (
+              <Badge
+                key={index}
+                variant="secondary"
+                className="px-3 py-1 text-sm font-medium flex items-center gap-1"
               >
-                <X className="w-3 h-3" />
-              </button>
-            </Badge>
-          ))}
-          {info.jobIds.length === 0 && (
-            <p className="text-sm text-muted-foreground pl-2">
-              No job IDs added yet.
-            </p>
+                {jobId}
+                <button
+                  type="button"
+                  onClick={() => handleRemoveJobId(jobId)}
+                  className="ml-1 hover:text-destructive focus:outline-none"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </Badge>
+            ))}
+            {info.jobIds.length === 0 && (
+              <p className="text-sm text-muted-foreground pl-2">
+                No job IDs added yet.
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {templateId !== "COLD" && (
+        <div className="space-y-2">
+          <Label htmlFor="job-description">Job Description</Label>
+          <Textarea
+            id="job-description"
+            placeholder="Paste the job description here..."
+            rows={6}
+            value={info.jobDescription || ""}
+            onChange={(e) => handleChange("jobDescription", e.target.value)}
+            className={`resize-none ${
+              errors?.jobDescription ? "border-destructive" : ""
+            }`}
+          />
+          {errors?.jobDescription && (
+            <p className="text-xs text-destructive">{errors.jobDescription}</p>
           )}
         </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="job-description">Job Description</Label>
-        <Textarea
-          id="job-description"
-          placeholder="Paste the job description here..."
-          rows={6}
-          value={info.jobDescription || ""}
-          onChange={(e) => handleChange("jobDescription", e.target.value)}
-          className={`resize-none ${
-            errors?.jobDescription ? "border-destructive" : ""
-          }`}
-        />
-        {errors?.jobDescription && (
-          <p className="text-xs text-destructive">{errors.jobDescription}</p>
-        )}
-      </div>
+      )}
     </div>
   );
 };

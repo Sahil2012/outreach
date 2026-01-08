@@ -2,6 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Mail, MessageCircle, Clock, UserX } from "lucide-react";
 import { OutreachStats } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface StatsCardsProps {
   stats?: OutreachStats;
@@ -43,27 +44,32 @@ export const StatsCards = ({ stats, isLoading }: StatsCardsProps) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       {data.map((item) => (
-        <Card key={item.label}>
-          <CardContent className="p-6 flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">
-                {item.label}
-              </p>
-              {isLoading ? (
-                <Skeleton className="mt-2 h-6 w-20" />
-              ) : (
-                <p className={`text-3xl font-bold mt-2 ${item.color}`}>
-                  {item.value}
-                </p>
-              )}
-            </div>
-            <div
-              className={`w-12 h-12 rounded-full ${item.bgColor} flex items-center justify-center`}
-            >
-              <item.icon className={`w-6 h-6 ${item.color}`} />
-            </div>
-          </CardContent>
-        </Card>
+        <Tooltip key={item.label}>
+          <TooltipTrigger>
+            <Card key={item.label}>
+              <CardContent className="p-6 flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    {item.label}
+                  </p>
+                  {isLoading ? (
+                    <Skeleton className="mt-2 h-6 w-20" />
+                  ) : (
+                    <p className={`text-3xl font-bold mt-2 ${item.color}`}>
+                      {item.value}
+                    </p>
+                  )}
+                </div>
+                <div
+                  className={`w-12 h-12 rounded-full ${item.bgColor} flex items-center justify-center`}
+                >
+                  <item.icon className={`w-6 h-6 ${item.color}`} />
+                </div>
+              </CardContent>
+            </Card>
+          </TooltipTrigger>
+          <TooltipContent>yo</TooltipContent>
+        </Tooltip>  
       ))}
     </div>
   );

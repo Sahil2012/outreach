@@ -3,11 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Loader } from "@/components/ui/loader";
 import { ArrowLeft, Send, UserX, MessageCircle } from "lucide-react";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { OutreachDetail } from "@/hooks/useOutreachDetail";
 import { formatDistanceToNow } from "date-fns";
 import { Separator } from "@/components/ui/separator";
 import ThreadStatusBadge from "@/components/function/ThreadStatusBadge";
+import AutomatedToggle from "@/components/function/AutomatedToggle";
 
 interface DetailsAndActionsProps {
   data: OutreachDetail;
@@ -27,7 +27,6 @@ export const DetailsAndActions: React.FC<DetailsAndActionsProps> = ({
   onSendFollowUp,
   onMarkAbsconded,
   onMarkReferred,
-  onToggleAutomated,
   onBack,
 }) => {
   return (
@@ -112,12 +111,7 @@ export const DetailsAndActions: React.FC<DetailsAndActionsProps> = ({
                 AI handles follow-ups
               </p>
             </div>
-            <Switch
-              id="automated"
-              checked={data.isAutomated}
-              onCheckedChange={onToggleAutomated}
-              disabled={isUpdating}
-            />
+            <AutomatedToggle threadId={data.threadId} />
           </div>
 
           <div className="space-y-4">
