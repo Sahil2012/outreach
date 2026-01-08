@@ -12,7 +12,7 @@ import EmailType from "../types/EmailType.js";
 
 export async function saveDraftEmail(
   authUserId: string,
-  req: Extract<GenerateMailRequest, { type: EmailType.COLD | EmailType.TAILORED | EmailType.FOLLOWUP }>,
+  req: GenerateMailRequest,
   body: string,
   subject: string
 ) {
@@ -24,7 +24,7 @@ export async function saveDraftEmail(
 
   return prisma.$transaction(async (tx) => {
     const employee = await upsertEmployee(tx, req);
-    const threadContext = await resolveThread(tx, authUserId, employee.id, req);
+    const threadContext = await resolveThread(tx, authUserId, employee?.id || 0, req);
 
     const message = await saveMessage(
       tx,
@@ -45,9 +45,9 @@ async function resolveThread(
   tx: Prisma.TransactionClient,
   authUserId: string,
   employeeId: number,
-  req: Extract<GenerateMailRequest, { type: EmailType.COLD | EmailType.TAILORED | EmailType.FOLLOWUP }>
+  req: GenerateMailRequest
 ) {
-  if (req.type === EmailType.FOLLOWUP) {
+  if (req.type === EmailType.FOLLOWUP || req.type === EmailType.THANKYOU) {
     return { id: req.threadId };
   }
 
@@ -62,7 +62,7 @@ async function resolveThread(
 
 export async function generateAndSaveEmail(
   authUserId: string,
-  req: Extract<GenerateMailRequest, { type: EmailType.COLD | EmailType.TAILORED | EmailType.FOLLOWUP }>
+  req: GenerateMailRequest
 ) {
   const strategy = emailStrategy[req.type.toLowerCase()];
   if (!strategy) {

@@ -9,13 +9,9 @@ import {
 } from "../service/threadService.js";
 import prisma from "../apis/prismaClient.js";
 import { MessageState, ThreadStatus } from "@prisma/client";
-import {
-  GenerateMailRequest,
-  TailoredEmailRequest,
-} from "../types/GenerateMailRequest.js";
+import { GenerateMailRequest } from "../types/GenerateMailRequest.js";
 import { generateAndSaveEmail } from "../service/emailService.js";
 import { DraftEmailDTO } from "../dto/reponse/DraftEmailDTO.js";
-import EmailType from "../types/EmailType.js";
 import { updateState } from "../service/messageService.js";
 import { getUserCredits, updateCredits } from "../service/profileService.js";
 
@@ -23,10 +19,7 @@ export const generateNewMailTrail = async (
   req: Request<
     {},
     {},
-    Extract<
-      GenerateMailRequest,
-      { type: EmailType.COLD | EmailType.TAILORED | EmailType.FOLLOWUP }
-    >
+    GenerateMailRequest
   >,
   res: Response<DraftEmailDTO | { error: string }>,
   next: NextFunction

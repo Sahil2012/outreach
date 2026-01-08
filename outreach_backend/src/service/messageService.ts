@@ -8,7 +8,7 @@ export async function saveMessage(
   subject: string,
   body: string
 ) {
-  log("Saving message for thread:", threadId, "by user:", authUserId);
+  log("Saving message for thread:", threadId, " by user:", authUserId);
   return tx.message.create({
     data: {
       threadId,
