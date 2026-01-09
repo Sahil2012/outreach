@@ -119,9 +119,7 @@ export const OutreachTable = ({
                             <span className="font-medium text-sm">
                               {thread.Employee.name}
                             </span>
-                            <MessageStateBadge
-                              state={thread.Message[0].state}
-                            />
+                      <MessageStateBadge state={thread.Message?.[0]?.state} />
                           </div>
                           <span className="text-xs text-muted-foreground">
                             {thread.Employee.email}
