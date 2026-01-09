@@ -300,27 +300,29 @@ function buildEmployeeFilter(
   companyName?: string[],
   employeeName?: string[]
 ): Prisma.EmployeeWhereInput | undefined {
-  let employeeFilter: Prisma.EmployeeWhereInput | undefined = undefined;
+  let employeeFilter: Prisma.EmployeeWhereInput[] = [];
 
   if (companyName && companyName.length > 0) {
     log("Filtering by company names:", companyName);
-    employeeFilter = {
-      ...(employeeFilter ?? {}),
+    employeeFilter.push({
       company: { in: companyName, mode: "insensitive" },
-    };
+    });
   }
 
   if (employeeName && employeeName.length > 0) {
     log("Filtering by employee names:", employeeName);
-    employeeFilter = {
-      ...(employeeFilter ?? {}),
+    employeeFilter.push({
       OR: employeeName.map((n) => ({
         name: { contains: n, mode: "insensitive" },
       })),
-    };
+    });
   }
 
-  return employeeFilter;
+  if (employeeFilter.length == 0) return undefined;
+
+  return {
+    OR: employeeFilter,
+  };
 }
 
 function calculateNextState(currentStatus: ThreadStatus): ThreadStatus {
