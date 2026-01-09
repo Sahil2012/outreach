@@ -1,3 +1,4 @@
+import { MessageState } from "@prisma/client";
 
 export interface MessageDTO {
     subject?: string | null;
@@ -6,4 +7,5 @@ export interface MessageDTO {
     messageId?: number | null;
     dateSent?: string | null;
     fromUser?: boolean | null;
+    state?: MessageState | null;
 }
