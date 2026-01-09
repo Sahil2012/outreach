@@ -120,8 +120,10 @@ export const updateThread = async (req: Request, res: Response) => {
   try {
     const { status, isAutomated } = req.body;
     let updatedThread;
+    const { userId: clerkUserId } = getAuth(req);
+
     if (status) {
-      updatedThread = await updateStatus(prisma, parseInt(req.params.threadId), status);
+      updatedThread = await updateStatus(prisma, parseInt(req.params.threadId), status, clerkUserId!);
     }
     if (isAutomated !== undefined && isAutomated !== null) {
       updatedThread = await updateAutomated(prisma, parseInt(req.params.threadId), isAutomated);

@@ -225,10 +225,10 @@ export async function linkToExternalThread(tx: Prisma.TransactionClient, threadI
   })
 }
 
-export async function updateStatus(tx: Prisma.TransactionClient, threadId: number, status: ThreadStatus) {
+export async function updateStatus(tx: Prisma.TransactionClient, threadId: number, status: ThreadStatus, authUserId: string) {
   log("Updating status of thread", threadId, "to", status);
   return await tx.thread.update({
-    where: { id: threadId },
+    where: { id: threadId, authUserId },
     data: {
       status,
       Message: {
@@ -245,7 +245,7 @@ export async function updateStatus(tx: Prisma.TransactionClient, threadId: numbe
   });
 }
 
-export async function upgradeThreadStatus(tx: Prisma.TransactionClient, threadId: number) {
+export async function upgradeThreadStatus(tx: Prisma.TransactionClient, threadId: number, userId: string) {
   log("Upgrading status of thread", threadId);
 
   const currentStatus = await tx.thread.findUnique({ where: { id: threadId } });
@@ -258,13 +258,13 @@ export async function upgradeThreadStatus(tx: Prisma.TransactionClient, threadId
     throw new Error("Thread not found or already in unupgradable state");
   }
 
-  const lastMessage = await getLastMessage(tx, threadId);
+  const lastMessage = await getLastMessage(tx, threadId, userId);
 
   if (lastMessage?.state === MessageState.SENT) {
     return;
   }
 
-  return await updateStatus(tx, threadId, calculateNextState(currentStatus.status));
+  return await updateStatus(tx, threadId, calculateNextState(currentStatus.status), userId);
 }
 
 export async function updateAutomated(tx: Prisma.TransactionClient, threadId: number, automated: boolean) {

@@ -81,8 +81,8 @@ export const sendMailUsingClerkToken = async (req: Request, res: Response) => {
     );
     console.log("Linked thread to external thread");
 
-    await upgradeThreadStatus(prisma, req.body.threadId);
-    await updateState(prisma, req.body.messageId, MessageState.SENT);
+    await upgradeThreadStatus(prisma, req.body.threadId, userId);
+    await updateState(prisma, req.body.messageId, MessageState.SENT, userId);
     console.log("Updated thread and message status to SENT");
     return res.json({ success: true });
   } catch (error: any) {

@@ -20,10 +20,11 @@ export async function saveMessage(
   });
 }
 
-export async function getLastMessage(tx: Prisma.TransactionClient, threadId: number) {
+export async function getLastMessage(tx: Prisma.TransactionClient, threadId: number, authUserId: string) {
   return tx.message.findFirst({
     where: {
       threadId,
+      authUserId: authUserId,
     },
     orderBy: {
       date: "desc",
@@ -61,13 +62,15 @@ export async function updateMessage(
 export async function updateState(
   tx: Prisma.TransactionClient,
   messageId: number,
-  state: MessageState
+  state: MessageState,
+  authUserId: string
 ) {
   console.log("Updating message ID:", messageId, "to state:", state);
 
   return tx.message.update({
     where: {
       id: messageId,
+      authUserId: authUserId,
     },
     data: {
       state,
