@@ -8,12 +8,12 @@ import {
   upgradeThreadStatus,
 } from "../service/threadService.js";
 import prisma from "../apis/prismaClient.js";
-import { MessageState, ThreadStatus } from "@prisma/client";
 import { GenerateMailRequest } from "../types/GenerateMailRequest.js";
 import { generateAndSaveEmail } from "../service/emailService.js";
 import { DraftEmailDTO } from "../dto/reponse/DraftEmailDTO.js";
-import { updateState } from "../service/messageService.js";
 import { getUserCredits, updateCredits } from "../service/profileService.js";
+import { updateState } from "../service/messageService.js";
+import { MessageState } from "@prisma/client";
 
 export const generateNewMailTrail = async (
   req: Request<
@@ -81,7 +81,7 @@ export const sendMailUsingClerkToken = async (req: Request, res: Response) => {
         response.id
       );
       console.log("Linked thread to external thread");
-
+      await updateState(tx, mailData.messageId, MessageState.SENT, userId);
       await upgradeThreadStatus(tx, req.body.threadId, userId);
       console.log("Upgraded the thread status and updated message status to SENT");
     });
