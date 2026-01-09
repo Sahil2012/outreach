@@ -20,6 +20,18 @@ export async function saveMessage(
   });
 }
 
+export async function getLastMessage(tx: Prisma.TransactionClient, threadId: number) {
+  return tx.message.findFirst({
+    where: {
+      threadId,
+    },
+    orderBy: {
+      date: "desc",
+    },
+    take: 1
+  });
+}
+
 export async function updateMessage(
   tx: Prisma.TransactionClient,
   messageId: number,
