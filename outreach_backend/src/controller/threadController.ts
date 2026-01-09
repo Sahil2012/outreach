@@ -7,7 +7,7 @@ import { toThreadPreviewDTO } from "../mapper/threadPreviewMapper.js";
 import { log } from "console";
 import { toThreadDTO } from "../mapper/threadDTOMapper.js";
 import { ThreadMetaResponse } from "../dto/reponse/ThreadMetaResponse.js";
-import { ThreadStatus } from "@prisma/client";
+import { MessageState, ThreadStatus } from "@prisma/client";
 
 function parseCSVQuery(q?: string | string[] | undefined): string[] | undefined {
   if (!q) return undefined;
@@ -74,16 +74,16 @@ export const getThreadMeta = async (req: Request, res: Response<ThreadMetaRespon
     const MAX_PAGE_SIZE = 100;
     const pageSize = Math.min(MAX_PAGE_SIZE, Math.max(1, isNaN(pageSizeRequested) ? 10 : pageSizeRequested));
 
-    const companyName = parseCSVQuery(req.query.companyName as any); // string[] | undefined
-    const employeeName = parseCSVQuery(req.query.employeeName as any);
-    const statusRaw = parseCSVQuery(req.query.status as any);
+    const search = parseCSVQuery(req.query.search as any); // string[] | undefined
+    const threadStatus = parseCSVQuery(req.query.status as any);
+    const messageState = parseCSVQuery(req.query.messageState as any)?.map((s) => (s.toUpperCase() as MessageState));
 
     let status: ThreadStatus[] | undefined = undefined;
 
-    if (statusRaw && statusRaw.length > 0) {
+    if (threadStatus && threadStatus.length > 0) {
       status = [];
 
-      for (const s of statusRaw) {
+      for (const s of threadStatus) {
         const upper = s.toUpperCase();
         if (upper === "FOLLOW_UP") {
           status.push(ThreadStatus.FIRST_FOLLOW_UP, ThreadStatus.SECOND_FOLLOW_UP, ThreadStatus.THIRD_FOLLOW_UP);
@@ -106,9 +106,9 @@ export const getThreadMeta = async (req: Request, res: Response<ThreadMetaRespon
       clerkUserId!,
       page,
       pageSize,
-      companyName,
-      employeeName,
-      status as any
+      search,
+      messageState,
+      status
     );
 
     return res.status(200).json(meta);

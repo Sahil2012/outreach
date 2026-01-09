@@ -161,8 +161,8 @@ export async function extractThreadMeta(
   authUserId: string,
   page: number,
   pageSize: number,
-  companyName?: string[],
-  employeeName?: string[],
+  search?: string[],
+  messageState?: MessageState[],
   status?: ThreadStatus[]
 ) {
   const skip = (page - 1) * pageSize;
@@ -172,7 +172,7 @@ export async function extractThreadMeta(
     authUserId,
   };
 
-  const employeeFilter: Prisma.EmployeeWhereInput | undefined = buildEmployeeFilter(companyName, employeeName);
+  const employeeFilter: Prisma.EmployeeWhereInput | undefined = buildEmployeeFilter(search, search);
 
   if (employeeFilter) {
     log("Applying employee filters:", employeeFilter);
@@ -182,6 +182,11 @@ export async function extractThreadMeta(
   if (status && status.length > 0) {
     log("Filtering by statuses:", status);
     whereClause.status = { in: status };
+  }
+
+  if (messageState && messageState.length > 0) {
+    log("Filtering by message states:", messageState);
+    whereClause.Message = { some: { state: { in: messageState } } };
   }
 
   log("Fetching threads for user:", authUserId);
@@ -254,17 +259,7 @@ export async function updateStatus(tx: Prisma.TransactionClient, threadId: numbe
   return await tx.thread.update({
     where: { id: threadId, authUserId },
     data: {
-      status,
-      Message: {
-        updateMany: {
-          where: {
-            threadId: threadId
-          },
-          data: {
-            state: MessageState.SENT
-          }
-        }
-      }
+      status
     }
   });
 }

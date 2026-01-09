@@ -12,7 +12,6 @@ import threadRoutes from "./routes/threadRoutes.js";
 import messageRoutes from "./routes/messageRoutes.js";
 import statsRoutes from "./routes/statsRoutes.js";
 import mailRoutes from "./routes/mailRoutes.js";
-import { testController } from "./controller/test.js";
 import { requireAuth } from "./middlleware/requireAuth.js";
 configDotenv();
 
@@ -42,7 +41,6 @@ app.use("/thread", requireAuth, threadRoutes);
 app.use("/message", requireAuth, messageRoutes);
 app.use("/stats", requireAuth, statsRoutes);
 app.use("/mail", requireAuth, mailRoutes);
-app.post("/test", requireAuth, testController);
 
 // Global error handler
 const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
