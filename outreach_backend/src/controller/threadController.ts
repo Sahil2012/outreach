@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { extractThreadMeta, getThreadById, getThreadPreview, updateAutomated, updateStatus } from "../service/threadService.js";
+import { extractThreadMeta, getThreadById, getThreadPreview, updateAutomated, updateStatus, syncThreadWithGoogle } from "../service/threadService.js";
 import prisma from "../apis/prismaClient.js";
 import { getAuth } from "@clerk/express";
 import { ThreadPreviewDTO } from "../dto/reponse/ThreadPreviewDTO.js";
@@ -50,11 +50,13 @@ export const getThread = async (req: Request, res: Response) => {
   const { userId: clerkUserId } = getAuth(req);
 
   try {
+    const sync = await syncThreadWithGoogle(prisma, clerkUserId!, threadId);
     const thread = await getThreadById(prisma, clerkUserId!, threadId);
+
     if (!thread) {
       return res.status(404).json({ error: "Thread not found" });
     }
-    return res.status(200).json(toThreadDTO(thread));
+    return res.status(200).json({ ...toThreadDTO(thread), sync });
   } catch (error) {
     console.error("Error fetching thread:", error);
     return res.status(500).json({ error: "Internal server error" });
@@ -120,8 +122,10 @@ export const updateThread = async (req: Request, res: Response) => {
   try {
     const { status, isAutomated } = req.body;
     let updatedThread;
+    const { userId: clerkUserId } = getAuth(req);
+
     if (status) {
-      updatedThread = await updateStatus(prisma, parseInt(req.params.threadId), status);
+      updatedThread = await updateStatus(prisma, parseInt(req.params.threadId), status, clerkUserId!);
     }
     if (isAutomated !== undefined && isAutomated !== null) {
       updatedThread = await updateAutomated(prisma, parseInt(req.params.threadId), isAutomated);

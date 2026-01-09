@@ -1,4 +1,3 @@
-import { clerkClient } from "@clerk/express";
 import { google } from "googleapis";
 import { log } from "console";
 import nodemailer from "nodemailer";
@@ -8,18 +7,28 @@ import { getThreadById } from "./threadService.js";
 
 import { storageService } from "./storageService.js";
 import { Readable } from "stream";
+import { getGoogleAccessToken } from "../apis/googleOAuth2Client.js";
 
 export class MailService {
   async sendMail(userId: string, mailData: SendMailDto) {
     const { threadId, messageId, attachResume } = mailData;
 
     // 1. Fetch & Validate Data
-    const thread = await getThreadById(prisma, userId, threadId);
+    const thread = await prisma.thread.findUnique({
+      where: { id: threadId, authUserId: userId },
+      include: {
+        Message: {
+          where: { id: messageId },
+        },
+        Employee: true,
+      },
+    });
+
     if (!thread || !thread.Employee) {
       throw new Error("Thread not found or Employee details missing");
     }
 
-    const message = thread.Message.find((message) => message.id === messageId);
+    const message = thread.Message[0];
     if (!message) {
       throw new Error("Message not found");
     }
@@ -37,15 +46,17 @@ export class MailService {
       await this.getResumeStream(userId, attachments);
     }
 
-    // 3. Authenticate & Setup
-    const accessToken = await this.getGoogleAccessToken(userId);
-    const auth = new google.auth.OAuth2();
-    auth.setCredentials({ access_token: accessToken });
+    // 3. Get User Info (From address)
+    const fromEmail = (await prisma.userProfileData.findUnique({
+      where: { authUserId: userId },
+      select: { email: true },
+    }))?.email;
 
-    // 4. Get User Info (From address)
-    const fromEmail = await this.getGmailAddress(auth);
+    if (!fromEmail) {
+      throw new Error("User email not found");
+    }
 
-    // 5. Construct MIME Stream using Nodemailer
+    // 4. Construct MIME Stream using Nodemailer
     const mimeStream = await this.getMimeStream({
       from: fromEmail,
       to,
@@ -54,8 +65,8 @@ export class MailService {
       attachments
     });
 
-    // 6. Send via Gmail Media Upload
-    return this.sendViaGmail(auth, mimeStream);
+    // 5. Send via Gmail Media Upload
+    return this.sendViaGmail(userId, mimeStream);
   }
 
   private async getResumeStream(userId: string, attachments: any[]) {
@@ -91,29 +102,12 @@ export class MailService {
     return info.message as Readable;
   }
 
-  private async getGoogleAccessToken(userId: string): Promise<string> {
-    const tokens = await clerkClient.users.getUserOauthAccessToken(userId, "google");
-    log("Tokens from Clerk:", JSON.stringify(tokens));
+  private async sendViaGmail(userId: string, mimeStream: Readable): Promise<any> {
 
-    if (!tokens || tokens.data.length === 0) {
-      throw new Error("User not connected with Google");
-    }
-    return tokens.data[0].token;
-  }
+    const accessToken = await getGoogleAccessToken(userId);
+    const auth = new google.auth.OAuth2();
+    auth.setCredentials({ access_token: accessToken });
 
-  private async getGmailAddress(auth: any): Promise<string> {
-    const oauth2Client = google.oauth2({ version: "v2", auth });
-    const { data: userInfo } = await oauth2Client.userinfo.get();
-    const email = userInfo.email;
-    log("User Email:", email);
-
-    if (!email) {
-      throw new Error("Could not retrieve user email from Google");
-    }
-    return email;
-  }
-
-  private async sendViaGmail(auth: any, mimeStream: Readable): Promise<any> {
     const gmail = google.gmail({ version: "v1", auth });
     try {
       const response = await gmail.users.messages.send({

@@ -3,7 +3,15 @@ import { mapEmailTypeToDB } from "../mapper/emailTypeMapper.js";
 import { log } from "console";
 import EmailType from "../types/EmailType.js";
 import externalMailService from "./externalMailService.js";
-import { populateMessagesForThread } from "./messageService.js";
+import { getLastMessage, populateMessagesForThread } from "./messageService.js";
+
+const status = [
+  ThreadStatus.PENDING,
+  ThreadStatus.SENT,
+  ThreadStatus.FIRST_FOLLOW_UP,
+  ThreadStatus.SECOND_FOLLOW_UP,
+  ThreadStatus.THIRD_FOLLOW_UP
+]
 
 export async function createThread(
   tx: Prisma.TransactionClient,
@@ -53,12 +61,6 @@ export async function getThreadById(
   authUserId: string,
   threadId: number
 ) {
-  log("Fetching thread messages for thread ID from external source:", threadId);
-  const messages = await externalMailService.getThreadMessage(threadId, authUserId);
-
-  log("Populating messages for thread ID:", threadId);
-  await populateMessagesForThread(tx, threadId, authUserId, messages);
-
   log("Fetching full thread for thread ID:", threadId);
   return tx.thread.findUnique({
     where: { id: threadId, AND: { authUserId: authUserId } },
@@ -76,6 +78,36 @@ export async function getThreadById(
       },
     },
   });
+}
+
+export async function syncThreadWithGoogle(
+  tx: Prisma.TransactionClient,
+  authUserId: string,
+  threadId: number
+) {
+  log("Fetching thread messages for thread ID from external source:", threadId);
+  let messages: any[] = [];
+  let status = true;
+  let code = "";
+
+  try {
+    messages = await externalMailService.getThreadMessage(threadId, authUserId);
+  } catch (err: any) {
+    console.error("Error fetching thread messages from external source:", err.message);
+    status = false;
+    code = err.message;
+  }
+
+  log("Populating messages for thread ID:", threadId);
+  try {
+    await populateMessagesForThread(tx, threadId, authUserId, messages);
+  } catch (err: any) {
+    console.error("Error populating messages for thread ID:", threadId, err.message);
+    status = false;
+    code = err.message;
+  }
+
+  return status ? { status } : { status, code };
 }
 
 export async function getStats(
@@ -217,10 +249,10 @@ export async function linkToExternalThread(tx: Prisma.TransactionClient, threadI
   })
 }
 
-export async function updateStatus(tx: Prisma.TransactionClient, threadId: number, status: ThreadStatus) {
+export async function updateStatus(tx: Prisma.TransactionClient, threadId: number, status: ThreadStatus, authUserId: string) {
   log("Updating status of thread", threadId, "to", status);
-  return tx.thread.update({
-    where: { id: threadId },
+  return await tx.thread.update({
+    where: { id: threadId, authUserId },
     data: {
       status,
       Message: {
@@ -235,6 +267,28 @@ export async function updateStatus(tx: Prisma.TransactionClient, threadId: numbe
       }
     }
   });
+}
+
+export async function upgradeThreadStatus(tx: Prisma.TransactionClient, threadId: number, userId: string) {
+  log("Upgrading status of thread", threadId);
+
+  const currentStatus = await tx.thread.findUnique({ where: { id: threadId } });
+  if (!currentStatus
+    || currentStatus.status === ThreadStatus.CLOSED
+    || currentStatus.status === ThreadStatus.REFFERED
+    || currentStatus.status === ThreadStatus.DELETED
+    || currentStatus.status === ThreadStatus.THIRD_FOLLOW_UP
+  ) {
+    throw new Error("Thread not found or already in unupgradable state");
+  }
+
+  const lastMessage = await getLastMessage(tx, threadId, userId);
+
+  if (lastMessage?.state === MessageState.SENT) {
+    return;
+  }
+
+  return await updateStatus(tx, threadId, calculateNextState(currentStatus.status), userId);
 }
 
 export async function updateAutomated(tx: Prisma.TransactionClient, threadId: number, automated: boolean) {
@@ -272,4 +326,12 @@ function buildEmployeeFilter(
   }
 
   return employeeFilter;
+}
+
+function calculateNextState(currentStatus: ThreadStatus): ThreadStatus {
+  const index = status.findIndex((s) => s === currentStatus);
+  if (index === -1) {
+    return currentStatus;
+  }
+  return status[index + 1];
 }
