@@ -61,12 +61,6 @@ export async function getThreadById(
   authUserId: string,
   threadId: number
 ) {
-  log("Fetching thread messages for thread ID from external source:", threadId);
-  const messages = await externalMailService.getThreadMessage(threadId, authUserId);
-
-  log("Populating messages for thread ID:", threadId);
-  await populateMessagesForThread(tx, threadId, authUserId, messages);
-
   log("Fetching full thread for thread ID:", threadId);
   return tx.thread.findUnique({
     where: { id: threadId, AND: { authUserId: authUserId } },
@@ -84,6 +78,36 @@ export async function getThreadById(
       },
     },
   });
+}
+
+export async function syncThreadWithGoogle(
+  tx: Prisma.TransactionClient,
+  authUserId: string,
+  threadId: number
+) {
+  log("Fetching thread messages for thread ID from external source:", threadId);
+  let messages: any[] = [];
+  let status = true;
+  let code = "";
+
+  try {
+    messages = await externalMailService.getThreadMessage(threadId, authUserId);
+  } catch (err: any) {
+    console.error("Error fetching thread messages from external source:", err.message);
+    status = false;
+    code = err.message;
+  }
+
+  log("Populating messages for thread ID:", threadId);
+  try {
+    await populateMessagesForThread(tx, threadId, authUserId, messages);
+  } catch (err: any) {
+    console.error("Error populating messages for thread ID:", threadId, err.message);
+    status = false;
+    code = err.message;
+  }
+
+  return status ? { status } : { status, code };
 }
 
 export async function getStats(

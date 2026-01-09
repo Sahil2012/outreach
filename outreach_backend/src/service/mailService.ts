@@ -8,6 +8,7 @@ import { getThreadById } from "./threadService.js";
 
 import { storageService } from "./storageService.js";
 import { Readable } from "stream";
+import { getGoogleAccessToken } from "../apis/googleOAuth2Client.js";
 
 export class MailService {
   async sendMail(userId: string, mailData: SendMailDto) {
@@ -38,7 +39,7 @@ export class MailService {
     }
 
     // 3. Authenticate & Setup
-    const accessToken = await this.getGoogleAccessToken(userId);
+    const accessToken = await getGoogleAccessToken(userId);
     const auth = new google.auth.OAuth2();
     auth.setCredentials({ access_token: accessToken });
 
@@ -89,16 +90,6 @@ export class MailService {
 
     const info = await transporter.sendMail(mailOptions);
     return info.message as Readable;
-  }
-
-  private async getGoogleAccessToken(userId: string): Promise<string> {
-    const tokens = await clerkClient.users.getUserOauthAccessToken(userId, "google");
-    log("Tokens from Clerk:", JSON.stringify(tokens));
-
-    if (!tokens || tokens.data.length === 0) {
-      throw new Error("User not connected with Google");
-    }
-    return tokens.data[0].token;
   }
 
   private async getGmailAddress(auth: any): Promise<string> {

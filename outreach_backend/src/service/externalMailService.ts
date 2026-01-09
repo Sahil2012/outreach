@@ -1,10 +1,7 @@
 import { google } from "googleapis";
 import prisma from "../apis/prismaClient.js";
-import { clerkClient } from "@clerk/express";
-import { log } from "console";
-import { parseBase64DataUrl } from "@langchain/core/messages";
-import { populateMessagesForThread } from "./messageService.js";
 import * as cheerio from "cheerio";
+import { getGoogleAccessToken } from "../apis/googleOAuth2Client.js";
 
 
 export class ExternalMailService {
@@ -15,15 +12,20 @@ export class ExternalMailService {
 
     async getThreadMessage(threadId: number, clerkUserId: string) {
 
-        const accessToken = await this.getGoogleAccessToken(clerkUserId);
+        let accessToken;
 
+        try {
+            accessToken = await getGoogleAccessToken(clerkUserId);
+        } catch (error: any) {
+            throw new Error("refresh_token_not_found");
+        }
         const thread = await prisma.thread.findUnique({
             where: {
                 id: threadId
             }
         });
         if (!thread) {
-            throw new Error("Thread not found");
+            throw new Error("thread_not_found");
         }
 
         const auth = new google.auth.OAuth2();
@@ -33,20 +35,26 @@ export class ExternalMailService {
             version: "v1",
             auth: auth
         });
-        const t = await gmail.users.threads.get({
-            userId: "me",
-            id: thread?.externalThreadId || ''
-        });
 
-        if (!t.data.messages) return [];
+        try {
+            const t = await gmail.users.threads.get({
+                userId: "me",
+                id: thread?.externalThreadId || ''
+            });
 
-        const result = t.data.messages.map((message) => {
-            const a = this.extractMessageBody(message.payload);
-            const fromUser = message.labelIds?.includes("SENT") || false;
-            return { id: message.id, threadId: message.threadId, body: a, fromUser };
-        });
+            if (!t.data.messages) return [];
 
-        return result;
+            const result = t.data.messages.map((message) => {
+                const a = this.extractMessageBody(message.payload);
+                const fromUser = message.labelIds?.includes("SENT") || false;
+                return { id: message.id, threadId: message.threadId, body: a, fromUser };
+            });
+
+            return result;
+        } catch (error: any) {
+            throw new Error(error.code == 403 ? "insufficient_permissions" : "thread_not_found_in_external_source");
+        }
+
     }
 
     private extractMessageBody(payload: any): string {
@@ -93,15 +101,6 @@ export class ExternalMailService {
         return "";
     }
 
-    private async getGoogleAccessToken(userId: string): Promise<string> {
-        const tokens = await clerkClient.users.getUserOauthAccessToken(userId, "google");
-        log("Tokens from Clerk:", JSON.stringify(tokens));
-
-        if (!tokens || tokens.data.length === 0) {
-            throw new Error("User not connected with Google");
-        }
-        return tokens.data[0].token;
-    }
 }
 
 export default new ExternalMailService();
