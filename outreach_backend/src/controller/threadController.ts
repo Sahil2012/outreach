@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { extractThreadMeta, getThreadById, getThreadPreview, updateAutomated, updateStatus, syncThreadWithGoogle } from "../service/threadService.js";
+import { UpdateThreadRequest } from "../schema/threadSchema.js";
 import prisma from "../apis/prismaClient.js";
 import { getAuth } from "@clerk/express";
 import { ThreadPreviewDTO } from "../dto/reponse/ThreadPreviewDTO.js";
@@ -118,7 +119,7 @@ export const getThreadMeta = async (req: Request, res: Response<ThreadMetaRespon
   }
 };
 
-export const updateThread = async (req: Request, res: Response) => {
+export const updateThread = async (req: Request<{ threadId: string }, {}, UpdateThreadRequest>, res: Response) => {
   try {
     const { status, isAutomated } = req.body;
     let updatedThread;

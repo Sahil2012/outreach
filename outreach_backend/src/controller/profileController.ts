@@ -6,6 +6,7 @@ import { log } from "console";
 import { getAuth } from "@clerk/express";
 import { toProfileDTO } from "../mapper/profileDTOMapper.js";
 import { getUserProfile, updateCredits, updateProfile as updateProfileService } from "../service/profileService.js";
+import { RechargeCreditsRequest, UpdateProfileRequest } from "../schema/profileSchema.js";
 import { ProfileDTO } from "../dto/reponse/ProfileDTO.js";
 import prisma from "../apis/prismaClient.js";
 
@@ -47,7 +48,7 @@ export const getProfile = async (req: Request, res: Response<ProfileDTO | any>) 
 };
 
 // PATCH /profile
-export const updateProfile = async (req: Request<{}, {}, ProfileDTO>, res: Response) => {
+export const updateProfile = async (req: Request<{}, {}, UpdateProfileRequest>, res: Response) => {
   try {
     const { userId: clerkUserId } = getAuth(req);
     if (!clerkUserId) {
@@ -55,7 +56,7 @@ export const updateProfile = async (req: Request<{}, {}, ProfileDTO>, res: Respo
       return res.status(401).json({ error: "Unauthorized" });
     }
 
-    const updatedProfile = await updateProfileService(clerkUserId, req.body);
+    const updatedProfile = await updateProfileService(clerkUserId, req.body as any);
     res.json({ message: "Profile updated", data: updatedProfile });
   } catch (err: any) {
     console.error("[updateProfile] Internal Error:", err);
@@ -135,7 +136,7 @@ export const uploadResume = async (req: Request, res: Response) => {
 };
 
 // PATCH /profile/rechargeCredits (Temporary Endpoint)
-export const rechargeCredits = async (req: Request, res: Response) => {
+export const rechargeCredits = async (req: Request<{}, {}, RechargeCreditsRequest>, res: Response) => {
   const { userId: clerkUserId } = getAuth(req);
 
   const amount = req.body.amount;

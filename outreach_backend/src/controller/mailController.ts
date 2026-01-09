@@ -1,25 +1,26 @@
 import { NextFunction, Request, Response } from "express";
 import { log } from "console";
 import { getAuth } from "@clerk/express";
-import { SendMailDto, SendMailSchema } from "../dto/request/SendMailDto.js";
 import { mailService } from "../service/mailService.js";
 import {
   linkToExternalThread,
   upgradeThreadStatus,
 } from "../service/threadService.js";
 import prisma from "../apis/prismaClient.js";
-import { GenerateMailRequest } from "../types/GenerateMailRequest.js";
 import { generateAndSaveEmail } from "../service/emailService.js";
 import { DraftEmailDTO } from "../dto/reponse/DraftEmailDTO.js";
+import { GenerateMailBody, SendMailDto } from "../schema/mailSchema.js";
 import { getUserCredits, updateCredits } from "../service/profileService.js";
 import { updateState } from "../service/messageService.js";
 import { MessageState } from "@prisma/client";
+
+import { GenerateMailRequest } from "../types/GenerateMailRequest.js";
 
 export const generateNewMailTrail = async (
   req: Request<
     {},
     {},
-    GenerateMailRequest
+    GenerateMailBody
   >,
   res: Response<DraftEmailDTO | { error: string }>,
   next: NextFunction
@@ -32,7 +33,7 @@ export const generateNewMailTrail = async (
       return res.status(401).json({ error: "Unauthorized" });
     }
 
-    req.body.userId = clerkUserId;
+    const requestWithUser = { ...req.body, userId: clerkUserId };
 
     const profile = await getUserCredits(clerkUserId);
     if (!profile || profile.credits <= 0) {
@@ -41,7 +42,7 @@ export const generateNewMailTrail = async (
     }
     log("User has credits:", profile.credits);
 
-    const result = await generateAndSaveEmail(clerkUserId, req.body);
+    const result = await generateAndSaveEmail(clerkUserId, requestWithUser as unknown as GenerateMailRequest);
 
     await updateCredits(clerkUserId, 1);
     res.status(200).json(result);
@@ -53,22 +54,11 @@ export const generateNewMailTrail = async (
   }
 };
 
-export const sendMailUsingClerkToken = async (req: Request, res: Response) => {
+export const sendMailUsingClerkToken = async (req: Request<{}, {}, SendMailDto>, res: Response) => {
   try {
     const { userId } = getAuth(req);
     if (!userId) return res.status(401).json({ error: "Unauthenticated" });
-
-    // Validate Input
-    const validationResult = SendMailSchema.safeParse(req.body);
-
-    if (!validationResult.success) {
-      return res.status(400).json({
-        error: "Validation Failed",
-        details: validationResult.error.errors,
-      });
-    }
-
-    const mailData: SendMailDto = validationResult.data;
+    const mailData: SendMailDto = req.body;
 
     const response = await mailService.sendMail(userId, mailData);
     console.log("Response from Gmail API:", response);

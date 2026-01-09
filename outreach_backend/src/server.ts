@@ -1,12 +1,9 @@
 import { configDotenv } from "dotenv";
 import express, { ErrorRequestHandler } from "express";
-import emailSender from "./controller/emailSender.js";
 import cors from "cors";
 import profileRouter from "./routes/profileRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
-import mailGeneratorController from "./controller/generatorController.js";
 import { clerkMiddleware } from "@clerk/express"
-import { ensureProfileCreated } from "./middlleware/ensureProfileCreated.js";
 import { getEmailTypes } from "./controller/emailController.js";
 import threadRoutes from "./routes/threadRoutes.js";
 import messageRoutes from "./routes/messageRoutes.js";
@@ -31,9 +28,6 @@ app.use(
 app.use(express.json());
 
 // Routers
-app.post("/generateMail", requireAuth, ensureProfileCreated, mailGeneratorController);
-app.post("/sendEmail", emailSender);
-app.post("/sendEmailV2", requireAuth, ensureProfileCreated, emailSender);
 app.use("/auth", authRoutes);
 app.use("/profile", requireAuth, profileRouter);
 app.get("/email/type", getEmailTypes);

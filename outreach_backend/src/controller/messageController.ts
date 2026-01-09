@@ -3,13 +3,13 @@ import { Request, Response, NextFunction } from "express";
 import { getMessageById, updateMessage, deleteMessage as removeMessage, updateState } from "../service/messageService.js";
 import { getAuth } from "@clerk/express";
 import prisma from "../apis/prismaClient.js";
-import { MessageRequestDTO } from "../dto/request/MessageRequestDTO.js";
+import { EditMessageRequest, MarkMessageAsSentRequest } from "../schema/messageSchema.js";
 import { MessageDTO } from "../dto/reponse/MessageDTO.js";
 import { toMessageDTO } from "../mapper/messageDTOMapper.js";
 import { MessageState } from "@prisma/client";
 import { upgradeThreadStatus } from "../service/threadService.js";
 
-export const editMessage = async (req: Request<any, {}, MessageRequestDTO>, res: Response) => {
+export const editMessage = async (req: Request<any, {}, EditMessageRequest>, res: Response) => {
 
     const messageId = parseInt(req.params.messageId, 10);
 
@@ -77,7 +77,7 @@ export const deleteMessage = async (req: Request, res: Response) => {
     }
 }
 
-export const markMessageAsSent = async (req: Request, res: Response) => {
+export const markMessageAsSent = async (req: Request<{ messageId: string }, {}, MarkMessageAsSentRequest>, res: Response) => {
     const messageId = parseInt(req.params.messageId, 10);
     const threadId = req.body.threadId;
 
