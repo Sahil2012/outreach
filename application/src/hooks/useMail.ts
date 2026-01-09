@@ -4,7 +4,7 @@ export const useMail = () => {
   const api = useApi();
 
   const generateMail = async (data: object) => {
-    const response = await api.post('/generateMail', data);
+    const response = await api.post('/mail/generate', data);
     return response.data;
   };
 

@@ -1,8 +1,8 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { GeneratedEmail, MessageResponse } from '@/lib/types';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useCallback, useState } from 'react';
 import { useApi } from './useApi';
 import { useMail } from './useMail';
-import { GeneratedEmail, GenerateEmailResponse, MessageResponse } from '@/lib/types';
-import { useState, useCallback } from 'react';
 
 export interface GenerateEmailPayload {
   contactName: string;
@@ -25,7 +25,7 @@ export interface UseOutreachOptions {
 
 export const useOutreach = (messageId?: string | number, options?: UseOutreachOptions) => {
   const api = useApi();
-  const { sendMail: sendMailApi } = useMail();
+  const { sendMail: sendMailApi, generateMail: generateMailApi } = useMail();
   const queryClient = useQueryClient();
   const [isPolling, setIsPolling] = useState(false);
 
@@ -68,8 +68,8 @@ export const useOutreach = (messageId?: string | number, options?: UseOutreachOp
   // Mutations
   const generateEmailMutation = useMutation({
     mutationFn: async (payload: GenerateEmailPayload) => {
-      const response = await api.post<GenerateEmailResponse>('/generateMail', payload);
-      return response.data;
+      const response = await generateMailApi(payload);
+      return response;
     }
   });
 

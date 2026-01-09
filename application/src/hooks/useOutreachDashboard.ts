@@ -30,6 +30,7 @@ export const useOutreachDashboard = (page: number, pageSize: number, search?: st
       return response.data;
     },
     placeholderData: (previousData) => previousData, // Keep previous data while fetching new
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   // Mutations
@@ -39,6 +40,15 @@ export const useOutreachDashboard = (page: number, pageSize: number, search?: st
     },
     onSuccess: () => {
       // Invalidate both list and stats as status change affects both
+      queryClient.invalidateQueries({ queryKey: ['outreach'] });
+    }
+  });
+
+  const deleteDraftMutation = useMutation({
+    mutationFn: async (messageId: number) => {
+      await api.delete(`/message/${messageId}`);
+    },
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['outreach'] });
     }
   });
@@ -68,9 +78,13 @@ export const useOutreachDashboard = (page: number, pageSize: number, search?: st
     data: listQuery.data,
     isLoadingList: listQuery.isLoading,
     listError: listQuery.error,
+    refreshData: listQuery.refetch,
 
     updateOutreach: updateOutreachMutation.mutateAsync,
     isUpdating: updateOutreachMutation.isPending,
+
+    deleteDraft: deleteDraftMutation.mutateAsync,
+    isDeletingDraft: deleteDraftMutation.isPending,
 
     sendFollowUp: sendFollowUpMutation.mutateAsync,
     isSendingFollowUp: sendFollowUpMutation.isPending,

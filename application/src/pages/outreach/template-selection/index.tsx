@@ -6,7 +6,7 @@ import { Template } from "@/lib/types";
 import { toast } from "sonner";
 import { TemplateCard } from "./TemplateCard";
 
-const templates = [
+export const templates = [
   {
     id: "COLD",
     name: "Cold",
@@ -16,16 +16,6 @@ const templates = [
     id: "TAILORED",
     name: "Tailored",
     content: "Personalized outreach based on your profile and their background",
-  },
-  {
-    id: "FOLLOW_UP",
-    name: "Follow Up",
-    content: "Check in with contacts who haven't responded yet",
-  },
-  {
-    id: "THANK_YOU",
-    name: "Thank You",
-    content: "Express gratitude for referrals or positive responses",
   },
 ];
 

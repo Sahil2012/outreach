@@ -20,7 +20,7 @@ export interface Employee {
 }
 
 export interface OutreachDetail extends ThreadMetaItem {
-  threadId: string;
+  threadId: number;
   status: ThreadStatus;
   isAutomated: boolean;
   externalThreadId: string;
@@ -31,7 +31,7 @@ export interface OutreachDetail extends ThreadMetaItem {
   messages: Message[];
 }
 
-export const useOutreachDetail = (id?: string) => {
+export const useOutreachDetail = (id?: number) => {
   const api = useApi();
   const queryClient = useQueryClient();
 

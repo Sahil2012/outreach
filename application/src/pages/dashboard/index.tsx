@@ -17,7 +17,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Plus, Search, Filter, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, Search, Filter, ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
 import { useOutreachDashboard } from "@/hooks/useOutreachDashboard";
 import { useDebounce } from "@/hooks/useDebounce";
 import { StatsCards } from "./StatsCards";
@@ -40,11 +40,8 @@ export default function DashboardPage() {
     isLoadingList,
     updateOutreach,
     sendFollowUp,
+    refreshData,
   } = useOutreachDashboard(page, pageSize, debouncedSearch, statusFilter);
-
-  const handleToggleAutomated = (id: number, current: boolean) => {
-    updateOutreach({ id, payload: { automated: !current } });
-  };
 
   const handleAction = async (
     id: number,
@@ -94,6 +91,14 @@ export default function DashboardPage() {
               </CardDescription>
             </div>
             <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                size="icon"
+                className="rounded-full relative"
+                onClick={() => refreshData()}
+              >
+                <RefreshCw className="h-4 w-4" />
+              </Button>
               <div className="relative">
                 <Search className="absolute left-4 top-3.5 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -146,7 +151,6 @@ export default function DashboardPage() {
           <OutreachTable
             threads={listData?.threads || []}
             isLoading={isLoadingList}
-            onToggleAutomated={handleToggleAutomated}
             onAction={handleAction}
           />
 
