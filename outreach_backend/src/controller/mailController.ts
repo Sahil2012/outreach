@@ -73,17 +73,19 @@ export const sendMailUsingClerkToken = async (req: Request, res: Response) => {
     const response = await mailService.sendMail(userId, mailData);
     console.log("Response from Gmail API:", response);
 
-    await linkToExternalThread(
-      prisma,
-      req.body.threadId,
-      response.threadId,
-      response.id
-    );
-    console.log("Linked thread to external thread");
+    await prisma.$transaction(async (tx) => {
+      await linkToExternalThread(
+        tx,
+        req.body.threadId,
+        response.threadId,
+        response.id
+      );
+      console.log("Linked thread to external thread");
 
-    await upgradeThreadStatus(prisma, req.body.threadId, userId);
-    await updateState(prisma, req.body.messageId, MessageState.SENT, userId);
-    console.log("Updated thread and message status to SENT");
+      await upgradeThreadStatus(tx, req.body.threadId, userId);
+      console.log("Upgraded the thread status and updated message status to SENT");
+    });
+
     return res.json({ success: true });
   } catch (error: any) {
     if (
