@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from './useApi';
 import { Profile } from '@/lib/types';
 import { useUser } from '@clerk/clerk-react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 export const useProfile = () => {
   const { user } = useUser();
@@ -11,16 +11,26 @@ export const useProfile = () => {
 
   const [isPollingProfile, setIsPollingProfile] = useState(false);
   const [intervalId, setIntervalId] = useState<NodeJS.Timeout>();
+  const pollCount = useRef(0);
+
+  const MAX_POLL_COUNT = 1;
+  const POLL_INTERVAL = 10 * 1000;
 
   const pollProfile = () => {
     setIsPollingProfile(true);
     const intervalId = setInterval(async () => {
+      if (pollCount.current >= MAX_POLL_COUNT) {
+        stopPollingProfile();
+        return;
+      }
       await profileQuery.refetch();
-    }, 2000);
+      pollCount.current++;
+    }, POLL_INTERVAL);
     setIntervalId(intervalId);
   };
 
   const stopPollingProfile = () => {
+    pollCount.current = 0;
     setIsPollingProfile(false);
     clearInterval(intervalId);
   };

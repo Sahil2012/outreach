@@ -39,13 +39,11 @@ const DraftsPage = () => {
     deleteDraft,
     isDeletingDraft: isDeleting,
     refreshData,
-  } = useOutreachDashboard(page, pageSize, debouncedSearch, statusFilter);
+  } = useOutreachDashboard(page, pageSize, debouncedSearch, statusFilter, "DRAFT");
 
-  const drafts = listData?.threads?.filter(
-    (thread) => thread?.Message?.[0]?.state === "DRAFT"
-  );
+  const drafts = listData?.threads || [];
 
-  const totalPages = Math.ceil(drafts?.length || 0 / pageSize) || 1;
+  const totalPages = Math.ceil((listData?.total || 0) / pageSize) || 1;
 
   const handleDelete = async (id: number) => {
     try {

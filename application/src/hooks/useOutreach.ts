@@ -12,6 +12,7 @@ export interface GenerateEmailPayload {
   jobDescription: string;
   jobs: string[];
   type: string;
+  threadId?: number;
 }
 export interface UpdateEmailPayload {
   subject?: string;
@@ -30,15 +31,6 @@ export const useOutreach = (messageId?: string | number, options?: UseOutreachOp
   const [isPolling, setIsPolling] = useState(false);
 
   // Queries
-  // const templatesQuery = useQuery({
-  //   queryKey: ['outreach', 'templates'],
-  //   queryFn: async (): Promise<Template[]> => {
-  //     const response = await api.get<Template[]>('/email/type');
-  //     return response.data;
-  //   },
-  //   staleTime: 1000 * 60 * 5, // 5 minutes
-  // });
-
   const draftQuery = useQuery({
     queryKey: ['outreach', 'message', messageId],
     queryFn: async (): Promise<GeneratedEmail> => {
@@ -70,7 +62,7 @@ export const useOutreach = (messageId?: string | number, options?: UseOutreachOp
     mutationFn: async (payload: GenerateEmailPayload) => {
       const response = await generateMailApi(payload);
       return response;
-    }
+    },
   });
 
   const updateMessageMutation = useMutation({
@@ -104,9 +96,6 @@ export const useOutreach = (messageId?: string | number, options?: UseOutreachOp
       await sendMailApi({ threadId, messageId });
     },
     onSuccess: () => {
-      // Maybe update draft status locally
-      // Invalidating using a broader key since we don't have the specific ID easily if we wanted to
-      // But typically we probably want to invalidate 'outreach' queries or specific message
       queryClient.invalidateQueries({ queryKey: ['outreach'] });
     }
   });

@@ -11,23 +11,29 @@ import AutomatedToggle from "@/components/function/AutomatedToggle";
 
 interface DetailsAndActionsProps {
   data: OutreachDetail;
-  isSendingFollowUp: boolean;
+  isGeneratingFollowUp: boolean;
   isUpdating: boolean;
-  onSendFollowUp: () => void;
+  isGmailConnected: boolean;
+  isGmailAuthLoading: boolean;
+  onGenerateFollowUp: () => void;
   onMarkAbsconded: () => void;
   onMarkReferred: () => void;
   onToggleAutomated: (checked: boolean) => void;
   onBack: () => void;
+  onConnectGmail: () => void;
 }
 
 export const DetailsAndActions: React.FC<DetailsAndActionsProps> = ({
   data,
-  isSendingFollowUp,
+  isGeneratingFollowUp,
   isUpdating,
-  onSendFollowUp,
+  isGmailConnected,
+  isGmailAuthLoading,
+  onGenerateFollowUp,
   onMarkAbsconded,
   onMarkReferred,
   onBack,
+  onConnectGmail,
 }) => {
   return (
     <div className="space-y-8 lg:sticky lg:top-6 h-full flex flex-col pt-2">
@@ -111,7 +117,7 @@ export const DetailsAndActions: React.FC<DetailsAndActionsProps> = ({
                 AI handles follow-ups
               </p>
             </div>
-            <AutomatedToggle threadId={data.threadId} />
+            <AutomatedToggle data={data} threadId={data.threadId} />
           </div>
 
           <div className="space-y-4">
@@ -119,10 +125,10 @@ export const DetailsAndActions: React.FC<DetailsAndActionsProps> = ({
               <Button
                 size="lg"
                 className="w-full"
-                onClick={onSendFollowUp}
-                disabled={isSendingFollowUp || isUpdating}
+                onClick={onGenerateFollowUp}
+                disabled={isGeneratingFollowUp || isUpdating}
               >
-                {isSendingFollowUp ? (
+                {isGeneratingFollowUp ? (
                   <Loader className="mr-2 text-white" />
                 ) : (
                   <Send className="mr-2 w-4 h-4" />
@@ -151,6 +157,31 @@ export const DetailsAndActions: React.FC<DetailsAndActionsProps> = ({
               Mark as Absconded
             </Button>
           </div>
+
+          {!isGmailConnected && (
+            <div className="bg-yellow-50 dark:bg-yellow-900/10 p-5 rounded-3xl border border-yellow-100 dark:border-yellow-900/20">
+              <div className="flex flex-col items-start gap-4">
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-yellow-700 dark:text-yellow-300">
+                    Thread not synced
+                  </p>
+                  <p className="text-xs text-yellow-600 dark:text-yellow-400">
+                    Your account is not connected to Google. Please connect your
+                    Google account to sync your emails and track your outreach.
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  size="sm"
+                  onClick={onConnectGmail}
+                  disabled={isUpdating || isGmailAuthLoading}
+                >
+                  Connect to Google
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

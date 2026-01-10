@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from './useApi';
 import { ThreadMetaItem, ThreadStatus } from '@/lib/types';
+import { useMail } from './useMail';
 
 export interface Message {
   subject: string;
@@ -34,15 +35,20 @@ export interface OutreachDetail extends ThreadMetaItem {
 export const useOutreachDetail = (id?: number) => {
   const api = useApi();
   const queryClient = useQueryClient();
+  const { generateMail: generateMailApi } = useMail();
 
   const detailQuery = useQuery({
     queryKey: ['outreach', 'detail', id],
     queryFn: async (): Promise<OutreachDetail> => {
       if (!id) throw new Error('ID is required');
       const response = await api.get<OutreachDetail>(`/thread/${id}`);
-      return response.data;
+      return {
+        ...response.data,
+        automated: response.data.isAutomated
+      };
     },
     enabled: !!id,
+    staleTime: 5 * 60 * 1000 // 5 minutes
   });
 
   const updateStatusMutation = useMutation({
@@ -75,13 +81,14 @@ export const useOutreachDetail = (id?: number) => {
     },
   });
 
-  const sendFollowUpMutation = useMutation({
+  const generateFollowUpMutation = useMutation({
     mutationFn: async () => {
       if (!id) return;
-      return await api.post(`/outreach/send/${id}`, {});
+      return await generateMailApi({ threadId: id, type: "FOLLOWUP" });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['outreach', 'detail', id] });
+      queryClient.invalidateQueries({ queryKey: ['outreach', 'list'] });
       queryClient.invalidateQueries({ queryKey: ['outreach', 'stats'] });
     }
   });
@@ -97,7 +104,7 @@ export const useOutreachDetail = (id?: number) => {
     toggleAutomated: toggleAutomatedMutation.mutateAsync,
     isTogglingAutomated: toggleAutomatedMutation.isPending,
 
-    sendFollowUp: sendFollowUpMutation.mutateAsync,
-    isSendingFollowUp: sendFollowUpMutation.isPending,
+    generateFollowUp: generateFollowUpMutation.mutateAsync,
+    isGeneratingFollowUp: generateFollowUpMutation.isPending
   };
 };

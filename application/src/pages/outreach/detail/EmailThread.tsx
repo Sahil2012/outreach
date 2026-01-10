@@ -34,18 +34,15 @@ export const EmailThread: React.FC<EmailThreadProps> = ({ thread }) => {
         return (
           <div
             key={email.messageId}
-            className={cn(
-              "p-8 rounded-3xl border transition-colors",
-              {
-                // User message styling
-                "bg-primary/5 border-primary/20": isMe,
-                // Recipient message styling
-                "bg-muted/30 border-muted-foreground/20": !isMe,
-                // Draft hover state
-                "cursor-pointer hover:bg-primary/10": isDraft && isMe,
-                "cursor-pointer hover:bg-muted/70": isDraft && !isMe,
-              }
-            )}
+            className={cn("p-8 rounded-3xl border transition-colors", {
+              // User message styling
+              "bg-primary/5 border-primary/20": isMe,
+              // Recipient message styling
+              "bg-muted/30 border-muted-foreground/20": !isMe,
+              // Draft hover state
+              "cursor-pointer hover:bg-primary/10": isDraft && isMe,
+              "cursor-pointer hover:bg-muted/70": isDraft && !isMe,
+            })}
             onClick={() => {
               if (isDraft) {
                 navigate(`/outreach/preview/${email.messageId}`);
@@ -74,13 +71,13 @@ export const EmailThread: React.FC<EmailThreadProps> = ({ thread }) => {
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col items-end gap-2">
+                  <MessageStateBadge state={email.state} />
                   <div className="text-xs text-muted-foreground whitespace-nowrap mt-1">
                     {formatDistanceToNow(new Date(email.dateSent), {
                       addSuffix: true,
                     })}
                   </div>
-                  <MessageStateBadge state={email.state} />
                 </div>
               </div>
 

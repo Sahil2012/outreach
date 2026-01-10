@@ -17,12 +17,21 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Plus, Search, Filter, ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
+import {
+  Plus,
+  Search,
+  Filter,
+  ChevronLeft,
+  ChevronRight,
+  RefreshCw,
+} from "lucide-react";
 import { useOutreachDashboard } from "@/hooks/useOutreachDashboard";
 import { useDebounce } from "@/hooks/useDebounce";
 import { StatsCards } from "./StatsCards";
 import { OutreachTable } from "./OutreachTable";
 import { THREAD_STATUS_VALUES } from "@/lib/types";
+import { toast } from "sonner";
+import useStats from "@/hooks/useStats";
 
 export default function DashboardPage() {
   const navigate = useNavigate();
@@ -34,25 +43,35 @@ export default function DashboardPage() {
   const pageSize = 10;
 
   const {
-    stats,
-    isLoadingStats,
     data: listData,
     isLoadingList,
     updateOutreach,
-    sendFollowUp,
     refreshData,
+    generateFollowUp,
+    isGeneratingFollowUp,
   } = useOutreachDashboard(page, pageSize, debouncedSearch, statusFilter);
+
+  const { stats, isLoadingStats } = useStats();
 
   const handleAction = async (
     id: number,
     action: "follow-up" | "mark-absconded" | "mark-referred"
   ) => {
-    if (action === "follow-up") {
-      await sendFollowUp(id);
-    } else if (action === "mark-absconded") {
-      await updateOutreach({ id, payload: { status: "CLOSED" } });
-    } else if (action === "mark-referred") {
-      await updateOutreach({ id, payload: { status: "REFERRED" } });
+    try {
+      if (action === "follow-up") {
+        const res = await generateFollowUp(id);
+        navigate(`/outreach/preview/${res?.messageId}`, { state: res });
+        toast.success("Follow-up generated successfully.");
+      } else if (action === "mark-absconded") {
+        await updateOutreach({ id, payload: { status: "CLOSED" } });
+        toast.success("Thread marked as absconded successfully.");
+      } else if (action === "mark-referred") {
+        await updateOutreach({ id, payload: { status: "REFERRED" } });
+        toast.success("Thread marked as referred successfully.");
+      }
+    } catch (err: any) {
+      console.error(err);
+      toast.error("Unable to perform action. Please try again later.");
     }
   };
 
@@ -82,10 +101,10 @@ export default function DashboardPage() {
 
       {/* Main Content */}
       <Card className="rounded-3xl shadow-xl border-border/40 backdrop-blur-sm bg-background/95 overflow-hidden">
-        <CardHeader className="border-b border-border/40 px-6 py-6 !pb-5">
+        <CardHeader className="border-b border-border/40 px-6 py-6 !pb-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <CardTitle>Outreach List</CardTitle>
+              <CardTitle className="text-xl">Outreach List</CardTitle>
               <CardDescription>
                 Manage your ongoing conversations
               </CardDescription>
@@ -152,6 +171,11 @@ export default function DashboardPage() {
             threads={listData?.threads || []}
             isLoading={isLoadingList}
             onAction={handleAction}
+            isGeneratingFollowUp={isGeneratingFollowUp}
+            page={page}
+            pageSize={pageSize}
+            search={searchQuery}
+            status={statusFilter}
           />
 
           {/* Pagination */}
