@@ -280,6 +280,7 @@ export async function upgradeThreadStatus(tx: Prisma.TransactionClient, threadId
   const lastMessage = await getLastMessage(tx, threadId, userId);
 
   if (lastMessage?.state === MessageState.SENT) {
+    log("Thread", threadId, "is already in SENT state");
     return;
   }
 

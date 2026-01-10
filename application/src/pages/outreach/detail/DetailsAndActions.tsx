@@ -35,6 +35,8 @@ export const DetailsAndActions: React.FC<DetailsAndActionsProps> = ({
   onBack,
   onConnectGmail,
 }) => {
+  const isClosed = data.status === "CLOSED";
+  const canBeFollowedUp = data.status === "PENDING" || data.status === "SENT" || data.status === "FIRST_FOLLOW_UP" || data.status === "SECOND_FOLLOW_UP";
   return (
     <div className="space-y-8 lg:sticky lg:top-6 h-full flex flex-col pt-2">
       {/* Navigation */}
@@ -82,8 +84,8 @@ export const DetailsAndActions: React.FC<DetailsAndActionsProps> = ({
                 <span className="text-xs text-muted-foreground">
                   {data.createdAt
                     ? formatDistanceToNow(new Date(data.createdAt), {
-                        addSuffix: true,
-                      })
+                      addSuffix: true,
+                    })
                     : "N/A"}
                 </span>
               </div>
@@ -94,8 +96,8 @@ export const DetailsAndActions: React.FC<DetailsAndActionsProps> = ({
                 <span className="text-xs text-muted-foreground">
                   {data.lastUpdated
                     ? formatDistanceToNow(new Date(data.lastUpdated), {
-                        addSuffix: true,
-                      })
+                      addSuffix: true,
+                    })
                     : "N/A"}
                 </span>
               </div>
@@ -121,7 +123,7 @@ export const DetailsAndActions: React.FC<DetailsAndActionsProps> = ({
           </div>
 
           <div className="space-y-4">
-            {!data.isAutomated && (
+            {!data.isAutomated && canBeFollowedUp && (
               <Button
                 size="lg"
                 className="w-full"
@@ -136,7 +138,7 @@ export const DetailsAndActions: React.FC<DetailsAndActionsProps> = ({
                 Generate Follow-up
               </Button>
             )}
-            {!data.isAutomated && (
+            {!data.isAutomated && !isClosed && (
               <Button
                 variant="outline"
                 className="w-full"
@@ -147,15 +149,17 @@ export const DetailsAndActions: React.FC<DetailsAndActionsProps> = ({
                 Mark as Referred
               </Button>
             )}
-            <Button
-              variant="outline"
-              className="w-full hover:bg-red-50 hover:text-red-700 hover:border-red-200 transition-colors"
-              onClick={onMarkAbsconded}
-              disabled={isUpdating}
-            >
-              <UserX className="mr-2 w-4 h-4" />
-              Mark as Absconded
-            </Button>
+            {!isClosed && (
+              <Button
+                variant="outline"
+                className="w-full hover:bg-red-50 hover:text-red-700 hover:border-red-200 transition-colors"
+                onClick={onMarkAbsconded}
+                disabled={isUpdating}
+              >
+                <UserX className="mr-2 w-4 h-4" />
+                Mark as Absconded
+              </Button>
+            )}
           </div>
 
           {!isGmailConnected && (

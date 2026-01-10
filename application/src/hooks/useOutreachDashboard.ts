@@ -37,14 +37,8 @@ export const useOutreachDashboard = (
 
   // Mutations
   const updateOutreachMutation = useMutation({
-    mutationFn: async ({
-      id,
-      payload,
-    }: {
-      id: number;
-      payload: Partial<ThreadMetaItem>;
-    }) => {
-      await api.patch(`/outreach/${id}`, payload);
+    mutationFn: async ({ id, payload }: { id: number; payload: Partial<ThreadMetaItem> }) => {
+      await api.patch(`/thread/${id}`, payload);
     },
     onSuccess: () => {
       // Invalidate both list and stats as status change affects both

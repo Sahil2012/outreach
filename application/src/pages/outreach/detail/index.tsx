@@ -147,7 +147,7 @@ const OutreachDetailPage: React.FC = () => {
 
   const handleMarkAbsconded = async () => {
     try {
-      await updateStatus({ status: "Absconded" });
+      await updateStatus({ status: 'CLOSED' });
       toast.success("Marked as absconded.");
     } catch {
       toast.error("Failed to update status.");
@@ -156,7 +156,7 @@ const OutreachDetailPage: React.FC = () => {
 
   const handleMarkReferred = async () => {
     try {
-      await updateStatus({ status: "Referred" });
+      await updateStatus({ status: 'REFFERED' });
       toast.success("Marked as referred!");
     } catch {
       console.error("Failed to update status.");

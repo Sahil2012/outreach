@@ -90,7 +90,7 @@ export interface SendEmail {
   messageId: number;
 }
 
-export const THREAD_STATUS_VALUES = ['PENDING', 'FIRST_FOLLOWUP', 'SECOND_FOLLOWUP', 'THIRD_FOLLOWUP', 'CLOSED', 'SENT', 'REFERRED', 'DELETED'] as const;
+export const THREAD_STATUS_VALUES = ['PENDING', 'FIRST_FOLLOW_UP', 'SECOND_FOLLOW_UP', 'THIRD_FOLLOW_UP', 'CLOSED', 'SENT', 'REFFERED', 'DELETED'] as const;
 
 export type ThreadStatus = typeof THREAD_STATUS_VALUES[number];
 
