@@ -8,6 +8,7 @@ import { formatDistanceToNow } from "date-fns";
 import { Separator } from "@/components/ui/separator";
 import ThreadStatusBadge from "@/components/function/ThreadStatusBadge";
 import AutomatedToggle from "@/components/function/AutomatedToggle";
+import { CreditInfo } from "@/components/function/CreditInfo";
 
 interface DetailsAndActionsProps {
   data: OutreachDetail;
@@ -21,6 +22,7 @@ interface DetailsAndActionsProps {
   onToggleAutomated: (checked: boolean) => void;
   onBack: () => void;
   onConnectGmail: () => void;
+  insufficientPermissions: boolean;
 }
 
 export const DetailsAndActions: React.FC<DetailsAndActionsProps> = ({
@@ -34,6 +36,7 @@ export const DetailsAndActions: React.FC<DetailsAndActionsProps> = ({
   onMarkReferred,
   onBack,
   onConnectGmail,
+  insufficientPermissions,
 }) => {
   const isClosed = data.status === "CLOSED";
   const canBeFollowedUp = data.status === "PENDING" || data.status === "SENT" || data.status === "FIRST_FOLLOW_UP" || data.status === "SECOND_FOLLOW_UP";
@@ -122,6 +125,8 @@ export const DetailsAndActions: React.FC<DetailsAndActionsProps> = ({
             <AutomatedToggle data={data} threadId={data.threadId} />
           </div>
 
+          <CreditInfo className="mb-2" />
+
           <div className="space-y-4">
             {!data.isAutomated && canBeFollowedUp && (
               <Button
@@ -167,11 +172,14 @@ export const DetailsAndActions: React.FC<DetailsAndActionsProps> = ({
               <div className="flex flex-col items-start gap-4">
                 <div className="space-y-1">
                   <p className="text-sm font-medium text-yellow-700 dark:text-yellow-300">
-                    Thread not synced
+                    {insufficientPermissions
+                      ? "Insufficient permissions"
+                      : "Thread not synced"}
                   </p>
                   <p className="text-xs text-yellow-600 dark:text-yellow-400">
-                    Your account is not connected to Google. Please connect your
-                    Google account to sync your emails and track your outreach.
+                    {insufficientPermissions
+                      ? "Your account is connected to Google but the permissions to access the thread is not granted. Please connect your Google account with required permissions to sync your emails and track your outreach."
+                      : "Your account is not connected to Google. Please connect your Google account to sync your emails and track your outreach."}
                   </p>
                 </div>
                 <Button

@@ -136,16 +136,16 @@ export function ExperienceSection({
                   <h4 className="font-semibold">{exp.title}</h4>
                   <p className="text-sm text-muted-foreground">{exp.company}</p>
                   <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
-                    {exp.start_date && (
+                    {exp.startDate && (
                       <span>
-                        {format(new Date(exp.start_date), "MMM yyyy")}
+                        {format(new Date(exp.startDate), "MMM yyyy")}
                       </span>
                     )}
-                    {(exp.start_date || exp.end_date) && <span>-</span>}
-                    {exp.end_date ? (
-                      <span>{format(new Date(exp.end_date), "MMM yyyy")}</span>
+                    {(exp.startDate || exp.endDate) && <span>-</span>}
+                    {exp.endDate ? (
+                      <span>{format(new Date(exp.endDate), "MMM yyyy")}</span>
                     ) : (
-                      exp.start_date && <span>Present</span>
+                      exp.startDate && <span>Present</span>
                     )}
                   </div>
                   {exp.description && (

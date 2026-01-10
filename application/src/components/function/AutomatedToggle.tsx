@@ -6,8 +6,8 @@ import { ThreadMetaItem } from "@/lib/types";
 interface AutomatedToggleProps {
   threadId: number;
   data: ThreadMetaItem;
-  page: number;
-  pageSize: number;
+  page?: number;
+  pageSize?: number;
   search?: string;
   status?: string;
 }

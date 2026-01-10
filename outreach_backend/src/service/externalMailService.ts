@@ -6,100 +6,100 @@ import { getGoogleAccessToken } from "../apis/googleOAuth2Client.js";
 
 export class ExternalMailService {
 
-    constructor() {
+  constructor() {
 
+  }
+
+  async getThreadMessage(threadId: number, clerkUserId: string) {
+
+    let accessToken;
+
+    try {
+      accessToken = await getGoogleAccessToken(clerkUserId);
+    } catch (error: any) {
+      throw new Error("refresh_token_not_found");
+    }
+    const thread = await prisma.thread.findUnique({
+      where: {
+        id: threadId
+      }
+    });
+    if (!thread) {
+      throw new Error("thread_not_found");
     }
 
-    async getThreadMessage(threadId: number, clerkUserId: string) {
+    const auth = new google.auth.OAuth2();
+    auth.setCredentials({ access_token: accessToken });
 
-        let accessToken;
+    const gmail = google.gmail({
+      version: "v1",
+      auth: auth
+    });
 
-        try {
-            accessToken = await getGoogleAccessToken(clerkUserId);
-        } catch (error: any) {
-            throw new Error("refresh_token_not_found");
-        }
-        const thread = await prisma.thread.findUnique({
-            where: {
-                id: threadId
-            }
-        });
-        if (!thread) {
-            throw new Error("thread_not_found");
-        }
+    try {
+      const t = await gmail.users.threads.get({
+        userId: "me",
+        id: thread?.externalThreadId || ''
+      });
 
-        const auth = new google.auth.OAuth2();
-        auth.setCredentials({ access_token: accessToken });
+      if (!t.data.messages) return [];
 
-        const gmail = google.gmail({
-            version: "v1",
-            auth: auth
-        });
+      const result = t.data.messages.map((message) => {
+        const a = this.extractMessageBody(message.payload);
+        const fromUser = message.labelIds?.includes("SENT") || false;
+        return { id: message.id, threadId: message.threadId, body: a, fromUser };
+      });
 
-        try {
-            const t = await gmail.users.threads.get({
-                userId: "me",
-                id: thread?.externalThreadId || ''
-            });
-
-            if (!t.data.messages) return [];
-
-            const result = t.data.messages.map((message) => {
-                const a = this.extractMessageBody(message.payload);
-                const fromUser = message.labelIds?.includes("SENT") || false;
-                return { id: message.id, threadId: message.threadId, body: a, fromUser };
-            });
-
-            return result;
-        } catch (error: any) {
-            throw new Error(error.code == 403 ? "insufficient_permissions" : "thread_not_found_in_external_source");
-        }
-
+      return result;
+    } catch (error: any) {
+      throw new Error(error.code == 403 ? "insufficient_permissions" : "thread_not_found_in_external_source");
     }
 
-    private extractMessageBody(payload: any): string {
-        if (!payload) return "";
-        console.log("Extracting body from payload MIME type:", payload.mimeType);
+  }
 
-        let body = "";
+  private extractMessageBody(payload: any): string {
+    if (!payload) return "";
+    console.log("Extracting body from payload MIME type:", payload.mimeType);
 
-        // 1. If there is body data directly (usually text/plain or text/html non-multipart)
-        if (payload.body && payload.body.data) {
-            console.log("Found body data directly");
-            body = Buffer.from(payload.body.data, 'base64').toString('utf-8');
-        }
-        // 2. If there are parts (multipart)
-        else if (payload.parts && payload.parts.length > 0) {
-            console.log("Found parts:", payload.parts.length);
-            // Find HTML part
-            let part = payload.parts.find((p: any) => p.mimeType === 'text/html');
-            // Fallback to plain text
-            if (!part) {
-                part = payload.parts.find((p: any) => p.mimeType === 'text/plain');
-            }
+    let body = "";
 
-            // If still no part found (maybe nested multipart/related or mixed)
-            if (!part) {
-                // Try to find a part that has parts
-                part = payload.parts.find((p: any) => p.parts && p.parts.length > 0);
-            }
-
-            if (part) {
-                body = this.extractMessageBody(part);
-            }
-        }
-
-        // Logic to cleanup html
-        if (body) {
-            const $ = cheerio.load(body);
-            $(".gmail_quote").remove();
-            $("div.gmail_quote").remove();
-            $("blockquote.gmail_quote").remove();
-            return $.html();
-        }
-
-        return "";
+    // 1. If there is body data directly (usually text/plain or text/html non-multipart)
+    if (payload.body && payload.body.data) {
+      console.log("Found body data directly");
+      body = Buffer.from(payload.body.data, 'base64').toString('utf-8');
     }
+    // 2. If there are parts (multipart)
+    else if (payload.parts && payload.parts.length > 0) {
+      console.log("Found parts:", payload.parts.length);
+      // Find HTML part
+      let part = payload.parts.find((p: any) => p.mimeType === 'text/html');
+      // Fallback to plain text
+      if (!part) {
+        part = payload.parts.find((p: any) => p.mimeType === 'text/plain');
+      }
+
+      // If still no part found (maybe nested multipart/related or mixed)
+      if (!part) {
+        // Try to find a part that has parts
+        part = payload.parts.find((p: any) => p.parts && p.parts.length > 0);
+      }
+
+      if (part) {
+        body = this.extractMessageBody(part);
+      }
+    }
+
+    // Logic to cleanup html
+    if (body) {
+      const $ = cheerio.load(body);
+      $(".gmail_quote").remove();
+      $("div.gmail_quote").remove();
+      $("blockquote.gmail_quote").remove();
+      return $.html();
+    }
+
+    return "";
+  }
 
 }
 

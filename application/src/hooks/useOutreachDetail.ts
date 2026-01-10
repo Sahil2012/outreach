@@ -30,6 +30,10 @@ export interface OutreachDetail extends ThreadMetaItem {
   jobs: any[];
   employee: Employee
   messages: Message[];
+  sync: {
+    status: boolean;
+    code: string;
+  }
 }
 
 export const useOutreachDetail = (id?: number) => {

@@ -50,6 +50,24 @@ const OutreachDetailPage: React.FC = () => {
       )
   );
 
+  let googleReauthorizationNeeded = false;
+  let threadNotFound = false;
+  let insufficientPermissions = false;
+  if (!data?.sync?.status) {
+    if (
+      data?.sync?.code?.includes("refresh_token_not_found") ||
+      data?.sync?.code?.includes("insufficient_permissions") ||
+      data?.sync?.code?.includes("thread_not_found_in_external_source")
+    ) {
+      googleReauthorizationNeeded = true;
+      if (data?.sync?.code?.includes("insufficient_permissions")) {
+        insufficientPermissions = true;
+      }
+    } else {
+      threadNotFound = true;
+    }
+  }
+
   const connectToGmail = useReverification(
     async () => {
       let res;
@@ -119,7 +137,7 @@ const OutreachDetailPage: React.FC = () => {
     );
   }
 
-  if (error || !data) {
+  if (error || threadNotFound || !data) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
         <div className="text-destructive font-medium">
@@ -190,10 +208,16 @@ const OutreachDetailPage: React.FC = () => {
               onMarkAbsconded={handleMarkAbsconded}
               onMarkReferred={handleMarkReferred}
               onToggleAutomated={handleToggleAutomated}
-              isGmailConnected={(isConnectedToGoogle && hasGmailScope) || false}
+              isGmailConnected={
+                (isConnectedToGoogle &&
+                  hasGmailScope &&
+                  !googleReauthorizationNeeded) ||
+                false
+              }
               onBack={() => navigate("/dashboard")}
               onConnectGmail={handleConnectGmail}
               isGmailAuthLoading={isGmailAuthLoading}
+              insufficientPermissions={insufficientPermissions}
             />
           </div>
           {/* Right Side: Thread */}

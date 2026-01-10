@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { RecipientForm } from "./RecipientForm";
 import { Loader } from "@/components/ui/loader";
 import { templates } from "../template-selection";
+import { CreditInfo } from "@/components/function/CreditInfo";
 
 const RecipientInfoPage: React.FC = () => {
   const { generateEmail, isGenerating } = useOutreach();
@@ -112,7 +113,7 @@ const RecipientInfoPage: React.FC = () => {
         templateId={templateId}
       />
 
-      <div className="flex justify-between pt-4">
+      <div className="flex items-end justify-between pt-4">
         <Button
           variant="outline"
           size="lg"
@@ -122,11 +123,14 @@ const RecipientInfoPage: React.FC = () => {
           <ArrowLeft className="w-4 h-4 mr-1 -ml-1" />
           Back
         </Button>
-        <Button size="lg" onClick={handleGenerate} disabled={isGenerating}>
-          {isGenerating ? <Loader className="mr-2" /> : null}
-          {isGenerating ? "Generating..." : "Generate Email"}
-          {!isGenerating && <ArrowRight className="w-4 h-4 ml-1 -mr-1" />}
-        </Button>
+        <div className="flex flex-col gap-1.5">
+          <CreditInfo className="mt-4" />
+          <Button size="lg" onClick={handleGenerate} disabled={isGenerating}>
+            {isGenerating ? <Loader className="mr-2" /> : null}
+            {isGenerating ? "Generating..." : "Generate Email"}
+            {!isGenerating && <ArrowRight className="w-4 h-4 ml-1 -mr-1" />}
+          </Button>
+        </div>
       </div>
     </div>
   );

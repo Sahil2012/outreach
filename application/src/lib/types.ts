@@ -24,8 +24,8 @@ export interface Experience {
   title: string;
   company: string;
   location?: string;
-  start_date?: Date;
-  end_date?: Date;
+  startDate?: Date;
+  endDate?: Date;
   description?: string;
 }
 
@@ -38,6 +38,7 @@ export interface Profile {
   projects?: Project[];
   education?: Education[];
   experiences?: Experience[];
+  credits?: number;
 }
 
 export interface Template {
