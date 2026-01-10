@@ -1,18 +1,18 @@
 import { Button } from "@/components/ui/button";
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -34,12 +34,12 @@ const DraftsPage = () => {
   const {
     data: listData,
     isLoadingList: isLoading,
-    updateOutreach,
-    isUpdating,
     deleteDraft,
     isDeletingDraft: isDeleting,
     refreshData,
-  } = useOutreachDashboard(page, pageSize, debouncedSearch, statusFilter, "DRAFT");
+    markAsSent,
+    isMarkingAsSent,
+  } = useOutreachDashboard(page, pageSize, debouncedSearch, statusFilter);
 
   const drafts = listData?.threads || [];
 
@@ -54,9 +54,9 @@ const DraftsPage = () => {
     }
   };
 
-  const handleMarkAsSent = async (id: number) => {
+  const handleMarkAsSent = async (id: number, threadId: number) => {
     try {
-    //   await markAsSent(id);
+      await markAsSent({ id, threadId });
       toast.success("Draft marked as sent");
     } catch {
       toast.error("Failed to mark draft as sent");
@@ -159,7 +159,7 @@ const DraftsPage = () => {
             onDelete={handleDelete}
             onMarkAsSent={handleMarkAsSent}
             isDeleting={isDeleting}
-            isMarkingSent={isUpdating}
+            isMarkingSent={isMarkingAsSent}
           />
 
           {/* Pagination */}

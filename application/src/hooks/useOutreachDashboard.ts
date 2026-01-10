@@ -73,6 +73,15 @@ export const useOutreachDashboard = (
     },
   });
 
+  const markAsSentMutation = useMutation({
+    mutationFn: async ({ id, threadId }: { id: number; threadId: number }) => {
+      await api.patch(`/message/markAsSent/${id}`, { threadId });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['outreach'] });
+    }
+  });
+
   return {
     data: listQuery.data,
     isLoadingList: listQuery.isLoading,
@@ -87,5 +96,8 @@ export const useOutreachDashboard = (
 
     generateFollowUp: generateFollowUpMutation.mutateAsync,
     isGeneratingFollowUp: generateFollowUpMutation.isPending,
+
+    markAsSent: markAsSentMutation.mutateAsync,
+    isMarkingAsSent: markAsSentMutation.isPending,
   };
 };

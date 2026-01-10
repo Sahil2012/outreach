@@ -36,7 +36,8 @@ interface OutreachTableProps {
   isGeneratingFollowUp: boolean;
   onAction: (
     id: number,
-    action: "follow-up" | "mark-absconded" | "mark-referred"
+    action: "follow-up" | "mark-absconded" | "mark-referred" | "mark-sent",
+    threadId: number
   ) => void;
   page: number;
   pageSize: number;
@@ -182,7 +183,7 @@ export const OutreachTable = ({
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem
-                        onClick={() => onAction(thread.id, "follow-up")}
+                        onClick={() => onAction(thread.id, "follow-up", thread.id)}
                       >
                         {isGeneratingFollowUp ? (
                           <Loader2 className="animate-spin" />
@@ -190,13 +191,26 @@ export const OutreachTable = ({
                           "Generate Follow Up"
                         )}
                       </DropdownMenuItem>
+                      {thread.Message?.[0]?.state === "DRAFT" && (
+                        <DropdownMenuItem
+                          onClick={() =>
+                            onAction(
+                              thread.Message?.[0]?.id,
+                              "mark-sent",
+                              thread.id
+                            )
+                          }
+                        >
+                          Mark as Sent
+                        </DropdownMenuItem>
+                      )}
                       <DropdownMenuItem
-                        onClick={() => onAction(thread.id, "mark-referred")}
+                        onClick={() => onAction(thread.id, "mark-referred", thread.id)}
                       >
                         Mark as Referred
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onClick={() => onAction(thread.id, "mark-absconded")}
+                        onClick={() => onAction(thread.id, "mark-absconded", thread.id)}
                         className="text-destructive"
                       >
                         Mark as Absconded

@@ -45,6 +45,8 @@ export default function DashboardPage() {
   const {
     data: listData,
     isLoadingList,
+    markAsSent,
+    isMarkingAsSent,
     updateOutreach,
     refreshData,
     generateFollowUp,
@@ -55,7 +57,8 @@ export default function DashboardPage() {
 
   const handleAction = async (
     id: number,
-    action: "follow-up" | "mark-absconded" | "mark-referred"
+    action: "follow-up" | "mark-absconded" | "mark-referred" | "mark-sent",
+    threadId: number
   ) => {
     try {
       if (action === "follow-up") {
@@ -68,6 +71,9 @@ export default function DashboardPage() {
       } else if (action === "mark-referred") {
         await updateOutreach({ id, payload: { status: "REFERRED" } });
         toast.success("Thread marked as referred successfully.");
+      } else if (action === "mark-sent") {
+        await markAsSent({ id, threadId });
+        toast.success("Draft marked as sent");
       }
     } catch (err: any) {
       console.error(err);
