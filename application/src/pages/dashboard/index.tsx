@@ -56,7 +56,7 @@ export default function DashboardPage() {
     } else if (action === "mark-absconded") {
       await updateOutreach({ id, payload: { status: "CLOSED" } });
     } else if (action === "mark-referred") {
-      await updateOutreach({ id, payload: { status: "REFERRED" } });
+      await updateOutreach({ id, payload: { status: "REFFERED" } });
     } else if (action == "mark-sent") {
       await handleMarkAsSent(id, threadId);
     }

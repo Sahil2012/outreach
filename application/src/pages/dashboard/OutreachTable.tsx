@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal, Building2, User, Loader2 } from "lucide-react";
-import { ThreadMetaItem } from "@/lib/types";
+import { ThreadMetaItem, ThreadStatus } from "@/lib/types";
 import { useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -59,6 +59,16 @@ export const OutreachTable = ({
       </div>
     );
   }
+
+  const canBeFollowedUp = (status: ThreadStatus) => {
+    return [
+      "PENDING",
+      "SENT",
+      "FIRST_FOLLOW_UP",
+      "SECOND_FOLLOW_UP"
+    ].includes(status);
+  };
+
 
   return (
     <Table>
@@ -175,11 +185,15 @@ export const OutreachTable = ({
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onClick={() => onAction(thread.id, "follow-up", thread.id)}
-                            >
-                              Send Follow Up
-                            </DropdownMenuItem>
+                            {
+                              canBeFollowedUp(thread.status) && (
+                                <DropdownMenuItem
+                                  onClick={() => onAction(thread.id, "follow-up", thread.id)}
+                                >
+                                  Generate Follow Up
+                                </DropdownMenuItem>
+                              )
+                            }
                             {
                               thread.Message?.[0].state === "DRAFT" && (
                                 <DropdownMenuItem
@@ -189,21 +203,29 @@ export const OutreachTable = ({
                                 </DropdownMenuItem>
                               )
                             }
-                            <DropdownMenuItem
-                              onClick={() =>
-                                onAction(thread.id, "mark-referred", thread.id)
-                              }
-                            >
-                              Mark as Referred
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() =>
-                                onAction(thread.id, "mark-absconded", thread.id)
-                              }
-                              className="text-destructive"
-                            >
-                              Mark as Absconded
-                            </DropdownMenuItem>
+                            {
+                              thread.status !== "CLOSED" && (
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    onAction(thread.id, "mark-referred", thread.id)
+                                  }
+                                >
+                                  Mark as Referred
+                                </DropdownMenuItem>
+                              )
+                            }
+                            {
+                              thread.status !== "CLOSED" && (
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    onAction(thread.id, "mark-absconded", thread.id)
+                                  }
+                                  className="text-destructive"
+                                >
+                                  Mark as Absconded
+                                </DropdownMenuItem>
+                              )
+                            }
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </button>

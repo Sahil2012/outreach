@@ -48,7 +48,7 @@ export const useOutreachDetail = (id?: number) => {
   const updateStatusMutation = useMutation({
     mutationFn: async ({ status }: { status: string }) => {
       if (!id) return;
-      return await api.patch(`/outreach/${id}`, { status });
+      return await api.patch(`/thread/${id}`, { status });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['outreach', 'detail', id] });

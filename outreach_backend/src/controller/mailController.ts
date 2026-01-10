@@ -71,8 +71,8 @@ export const sendMailUsingClerkToken = async (req: Request<{}, {}, SendMailDto>,
         response.id
       );
       console.log("Linked thread to external thread");
-      await updateState(tx, mailData.messageId, MessageState.SENT, userId);
       await upgradeThreadStatus(tx, req.body.threadId, userId);
+      await updateState(tx, mailData.messageId, MessageState.SENT, userId);
       console.log("Upgraded the thread status and updated message status to SENT");
     });
 
