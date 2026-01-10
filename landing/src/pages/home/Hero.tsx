@@ -24,10 +24,10 @@ export default function Hero() {
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
           <Button size="lg" className="h-14 px-8 text-lg rounded-full bg-foreground text-background hover:bg-foreground/90 font-medium" asChild>
-            <a href="/signup">Get Started</a>
+            <a href={import.meta.env.VITE_APP_URL + "/signup"}>Get Started</a>
           </Button>
           <Button size="lg" variant="outline" className="h-14 px-8 text-lg rounded-full border-border hover:bg-muted/50 font-medium" asChild>
-            <a href="/login">Sign In</a>
+            <a href={import.meta.env.VITE_APP_URL + "/login"}>Sign In</a>
           </Button>
         </div>
       </div>
