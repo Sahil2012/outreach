@@ -51,7 +51,7 @@ export const useOutreachDetail = (id?: number) => {
         automated: response.data.isAutomated
       };
     },
-    enabled: !!id,
+    // enabled: !!id,
     staleTime: 5 * 60 * 1000 // 5 minutes
   });
 

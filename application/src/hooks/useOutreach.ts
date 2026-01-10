@@ -49,7 +49,7 @@ export const useOutreach = (messageId?: string | number, options?: UseOutreachOp
         isMailGenerated: true
       };
     },
-    enabled: !!messageId && !options?.skipFetch,
+    // enabled: !!messageId && !options?.skipFetch,
     refetchInterval: isPolling ? 2000 : false,
   });
 
