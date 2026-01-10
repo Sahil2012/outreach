@@ -1,28 +1,28 @@
-import { Zap, BarChart3, Globe, Shield, Search, Mail, Send } from "lucide-react";
+import { BarChart3, Mail, Send, TableOfContents, Briefcase, SquareChartGantt } from "lucide-react";
 
 export const howItWorksSteps = [
   {
-    title: "Find Employees",
-    description: "Search for employees at your dream companies who are willing to refer.",
-    icon: Search,
+    title: "Add a Job",
+    description: "Complete your profile and add the job you're applying for and the company you're applying to.",
+    icon: Briefcase,
   },
   {
-    title: "Select Template",
-    description: "Choose from our AI-crafted templates to send a personalized request.",
+    title: "Generate Messages",
+    description: "Create context aware referral and follow-up messages tailored to the role and company using AI without relying on generic templates.",
     icon: Mail,
   },
   {
-    title: "Get Referred",
-    description: "Send your request and track the status until you get referred.",
-    icon: Send,
+    title: "Manage Outreach",
+    description: "Send emails from your inbox, track conversations, and automate follow-ups until the loop is closed.",
+    icon: SquareChartGantt,
   },
 ];
 
 export const features = [
   {
-    title: "Smart Templates",
-    description: "AI-powered email templates crafted specifically for referral success. Our templates are A/B tested to ensure high response rates.",
-    icon: Zap,
+    title: "Context Aware Messaging",
+    description: "AI-generated referral and follow-up messages tailored to the job description, company, and role so every outreach feels relevant, not templated.",
+    icon: Send
   },
   {
     title: "Track Progress",
@@ -30,23 +30,23 @@ export const features = [
     icon: BarChart3,
   },
   {
-    title: "Global Network",
-    description: "Connect with employees at top companies worldwide. Access a vast database of professionals willing to refer.",
-    icon: Globe,
+    title: "Inbox Native Outreach",
+    description: "Send, track, and manage referral outreach through your existing Gmail account.",
+    icon: Mail,
   },
   {
-    title: "Verified Profiles",
-    description: "All employee profiles are verified to ensure authenticity. Connect with confidence knowing you're talking to real employees.",
-    icon: Shield,
+    title: "Structured Outreach",
+    description: "Track referral requests, replies, and follow-ups in a single workflow, without relying on spreadsheets or reminders.",
+    icon: TableOfContents,
   },
 ];
 
 export const benefits = [
-  "Higher response rates with AI templates",
-  "Automated follow-up reminders",
-  "Direct access to verified employees",
-  "Real-time tracking of applications",
-  "Community-driven insights",
+  "Context-aware referral and follow-up messages",
+  "One place to manage outreach",
+  "Automated follow-ups",
+  "Send and track emails from Gmail",
+  "Less overhead, more focus on applying",
 ];
 
 export const pricingPlans = [

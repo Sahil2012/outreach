@@ -39,7 +39,7 @@ export default function Header() {
                     <span>Outreach</span>
                 </a>
 
-                {/* Desktop Navigation */}
+                {/* Desktop Navigation
                 <nav className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
                     {navLinks.map((link) => (
                         <a
@@ -50,7 +50,7 @@ export default function Header() {
                             {link.name}
                         </a>
                     ))}
-                </nav>
+                </nav> */}
 
                 {/* Desktop Buttons */}
                 <div className="hidden md:flex items-center gap-3">

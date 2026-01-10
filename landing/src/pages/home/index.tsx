@@ -4,7 +4,6 @@ import Demo from "./Demo";
 import Features from "./Features";
 import HowItWorks from "./HowItWorks";
 import Benefits from "./Benefits";
-import Pricing from "./Pricing";
 import CTA from "./CTA";
 import Footer from "./Footer";
 
@@ -17,7 +16,7 @@ export default function HomePage() {
       <Features />
       <HowItWorks />
       <Benefits />
-      <Pricing />
+      {/* <Pricing /> */}
       <CTA />
       <Footer />
     </div>

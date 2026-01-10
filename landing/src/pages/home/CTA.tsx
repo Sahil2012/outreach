@@ -16,7 +16,7 @@ export default function CTA() {
             <a href="/signup">Get Started Now</a>
           </Button>
           <Button size="lg" variant="outline" className="h-14 px-10 text-lg rounded-full border-border hover:bg-muted/50 font-medium" asChild>
-            <a href="/contact">Contact Sales</a>
+            <a href="https://cal.com/sahil-gupta-7/15min?overlayCalendar=true" target="_blank">Contact Sales</a>
           </Button>
         </div>
       </div>

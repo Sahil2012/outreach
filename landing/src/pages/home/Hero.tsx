@@ -18,8 +18,8 @@ export default function Hero() {
           <span className="text-foreground/80">Land Your Dream Job.</span>
         </h1>
 
-        <p className="mt-6 text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed font-light">
-          Connect with employees at top companies, track your referral requests, and manage follow-ups—all in one elegant platform.
+        <p className="mt-6 text-xl text-muted-foreground max-w-4xl mx-auto mb-10 leading-relaxed font-light">
+          Generate AI-powered referral and follow-up messages tailored to the job description and company, while outreach tracking and follow-ups run automatically in one focused workflow.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
