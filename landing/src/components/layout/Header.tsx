@@ -86,10 +86,10 @@ export default function Header() {
                     ))}
                     <div className="flex flex-col gap-2 mt-2">
                         <Button variant="outline" className="w-full rounded-full border-border hover:bg-muted/50 font-medium" asChild>
-                            <a href="/auth/login">Sign In</a>
+                            <a href={import.meta.env.VITE_APP_URL + "/login"}>Sign In</a>
                         </Button>
                         <Button className="w-full rounded-full bg-foreground text-background hover:bg-foreground/90 font-medium" asChild>
-                            <a href="/auth/signup">Get Started</a>
+                            <a href={import.meta.env.VITE_APP_URL + "/signup"}>Get Started</a>
                         </Button>
                     </div>
                 </div>

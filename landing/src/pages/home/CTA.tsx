@@ -8,15 +8,32 @@ export default function CTA() {
           Ready to accelerate your career?
         </h2>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-12 font-light">
-          Join thousands of professionals who have already landed their dream jobs using our platform.
+          Join thousands of professionals who have already landed their dream
+          jobs using our platform.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button size="lg" className="h-14 px-10 text-lg rounded-full bg-foreground text-background hover:bg-foreground/90 font-medium" asChild>
-            <a href="/signup">Get Started Now</a>
+          <Button
+            size="lg"
+            className="h-14 px-10 text-lg rounded-full bg-foreground text-background hover:bg-foreground/90 font-medium"
+            asChild
+          >
+            <a href={import.meta.env.VITE_APP_URL + "/signup"}>
+              Get Started Now
+            </a>
           </Button>
-          <Button size="lg" variant="outline" className="h-14 px-10 text-lg rounded-full border-border hover:bg-muted/50 font-medium" asChild>
-            <a href="https://cal.com/sahil-gupta-7/15min?overlayCalendar=true" target="_blank">Contact Sales</a>
+          <Button
+            size="lg"
+            variant="outline"
+            className="h-14 px-10 text-lg rounded-full border-border hover:bg-muted/50 font-medium"
+            asChild
+          >
+            <a
+              href="https://cal.com/sahil-gupta-7/15min?overlayCalendar=true"
+              target="_blank"
+            >
+              Contact Sales
+            </a>
           </Button>
         </div>
       </div>
