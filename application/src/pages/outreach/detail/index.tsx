@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Loader } from "@/components/ui/loader";
 import { useOutreachDetail } from "@/hooks/useOutreachDetail";

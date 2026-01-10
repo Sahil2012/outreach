@@ -63,12 +63,18 @@ export const useOutreach = (messageId?: string | number, options?: UseOutreachOp
       const response = await generateMailApi(payload);
       return response;
     },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['outreach'] });
+    }
   });
 
   const updateMessageMutation = useMutation({
     mutationFn: async ({ messageId, subject, body }: { messageId: string | number, subject: string, body: string }) => {
       const response = await api.patch(`/message/edit/${messageId}`, { subject, body });
       return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['outreach'] });
     }
   });
 

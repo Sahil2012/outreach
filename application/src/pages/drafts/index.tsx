@@ -39,7 +39,7 @@ const DraftsPage = () => {
     refreshData,
     markAsSent,
     isMarkingAsSent,
-  } = useOutreachDashboard(page, pageSize, debouncedSearch, statusFilter);
+  } = useOutreachDashboard(page, pageSize, debouncedSearch, statusFilter, "DRAFT");
 
   const drafts = listData?.threads || [];
 
