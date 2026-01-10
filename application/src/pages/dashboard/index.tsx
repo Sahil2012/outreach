@@ -69,7 +69,7 @@ export default function DashboardPage() {
         await updateOutreach({ id, payload: { status: "CLOSED" } });
         toast.success("Thread marked as absconded successfully.");
       } else if (action === "mark-referred") {
-        await updateOutreach({ id, payload: { status: "REFERRED" } });
+        await updateOutreach({ id, payload: { status: "REFFERED" } });
         toast.success("Thread marked as referred successfully.");
       } else if (action === "mark-sent") {
         await markAsSent({ id, threadId });
