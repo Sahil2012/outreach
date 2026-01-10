@@ -53,12 +53,15 @@ export default function Demo() {
             </div>
 
             <div className="aspect-[16/10] w-full bg-background flex items-center justify-center p-1 pt-12">
-              {/* Placeholder for actual demo content/image/video */}
-              <div className="w-full h-full bg-muted/10 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="w-20 h-20 bg-muted rounded-2xl mx-auto mb-4 animate-pulse" />
-                  <p className="text-muted-foreground font-medium">Dashboard Preview</p>
-                </div>
+              <div className="relative w-full h-full group">
+                <img
+                  src="/dashboard.png"
+                  alt="Dashboard Preview"
+                  className="w-full h-full object-contain shadow-sm transition-transform duration-700 ease-out group-hover:scale-[1.02]"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-60 pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-tr from-primary/10 via-transparent to-primary/5 opacity-40 mix-blend-overlay pointer-events-none" />
+                <div className="absolute inset-0 ring-1 ring-inset ring-black/5 dark:ring-white/5 rounded-lg pointer-events-none" />
               </div>
             </div>
           </div>
