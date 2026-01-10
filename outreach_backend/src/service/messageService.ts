@@ -8,6 +8,23 @@ export async function saveMessage(
   subject: string,
   body: string
 ) {
+
+  const lastMessage = await getLastMessage(tx, threadId, authUserId);
+
+  if (lastMessage && lastMessage.state == MessageState.DRAFT) {
+    log("Updating draft message for thread:", threadId, " by user:", authUserId);
+    return tx.message.update({
+      where: {
+        id: lastMessage.id,
+        authUserId: authUserId,
+      },
+      data: {
+        subject,
+        body,
+      },
+    });
+  }
+
   log("Saving message for thread:", threadId, " by user:", authUserId);
   return tx.message.create({
     data: {
