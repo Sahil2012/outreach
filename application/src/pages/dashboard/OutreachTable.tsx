@@ -40,7 +40,8 @@ interface OutreachTableProps {
   isLoading: boolean;
   onAction: (
     id: number,
-    action: "follow-up" | "mark-absconded" | "mark-referred"
+    action: "follow-up" | "mark-absconded" | "mark-referred" | "mark-sent",
+    threadId: number
   ) => void;
 }
 
@@ -119,7 +120,7 @@ export const OutreachTable = ({
                             <span className="font-medium text-sm">
                               {thread.Employee.name}
                             </span>
-                      <MessageStateBadge state={thread.Message?.[0]?.state} />
+                            <MessageStateBadge state={thread.Message?.[0]?.state} />
                           </div>
                           <span className="text-xs text-muted-foreground">
                             {thread.Employee.email}
@@ -152,8 +153,8 @@ export const OutreachTable = ({
                       <span className="text-sm text-muted-foreground">
                         {thread.lastUpdated
                           ? formatDistanceToNow(new Date(thread.lastUpdated), {
-                              addSuffix: true,
-                            })
+                            addSuffix: true,
+                          })
                           : "-"}
                       </span>
                     </TableCell>
@@ -175,20 +176,29 @@ export const OutreachTable = ({
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem
-                              onClick={() => onAction(thread.id, "follow-up")}
+                              onClick={() => onAction(thread.id, "follow-up", thread.id)}
                             >
                               Send Follow Up
                             </DropdownMenuItem>
+                            {
+                              thread.Message?.[0].state === "DRAFT" && (
+                                <DropdownMenuItem
+                                  onClick={() => onAction(thread.Message?.[0]?.id!, "mark-sent", thread.id)}
+                                >
+                                  Mark as Sent
+                                </DropdownMenuItem>
+                              )
+                            }
                             <DropdownMenuItem
                               onClick={() =>
-                                onAction(thread.id, "mark-referred")
+                                onAction(thread.id, "mark-referred", thread.id)
                               }
                             >
                               Mark as Referred
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() =>
-                                onAction(thread.id, "mark-absconded")
+                                onAction(thread.id, "mark-absconded", thread.id)
                               }
                               className="text-destructive"
                             >

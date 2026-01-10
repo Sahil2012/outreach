@@ -29,7 +29,7 @@ import ThreadStatusBadge from "@/components/function/ThreadStatusBadge";
 interface DraftsTableProps {
   data: ThreadMetaItem[];
   isLoading: boolean;
-  onMarkAsSent: (id: number) => void;
+  onMarkAsSent: (id: number, threadId: number) => void;
   onDelete: (id: number) => void;
   isMarkingSent: boolean;
   isDeleting: boolean;
@@ -113,8 +113,8 @@ export const DraftsTable = ({
                 <span className="text-sm text-muted-foreground">
                   {item.lastUpdated
                     ? formatDistanceToNow(new Date(item.lastUpdated), {
-                        addSuffix: true,
-                      })
+                      addSuffix: true,
+                    })
                     : "-"}
                 </span>
               </TableCell>
@@ -138,7 +138,7 @@ export const DraftsTable = ({
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem
-                        onClick={() => onMarkAsSent(item.Message[0].id)}
+                        onClick={() => onMarkAsSent(item.Message[0].id, item.id)}
                       >
                         <Send className="mr-2 h-4 w-4" />
                         Mark as Sent

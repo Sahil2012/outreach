@@ -23,6 +23,7 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { StatsCards } from "./StatsCards";
 import { OutreachTable } from "./OutreachTable";
 import { THREAD_STATUS_VALUES } from "@/lib/types";
+import { toast } from "sonner";
 
 export default function DashboardPage() {
   const navigate = useNavigate();
@@ -38,6 +39,8 @@ export default function DashboardPage() {
     isLoadingStats,
     data: listData,
     isLoadingList,
+    markAsSent,
+    isMarkingAsSent,
     updateOutreach,
     sendFollowUp,
     refreshData,
@@ -45,7 +48,8 @@ export default function DashboardPage() {
 
   const handleAction = async (
     id: number,
-    action: "follow-up" | "mark-absconded" | "mark-referred"
+    action: "follow-up" | "mark-absconded" | "mark-referred" | "mark-sent",
+    threadId: number
   ) => {
     if (action === "follow-up") {
       await sendFollowUp(id);
@@ -53,6 +57,17 @@ export default function DashboardPage() {
       await updateOutreach({ id, payload: { status: "CLOSED" } });
     } else if (action === "mark-referred") {
       await updateOutreach({ id, payload: { status: "REFERRED" } });
+    } else if (action == "mark-sent") {
+      await handleMarkAsSent(id, threadId);
+    }
+  };
+
+  const handleMarkAsSent = async (id: number, threadId: number) => {
+    try {
+      await markAsSent({ id, threadId });
+      toast.success("Draft marked as sent");
+    } catch {
+      toast.error("Failed to mark draft as sent");
     }
   };
 
