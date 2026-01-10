@@ -27,11 +27,14 @@ export const coldEmailStrategy = async (emailRequest: ColdEmailRequest) => {
 
     const emailContent = await callLLM(
         await coldEmailPrompt.format({
+            userName: profileDetails.userName,
             skills: profileDetails.skills,
             experience: profileDetails.experiences,
             education: profileDetails.education,
             template: template || "No template provided",
             emailSchema: parser.getFormatInstructions(),
+            companyName: emailRequest.companyName,
+            employeeName: emailRequest.contactName,
         })
     );
 

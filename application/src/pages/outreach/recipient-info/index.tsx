@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { isAxiosError } from "axios";
 import { Button } from "@/components/ui/button";
 import { useOutreach } from "@/hooks/useOutreach";
 import { RecipientInfo } from "@/lib/types";
@@ -56,17 +57,20 @@ const RecipientInfoPage: React.FC = () => {
       newErrors.employeeEmail = "Employee email is required";
     if (!recipientInfo.companyName)
       newErrors.companyName = "Company name is required";
+    if (templateId !== "COLD" && !recipientInfo.jobIds.length)
+      newErrors.jobIds = "At least one job is required for tailored messages";
     // Job description is only required for non-COLD templates
     if (templateId !== "COLD" && !recipientInfo.jobDescription)
       newErrors.jobDescription = "Job description is required";
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return newErrors;
   };
 
   const handleGenerate = async () => {
-    if (!validateForm()) {
-      toast.error("Please fill in all required fields.");
+    const fnErrors = validateForm();
+    if (Object.keys(fnErrors).length > 0) {
+      toast.error(Object.values(fnErrors)[0]);
       return;
     }
 
@@ -87,7 +91,17 @@ const RecipientInfoPage: React.FC = () => {
       });
 
       navigate(`/outreach/preview/${res?.messageId}`, { state: res });
-    } catch (error) {
+    } catch (error: Error | unknown) {
+      if (isAxiosError(error)) {
+        if (error.response?.status === 429) {
+          toast.error("You have reached the limit. Please try again later.");
+          return;
+        }
+        if (error.response?.status === 500) {
+          toast.error("Server error. Please try again in 5 minutes.");
+          return;
+        }
+      }
       console.error("Error generating mail:", error);
       toast.error("Failed to generate email. Please try again.");
     }
