@@ -19,6 +19,7 @@ model UserProfileData {
   phoneNo       BigInt?                   @unique
   resumeUrl     String?
   status        ProfileCompletenessStatus @default(INCOMPLETE)
+  credits       Int                       @default(5)
   experiences   Experience[]
   Message       Message[]
   profileSkills ProfilSkillMapping[]
@@ -95,12 +96,13 @@ model Message {
   body              String
   subject           String?
   authUserId        String
-  threadId          Int
+  threadId          Int?
   date              DateTime        @default(now())
   fromUser          Boolean
   externalMessageId String?
+  state             MessageState    @default(DRAFT)
   UserTable         UserProfileData @relation(fields: [authUserId], references: [authUserId])
-  Thread            Thread          @relation(fields: [threadId], references: [id])
+  Thread            Thread?         @relation(fields: [threadId], references: [id])
 }
 
 model ThreadJobMapping {
@@ -139,4 +141,9 @@ enum ThreadStatus {
   REFFERED
   SENT
   DELETED
+}
+
+enum MessageState {
+  SENT
+  DRAFT
 }

@@ -4,6 +4,7 @@ import { PromptTemplate } from "@langchain/core/prompts";
 import { userDetailsSchema } from "../schema/schema.js";
 import callLLM from "../apis/geminichat.js";
 import { StructuredOutputParser } from "@langchain/core/output_parsers";
+import { log } from "console";
 
 configDotenv();
 
@@ -38,13 +39,15 @@ async function extractDataFromResume(buffer: Buffer) {
     Resume Text:
     {resumeText}
   `);
-
+  log("Resume Text: ", data.text);
   const res = await callLLM(
     await extractPrompt.format({
       resumeText: data.text,
       outputformat: parser.getFormatInstructions(),
     })
   );
+
+  log("Response from LLM: ", res);
 
   return await parser.parse(res);
 }
