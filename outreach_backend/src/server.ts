@@ -25,7 +25,11 @@ app.use(
 
   })
 );
-app.use(express.json());
+app.use(express.json({
+  verify: (req: any, res, buf) => {
+    req.rawBody = buf.toString();
+  }
+}));
 
 // Routers
 app.use("/auth", authRoutes);
