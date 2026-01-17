@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { Template } from "@/lib/types";
 import { toast } from "sonner";
 import { TemplateCard } from "./TemplateCard";

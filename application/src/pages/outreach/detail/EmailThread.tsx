@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Message } from "@/hooks/useOutreachDetail";
 import { useUser } from "@clerk/clerk-react";
 import MessageStateBadge from "@/components/function/MessageStateBadge";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { cn } from "@/lib/utils";
 
 interface EmailThreadProps {

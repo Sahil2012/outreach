@@ -8,7 +8,7 @@ import { ExperienceSection } from './ExperienceSection';
 import { EducationSection } from './EducationSection';
 import { ProjectsSection } from './ProjectsSection';
 import { Project, Education, Experience } from '@/lib/types';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 
 export default function ProfessionalInfoPage() {
   const navigate = useNavigate();

@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Loader } from "@/components/ui/loader";
 import { useOutreach } from "@/hooks/useOutreach";
 import { useUser, useReverification } from "@clerk/clerk-react";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import { EmailPreviewStatic } from "./EmailPreviewStatic";
 import { SendOptions } from "./SendOptions";

@@ -15,7 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal, Building2, User, Loader2 } from "lucide-react";
 import { ThreadMetaItem, ThreadStatus } from "@/lib/types";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 import ThreadStatusBadge from "@/components/function/ThreadStatusBadge";

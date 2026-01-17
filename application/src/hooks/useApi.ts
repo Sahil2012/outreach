@@ -1,7 +1,7 @@
 import { useAuth } from '@clerk/clerk-react';
 import axios, { AxiosInstance } from 'axios';
 import { useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 
 export const useApi = (): AxiosInstance => {
   const { getToken } = useAuth();

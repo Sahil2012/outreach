@@ -1,14 +1,10 @@
-import React from "react";
-import { Sidebar } from "./Sidebar";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
+import { Sidebar } from "./Sidebar";
+import { Outlet } from "react-router";
 
-interface MainLayoutProps {
-  children: React.ReactNode;
-}
-
-const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
+const MainLayout = () => {
   return (
     <div className="min-h-screen bg-background font-sans text-foreground flex">
       {/* Background Pattern */}
@@ -44,7 +40,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
         {/* Main Content */}
         <main className="flex-1 p-4 md:p-8 max-w-7xl mx-auto w-full">
-          {children}
+          <Outlet />
         </main>
       </div>
     </div>

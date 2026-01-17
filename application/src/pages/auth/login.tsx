@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useSignIn } from "@clerk/clerk-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router";
 import AuthLayout from "@/components/layout/AuthLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

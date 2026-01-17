@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useOutreach } from "@/hooks/useOutreach";
 import { RecipientInfo } from "@/lib/types";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import { RecipientForm } from "./RecipientForm";
 import { Loader } from "@/components/ui/loader";

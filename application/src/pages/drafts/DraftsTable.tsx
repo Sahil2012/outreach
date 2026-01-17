@@ -21,7 +21,7 @@ import {
   Send,
   Trash2,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { formatDistanceToNow } from "date-fns";
 import { ThreadMetaItem } from "@/lib/types";
 import ThreadStatusBadge from "@/components/function/ThreadStatusBadge";

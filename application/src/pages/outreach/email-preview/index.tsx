@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Loader } from "@/components/ui/loader";
 import { useOutreach } from "@/hooks/useOutreach";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router";
 import { GenerateEmailResponse } from "@/lib/types";
 import { EmailEditor } from "./EmailEditor";
 import { toast } from "sonner";

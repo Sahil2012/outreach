@@ -1,6 +1,6 @@
 import React from "react";
 import { Progress } from "../../components/ui/progress";
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet, useLocation } from "react-router";
 
 const OutreachWizard: React.FC = () => {
   const location = useLocation();
