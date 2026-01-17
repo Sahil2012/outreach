@@ -65,3 +65,27 @@ Features:
   - credits
     - buy
     - history
+
+# PROFILE
+
+  -	GET 				/profile 
+	-	PATCH 			/profile
+	-	PUT				  /profile/resume
+	-	POST				/profile/credits/transaction
+	-	GET				  /profile/stats
+
+# THREAD
+
+  - GET				/threads
+	-	GET				/threads/:id
+	-	PATCH			/threads/:id
+
+# MESSAGE
+
+  -	POST 				/messages
+	-	GET				  /messages/types
+
+	-	POST				/messages/:id/send
+	-	PATCH 			/messages/:id
+	-	GET				  /messages
+	-	DELETE			/messages/:id
