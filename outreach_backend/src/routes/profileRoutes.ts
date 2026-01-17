@@ -1,7 +1,5 @@
 import express from 'express';
-import { getProfile, rechargeCredits, updateProfile, uploadResume } from '../controller/profileController.js';
-import { extractStats } from '../controller/statsController.js';
-
+import { extractStats, getProfile, rechargeCredits, updateProfile, uploadResume } from '../controller/profileController.js';
 import { schemaValidator } from '../middlleware/schemaValidator.js';
 import { RechargeCreditsSchema, UpdateProfileSchema } from '../schema/profileSchema.js';
 

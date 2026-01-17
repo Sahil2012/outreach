@@ -1,11 +1,12 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
+import { logger } from "../utils/logger.js";
 import { extractThreadMeta, getThreadById, getThreadPreview, updateAutomated, updateStatus, syncThreadWithGoogle } from "../service/threadService.js";
 import { UpdateThreadRequest } from "../schema/threadSchema.js";
 import prisma from "../apis/prismaClient.js";
 import { getAuth } from "@clerk/express";
 import { ThreadPreviewDTO } from "../dto/reponse/ThreadPreviewDTO.js";
 import { toThreadPreviewDTO } from "../mapper/threadPreviewMapper.js";
-import { log } from "console";
+
 import { toThreadDTO } from "../mapper/threadDTOMapper.js";
 import { ThreadMetaResponse } from "../dto/reponse/ThreadMetaResponse.js";
 import { MessageState, ThreadStatus } from "@prisma/client";
@@ -16,31 +17,34 @@ function parseCSVQuery(q?: string | string[] | undefined): string[] | undefined 
   return q.split(",").map(x => x.trim()).filter(Boolean);
 }
 
-export const previewThread = async (req: Request, res: Response<ThreadPreviewDTO | { error: string }>) => {
+export const previewThread = async (req: Request, res: Response<ThreadPreviewDTO | { error: string }>, next: NextFunction) => {
 
-  const threadId = parseInt(req.params.threadId, 10);
+  const threadId = parseInt(req.params.id, 10);
 
   if (isNaN(threadId)) {
     return res.status(400).json({ error: "Invalid thread ID" });
   }
 
   const { userId: clerkUserId } = getAuth(req);
+  logger.info("Previewing thread", { userId: clerkUserId, threadId });
 
   try {
     const threadPreview = await getThreadPreview(prisma, clerkUserId!, threadId);
     if (!threadPreview) {
+      logger.warn("Thread preview not found", { userId: clerkUserId, threadId });
       return res.status(404).json({ error: "Thread not found" });
     }
     const threadPreviewDTO = toThreadPreviewDTO(threadPreview);
-    log("Fetched thread preview DTO:", threadPreview);
+
+    logger.info("Thread preview fetched successfully", { userId: clerkUserId, threadId });
     return res.status(200).json(threadPreviewDTO);
   } catch (error) {
-    console.error("Error fetching thread preview:", error);
-    return res.status(500).json({ error: "Internal server error" });
+    logger.error("Error fetching thread preview", error);
+    next(error);
   }
 }
 
-export const getThread = async (req: Request, res: Response) => {
+export const getThread = async (req: Request, res: Response, next: NextFunction) => {
 
   const threadId = parseInt(req.params.threadId, 10);
 
@@ -49,25 +53,30 @@ export const getThread = async (req: Request, res: Response) => {
   }
 
   const { userId: clerkUserId } = getAuth(req);
+  logger.info("Fetching single thread", { userId: clerkUserId, threadId });
 
   try {
     const sync = await syncThreadWithGoogle(prisma, clerkUserId!, threadId);
     const thread = await getThreadById(prisma, clerkUserId!, threadId);
 
     if (!thread) {
+      logger.info("Thread not found", { userId: clerkUserId, threadId });
       return res.status(404).json({ error: "Thread not found" });
     }
+
+    logger.info("Thread fetched successfully", { userId: clerkUserId, threadId });
     return res.status(200).json({ ...toThreadDTO(thread), sync });
   } catch (error) {
-    console.error("Error fetching thread:", error);
-    return res.status(500).json({ error: "Internal server error" });
+    logger.error("Error fetching thread", error);
+    next(error);
   }
 }
 
-export const getThreads = async (req: Request, res: Response<ThreadMetaResponse | { error: string }>) => {
+export const getThreads = async (req: Request, res: Response<ThreadMetaResponse | { error: string }>, next: NextFunction) => {
   try {
 
     const { userId: clerkUserId } = getAuth(req);
+    logger.info("Fetching threads list", { userId: clerkUserId, query: req.query });
 
     // parse query params with defaults and limits
     const page = Math.max(1, Number(req.query.page ?? 1));
@@ -112,18 +121,20 @@ export const getThreads = async (req: Request, res: Response<ThreadMetaResponse 
       status
     );
 
+    logger.info("Threads list fetched successfully", { userId: clerkUserId, count: meta.threads.length });
     return res.status(200).json(meta);
   } catch (err) {
-    console.error("Error fetching thread meta:", err);
-    return res.status(500).json({ error: "Internal server error" });
+    logger.error("Error fetching thread meta", err);
+    next(err);
   }
 };
 
-export const updateThread = async (req: Request<{ threadId: string }, {}, UpdateThreadRequest>, res: Response) => {
+export const updateThread = async (req: Request<{ threadId: string }, {}, UpdateThreadRequest>, res: Response, next: NextFunction) => {
   try {
     const { status, isAutomated } = req.body;
     let updatedThread;
     const { userId: clerkUserId } = getAuth(req);
+    logger.info("Updating thread status", { userId: clerkUserId, threadId: req.params.threadId, status, isAutomated });
 
     if (status) {
       updatedThread = await updateStatus(prisma, parseInt(req.params.threadId), status, clerkUserId!);
@@ -131,9 +142,11 @@ export const updateThread = async (req: Request<{ threadId: string }, {}, Update
     if (isAutomated !== undefined && isAutomated !== null) {
       updatedThread = await updateAutomated(prisma, parseInt(req.params.threadId), isAutomated);
     }
+
+    logger.info("Thread updated successfully", { userId: clerkUserId, threadId: req.params.threadId });
     return res.status(200).json(updatedThread);
   } catch (error) {
-    console.error("Error updating thread status:", error);
-    return res.status(500).json({ error: "Internal server error" });
+    logger.error("Error updating thread status", error);
+    next(error);
   }
 };

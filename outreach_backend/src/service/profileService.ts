@@ -1,6 +1,7 @@
 import prisma from "../apis/prismaClient.js";
-import { ProfileDTO } from "../dto/reponse/ProfileDTO.js";
+import { ProfileDTO } from "../dto/response/ProfileDTO.js";
 import { ProfileCompletenessStatus } from "@prisma/client";
+import { ProfileRequest } from "../schema/profileSchema.js";
 
 export const getUserProfile = async (userId: string) => {
   return await prisma.userProfileData.findUnique({
@@ -16,7 +17,7 @@ export const getUserProfile = async (userId: string) => {
   });
 };
 
-export const updateProfile = async (authUserId: string, profile: ProfileDTO) => {
+export const updateProfile = async (authUserId: string, profile: ProfileRequest) => {
   const {
     summary,
     education,
