@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import { Webhook } from "svix";
 import prisma from "../apis/prismaClient.js";
-import { clerkClient } from "@clerk/express";
 
-export const getMe = async (req: Request, res: Response) => {
+// Webhook handler
+export const handleClerkWebhook = async (req: Request, res: Response) => {
   const SIGNING_SECRET = process.env.CLERK_WEBHOOK_SECRET;
 
   if (!SIGNING_SECRET) {
@@ -87,4 +87,10 @@ export const getMe = async (req: Request, res: Response) => {
     success: true,
     message: "Webhook received",
   });
+
+};
+// Client-side "Lazy Sync" handler
+export const getMe = async (req: Request, res: Response) => {
+  const user = res.locals.user;
+  res.status(200).json({ user, message: "User info retrieved" });
 };

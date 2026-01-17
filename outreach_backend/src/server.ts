@@ -7,8 +7,6 @@ import { clerkMiddleware } from "@clerk/express"
 import { getEmailTypes } from "./controller/emailController.js";
 import threadRoutes from "./routes/threadRoutes.js";
 import messageRoutes from "./routes/messageRoutes.js";
-import statsRoutes from "./routes/statsRoutes.js";
-import mailRoutes from "./routes/mailRoutes.js";
 import { requireAuth } from "./middlleware/requireAuth.js";
 configDotenv();
 
@@ -25,20 +23,12 @@ app.use(
 
   })
 );
-app.use(express.json({
-  verify: (req: any, res, buf) => {
-    req.rawBody = buf.toString();
-  }
-}));
 
 // Routers
 app.use("/auth", authRoutes);
 app.use("/profile", requireAuth, profileRouter);
-app.get("/email/type", getEmailTypes);
-app.use("/thread", requireAuth, threadRoutes);
-app.use("/message", requireAuth, messageRoutes);
-app.use("/stats", requireAuth, statsRoutes);
-app.use("/mail", requireAuth, mailRoutes);
+app.use("/threads", requireAuth, threadRoutes);
+app.use("/messages", requireAuth, messageRoutes);
 
 // Global error handler
 const errorHandler: ErrorRequestHandler = (err, req, res, next) => {

@@ -64,7 +64,7 @@ export const getThread = async (req: Request, res: Response) => {
   }
 }
 
-export const getThreadMeta = async (req: Request, res: Response<ThreadMetaResponse | { error: string }>) => {
+export const getThreads = async (req: Request, res: Response<ThreadMetaResponse | { error: string }>) => {
   try {
 
     const { userId: clerkUserId } = getAuth(req);
