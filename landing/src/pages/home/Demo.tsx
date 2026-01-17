@@ -29,7 +29,7 @@ export default function Demo() {
   }, []);
 
   return (
-    <section className="py-20 relative overflow-hidden bg-background">
+    <section className="pt-10 pb-20 relative overflow-hidden bg-background">
       <div className="container mx-auto px-4">
         <div
           ref={containerRef}
