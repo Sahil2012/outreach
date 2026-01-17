@@ -1,16 +1,6 @@
 import { ThreadStatus, MessageStatus } from "@prisma/client";
 import z from "zod";
-
-
-const MessageSchema = z.object({
-    subject: z.string(),
-    body: z.string(),
-    id: z.number(),
-    threadId: z.number(),
-    date: z.string().datetime(),
-    fromUser: z.boolean(),
-    status: z.nativeEnum(MessageStatus)
-});
+import { MessageSchema } from "./messageSchema.js";
 
 const JobSchema = z.object({
     title: z.string().nullable(),
@@ -71,7 +61,6 @@ export const UpdateThreadSchema = z.object({
 
 export type UpdateThreadRequest = z.infer<typeof UpdateThreadSchema>;
 export type UpdateThreadResponse = z.infer<typeof UpdateThreadSchema>;
-export type Message = z.infer<typeof MessageSchema>;
 export type Job = z.infer<typeof JobSchema>;
 export type Employee = z.infer<typeof EmployeeSchema>;
 export type Thread = z.infer<typeof ThreadSchema>;
