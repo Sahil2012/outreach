@@ -6,9 +6,9 @@ import { enqueueResumeJob } from "../utils/enqueResume.js";
 import { getAuth } from "@clerk/express";
 import { toProfileDTO } from "../mapper/profileDTOMapper.js";
 import { getUserProfile, updateCredits, updateProfile as updateProfileService } from "../service/profileService.js";
-import { ProfileRequest, ProfileResponse, RechargeCreditsRequest, StatsResponse } from "../schema/profileSchema.js";
 import prisma from "../apis/prismaClient.js";
 import { getStats } from "../service/threadService.js";
+import { CreditRequest, CreditResponse, ProfileRequest, ProfileResponse, StatsResponse } from "../schema/profileSchema.js";
 
 // GET /profile
 export const getProfile = async (
@@ -61,7 +61,7 @@ export const updateProfile = async (
 // PUT /profile/resume
 export const uploadResume = async (
   req: Request,
-  res: Response<any>,
+  res: Response,
   next: NextFunction
 ) => {
 
@@ -132,8 +132,8 @@ export const uploadResume = async (
 
 // POST /profile/credits/transaction
 export const rechargeCredits = async (
-  req: Request<{}, {}, RechargeCreditsRequest>,
-  res: Response,
+  req: Request<{}, {}, CreditRequest>,
+  res: Response<CreditResponse>,
   next: NextFunction
 ) => {
 
@@ -143,9 +143,9 @@ export const rechargeCredits = async (
   logger.info("Initiating credit recharge", { userId: clerkUserId, amount });
 
   try {
-    await updateCredits(clerkUserId!, - amount * 20);
+    const profile = await updateCredits(clerkUserId!, - amount * 20);
     logger.info("Credits recharged successfully", { userId: clerkUserId, amount });
-    res.json({ message: "Credits recharged successfully" });
+    res.status(200).json({ amount: profile.credits });
   } catch (e) {
     logger.error("Error recharging credits", e);
     next(e);

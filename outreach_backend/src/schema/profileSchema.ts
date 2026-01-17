@@ -1,49 +1,47 @@
-import { z } from "zod";
+import { ProfileCompletenessStatus } from "@prisma/client";
+import z from "zod";
+import { JSONSchema } from "zod/v4/core";
 
 
-
-const experiencesSchema = z.array(z.object({
-    title: z.string(),
+const ExperienceSchema = z.object({
     company: z.string(),
-    startDate: z.string().nullable().optional(),
-    endDate: z.string().nullable().optional(),
-    description: z.string().nullable().optional(),
-}));
-
-export const ProfileSchema = z.object({
-    summary: z.string().nullable(),
-    education: z.any().nullable(),
-    skills: z.array(z.object({
-        name: z.string(),
-    })),
-    experiences: experiencesSchema,
-    status: z.string().nullable(),
-    firstName: z.string().nullable(),
-    lastName: z.string().nullable(),
-    resumeUrl: z.string().nullable().optional(),
-    credits: z.number().optional(),
+    role: z.string(),
+    startDate: z.date().optional(),
+    endDate: z.date().optional(),
+    description: z.string().optional(),
 });
 
-export const RechargeCreditsRequestSchema = z.object({
-    amount: z.number().int().positive(),
+const SkillSchema = z.object({
+    name: z.string(),
+    category: z.string().optional(),
 });
 
-export const RechargeCreditsResponseSchema = z.object({
-    message: z.string(),
+const ProfileSchema = z.object({
+    summary: z.string().optional(),
+    education: z.object(JSONSchema).optional(),
+    email: z.string().optional(),
+    firstName: z.string().optional(),
+    lastName: z.string().optional(),
+    phoneNo: z.string().optional(),
+    status: z.enum([ProfileCompletenessStatus.INCOMPLETE, ProfileCompletenessStatus.PARTIAL, ProfileCompletenessStatus.COMPLETE]).optional(),
+    credits: z.number(),
+    experience: z.array(ExperienceSchema).optional(),
+    skills: z.array(SkillSchema).optional(),
 });
 
-export const StatsResponseSchema = z.object({
-    reffered: z.number(),
+const StatsSchema = z.object({
+    followUp: z.number(),
+    absconded: z.number(),
     reachedOut: z.number(),
-    followUps: z.number(),
-    absonded: z.number(),
+    referred: z.number()
 });
 
-export type ProfileResponse = z.infer<typeof ProfileSchema>;
+const CreditsSchema = z.object({
+    amount: z.number()
+});
 
 export type ProfileRequest = z.infer<typeof ProfileSchema>;
-
-export type RechargeCreditsRequest = z.infer<typeof RechargeCreditsRequestSchema>;
-
-export type StatsResponse = z.infer<typeof StatsResponseSchema>;
-
+export type ProfileResponse = z.infer<typeof ProfileSchema>;
+export type StatsResponse = z.infer<typeof StatsSchema>;
+export type CreditResponse = z.infer<typeof CreditsSchema>;
+export type CreditRequest = z.infer<typeof CreditsSchema>;
