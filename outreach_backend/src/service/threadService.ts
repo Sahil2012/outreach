@@ -1,5 +1,4 @@
-import { MessageState, Prisma, ThreadStatus } from "@prisma/client";
-import { mapEmailTypeToDB } from "../mapper/emailTypeMapper.js";
+import { MessageStatus, Prisma, ThreadStatus } from "@prisma/client";
 import { log } from "console";
 import EmailType from "../types/EmailType.js";
 import externalMailService from "./externalMailService.js";
@@ -31,7 +30,6 @@ export async function createThread(
     data: {
       authUserId,
       employeeId,
-      type: mapEmailTypeToDB(type),
       lastUpdated: new Date(),
     },
   });
@@ -46,7 +44,7 @@ export async function getThreadPreview(
   return tx.thread.findUnique({
     where: { id: threadId, AND: { authUserId: authUserId } },
     include: {
-      Message: {
+      messages: {
         orderBy: {
           date: "desc",
         },
@@ -65,15 +63,15 @@ export async function getThreadById(
   return tx.thread.findUnique({
     where: { id: threadId, AND: { authUserId: authUserId } },
     include: {
-      Message: {
+      messages: {
         orderBy: {
           date: "asc",
         },
       },
-      Employee: true,
-      Job: {
+      employee: true,
+      jobs: {
         select: {
-          Job: true,
+          job: true,
         },
       },
     },
@@ -107,7 +105,10 @@ export async function syncThreadWithGoogle(
     code = err.message;
   }
 
-  return status ? { status } : { status, code };
+  return {
+    status,
+    code: status ? undefined : code
+  };
 }
 
 export async function getStats(
@@ -137,11 +138,11 @@ export async function getStats(
     },
     reffered: {
       authUserId,
-      status: ThreadStatus.REFFERED,
+      status: ThreadStatus.REFERRED,
     },
   };
 
-  const [followUps, absonded, reachedOut, reffered] = await Promise.all([
+  const [followUp, absconded, reachedOut, referred] = await Promise.all([
     tx.thread.count({ where: statQueries.followUps }),
     tx.thread.count({ where: statQueries.absonded }),
     tx.thread.count({ where: statQueries.reachedOut }),
@@ -149,10 +150,10 @@ export async function getStats(
   ]);
 
   return {
-    followUps,
-    absonded,
+    followUp,
+    absconded,
     reachedOut,
-    reffered,
+    referred,
   };
 }
 
@@ -162,7 +163,7 @@ export async function extractThreadMeta(
   page: number,
   pageSize: number,
   search?: string[],
-  messageState?: MessageState[],
+  messageState?: MessageStatus[],
   status?: ThreadStatus[]
 ) {
   const skip = (page - 1) * pageSize;
@@ -176,7 +177,7 @@ export async function extractThreadMeta(
 
   if (employeeFilter) {
     log("Applying employee filters:", employeeFilter);
-    whereClause.Employee = employeeFilter;
+    whereClause.employee = employeeFilter;
   }
 
   if (status && status.length > 0) {
@@ -186,7 +187,7 @@ export async function extractThreadMeta(
 
   if (messageState && messageState.length > 0) {
     log("Filtering by message states:", messageState);
-    whereClause.Message = { some: { state: { in: messageState } } };
+    whereClause.messages = { some: { status: { in: messageState } } };
   }
 
   log("Fetching threads for user:", authUserId);
@@ -200,26 +201,37 @@ export async function extractThreadMeta(
       select: {
         status: true,
         lastUpdated: true,
-        Employee: {
+        createdAt: true,
+        employee: {
           select: {
             name: true,
-            company: true,
             email: true,
           },
         },
-        Message: {
+        messages: {
           orderBy: { date: "desc" },
           take: 1,
           select: {
             id: true,
-            state: true,
+            status: true,
           },
         },
         automated: true,
-        type: true,
+        jobs: {
+          select: {
+            job: {
+              select: {
+                title: true,
+                company: true,
+                jobId: true,
+                description: true,
+              }
+            }
+          }
+        },
         id: true,
         _count: {
-          select: { Message: true },
+          select: { messages: true },
         },
       },
     }),
@@ -240,7 +252,7 @@ export async function linkToExternalThread(tx: Prisma.TransactionClient, threadI
     where: { id: threadId },
     data: {
       externalThreadId,
-      Message: {
+      messages: {
         updateMany: {
           where: {
             threadId: threadId
@@ -270,7 +282,7 @@ export async function upgradeThreadStatus(tx: Prisma.TransactionClient, threadId
   const currentStatus = await tx.thread.findUnique({ where: { id: threadId } });
   if (!currentStatus
     || currentStatus.status === ThreadStatus.CLOSED
-    || currentStatus.status === ThreadStatus.REFFERED
+    || currentStatus.status === ThreadStatus.REFERRED
     || currentStatus.status === ThreadStatus.DELETED
     || currentStatus.status === ThreadStatus.THIRD_FOLLOW_UP
   ) {
@@ -279,7 +291,7 @@ export async function upgradeThreadStatus(tx: Prisma.TransactionClient, threadId
 
   const lastMessage = await getLastMessage(tx, threadId, userId);
 
-  if (lastMessage?.state === MessageState.SENT) {
+  if (lastMessage?.status === MessageStatus.SENT) {
     log("Thread", threadId, "is already in SENT state");
     return;
   }

@@ -1,5 +1,66 @@
-import { z } from "zod";
-import { ThreadStatus } from "@prisma/client";
+import { ThreadStatus, MessageStatus } from "@prisma/client";
+import z from "zod";
+
+
+const MessageSchema = z.object({
+    subject: z.string(),
+    body: z.string(),
+    id: z.number(),
+    threadId: z.number(),
+    date: z.string().datetime(),
+    fromUser: z.boolean(),
+    status: z.nativeEnum(MessageStatus)
+});
+
+const JobSchema = z.object({
+    title: z.string().nullable(),
+    company: z.string().nullable(),
+    jobId: z.string(),
+    description: z.string().nullable()
+});
+
+export const EmployeeSchema = z.object({
+    name: z.string(),
+    email: z.string().nullable()
+});
+
+const ThreadBaseSchema = z.object({
+    id: z.number(),
+    createdAt: z.string().datetime(),
+    lastUpdated: z.string().datetime(),
+    status: z.nativeEnum(ThreadStatus),
+    automated: z.boolean(),
+    employee: EmployeeSchema,
+    jobs: z.array(JobSchema).optional()
+});
+
+const ThreadSchema = ThreadBaseSchema.extend({
+    messages: z.array(MessageSchema)
+});
+
+const ThreadDetailSchema = ThreadSchema.extend({
+    sync: z.object({
+        status: z.boolean(),
+        code: z.string().optional()
+    })
+});
+
+const ThreadMetaParamsSchema = z.object({
+    page: z.string().optional(),
+    pageSize: z.string().optional(),
+    status: z.nativeEnum(ThreadStatus).optional(),
+    search: z.string().optional(),
+    messageState: z.nativeEnum(MessageStatus).optional()
+});
+
+const ThreadMetaSchema = z.object({
+    threads: z.array(ThreadBaseSchema.extend({
+        messages: z.array(MessageSchema.pick({ id: true, status: true })),
+    })),
+    total: z.number().default(0),
+    page: z.number(),
+    pageSize: z.number()
+});
 
 export const UpdateThreadSchema = z.object({
     status: z.nativeEnum(ThreadStatus).optional(),
@@ -9,3 +70,12 @@ export const UpdateThreadSchema = z.object({
 });
 
 export type UpdateThreadRequest = z.infer<typeof UpdateThreadSchema>;
+export type UpdateThreadResponse = z.infer<typeof UpdateThreadSchema>;
+export type Message = z.infer<typeof MessageSchema>;
+export type Job = z.infer<typeof JobSchema>;
+export type Employee = z.infer<typeof EmployeeSchema>;
+export type Thread = z.infer<typeof ThreadSchema>;
+export type ThreadMetaParams = z.infer<typeof ThreadMetaParamsSchema>;
+export type ThreadMetaResponse = z.infer<typeof ThreadMetaSchema>;
+export type ThreadDetailResponse = z.infer<typeof ThreadDetailSchema>;
+export type ThreadResponse = z.infer<typeof ThreadBaseSchema>;
