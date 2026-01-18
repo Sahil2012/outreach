@@ -1,4 +1,4 @@
-import { MessageState, Prisma } from "@prisma/client";
+import { MessageStatus, Prisma } from "@prisma/client";
 import { log } from "console";
 
 export async function saveMessage(
@@ -11,7 +11,7 @@ export async function saveMessage(
 
   const lastMessage = await getLastMessage(tx, threadId, authUserId);
 
-  if (lastMessage && lastMessage.state == MessageState.DRAFT) {
+  if (lastMessage && lastMessage.status == MessageStatus.DRAFT) {
     log("Updating draft message for thread:", threadId, " by user:", authUserId);
     return tx.message.update({
       where: {
@@ -79,10 +79,10 @@ export async function updateMessage(
 export async function updateState(
   tx: Prisma.TransactionClient,
   messageId: number,
-  state: MessageState,
+  status: MessageStatus,
   authUserId: string
 ) {
-  console.log("Updating message ID:", messageId, "to state:", state);
+  console.log("Updating message ID:", messageId, "to status:", status);
 
   return tx.message.update({
     where: {
@@ -90,7 +90,7 @@ export async function updateState(
       authUserId: authUserId,
     },
     data: {
-      state,
+      status
     },
   });
 }
@@ -163,7 +163,7 @@ export async function deleteMessage(tx: Prisma.TransactionClient, messageId: num
     return null;
   }
 
-  if (message.state !== MessageState.DRAFT) {
+  if (message.status !== MessageStatus.DRAFT) {
     throw new Error("Message cannot be deleted unless it is in DRAFT state");
   }
 

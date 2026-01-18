@@ -15,7 +15,7 @@ export const MessageSchema = z.object({
 
 const MessageTypeSchema = z.array(z.nativeEnum(MessageType));
 
-const SendMailSchema = z.object({
+export const SendMailSchema = z.object({
     threadId: z.number().int().positive(),
     attachResume: z.boolean().optional(),
 });

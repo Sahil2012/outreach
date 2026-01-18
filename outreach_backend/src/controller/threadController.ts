@@ -20,7 +20,7 @@ export const getThread = async (
   next: NextFunction
 ) => {
 
-  const threadId = parseInt(req.params.threadId, 10);
+  const threadId = parseInt(req.params.threadId as string, 10);
 
   if (isNaN(threadId)) {
     return res.status(400).json({ error: "Invalid thread ID" });

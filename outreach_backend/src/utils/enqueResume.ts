@@ -2,7 +2,7 @@ import { Queue } from 'bullmq';
 import { redisConnection } from './redis.js';
 
 export const resumeQueue = new Queue('resume-processing', {
-  connection: redisConnection,
+  connection: redisConnection as any,
 });
 
 // Add job with retry and backoff configuration

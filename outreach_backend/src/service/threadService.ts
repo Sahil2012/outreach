@@ -1,6 +1,6 @@
 import { MessageStatus, Prisma, ThreadStatus } from "@prisma/client";
 import { log } from "console";
-import EmailType from "../types/EmailType.js";
+import EmailType from "../types/MessageType.js";
 import externalMailService from "./externalMailService.js";
 import { getLastMessage, populateMessagesForThread } from "./messageService.js";
 

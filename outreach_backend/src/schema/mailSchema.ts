@@ -47,7 +47,7 @@ export const GenerateMailSchema = z.discriminatedUnion("type", [
     ThankYouEmailSchema,
 ]);
 
-const DraftMailSchema = MessageSchema.pick({
+export const DraftMailSchema = MessageSchema.pick({
     subject: true,
     body: true,
     id: true,

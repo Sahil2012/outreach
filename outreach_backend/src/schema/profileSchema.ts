@@ -6,8 +6,8 @@ import { JSONSchema } from "zod/v4/core";
 const ExperienceSchema = z.object({
     company: z.string(),
     role: z.string(),
-    startDate: z.date().optional(),
-    endDate: z.date().optional(),
+    startDate: z.string().datetime().optional(),
+    endDate: z.string().datetime().optional(),
     description: z.string().optional(),
 });
 
@@ -16,7 +16,7 @@ const SkillSchema = z.object({
     category: z.string().optional(),
 });
 
-const ProfileSchema = z.object({
+export const ProfileSchema = z.object({
     summary: z.string().optional(),
     education: z.object(JSONSchema).optional(),
     email: z.string().optional(),
@@ -36,7 +36,7 @@ const StatsSchema = z.object({
     referred: z.number()
 });
 
-const CreditsSchema = z.object({
+export const CreditsSchema = z.object({
     amount: z.number()
 });
 

@@ -48,7 +48,7 @@ export const getMessage = async (
     req: Request,
     res: Response<MessageResponse | { error: string }>
 ) => {
-    const messageId = parseInt(req.params.messageId, 10);
+    const messageId = parseInt(req.params.messageId as string, 10);
 
     if (isNaN(messageId)) {
         return res.status(400).json({ error: "Invalid message ID" });
@@ -71,7 +71,7 @@ export const deleteMessage = async (
     res: Response<MessageResponse | { error: string }>
 ) => {
 
-    const messageId = parseInt(req.params.messageId, 10);
+    const messageId = parseInt(req.params.messageId as string, 10);
 
     if (isNaN(messageId)) {
         return res.status(400).json({ error: "Invalid message ID" });

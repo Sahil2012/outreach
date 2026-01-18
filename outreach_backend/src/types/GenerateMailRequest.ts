@@ -5,10 +5,6 @@ import {
   TailoredEmailBody,
   ThankYouEmailBody,
 } from "../schema/mailSchema.js";
-import EmailType from "./EmailType.js";
-
-
-
 
 export type TailoredEmailRequest = TailoredEmailBody & { userId: string };
 export type FollowupEmailRequest = FollowupEmailBody & { userId: string };

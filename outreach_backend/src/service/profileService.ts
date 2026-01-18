@@ -1,5 +1,4 @@
 import prisma from "../apis/prismaClient.js";
-import { ProfileDTO } from "../dto/response/ProfileDTO.js";
 import { ProfileCompletenessStatus } from "@prisma/client";
 import { ProfileRequest } from "../schema/profileSchema.js";
 
@@ -22,7 +21,7 @@ export const updateProfile = async (authUserId: string, profile: ProfileRequest)
     summary,
     education,
     skills,
-    experiences,
+    experience,
     status,
     firstName,
     lastName,
@@ -36,12 +35,12 @@ export const updateProfile = async (authUserId: string, profile: ProfileRequest)
       firstName,
       lastName,
       status: status ? (status as ProfileCompletenessStatus) : undefined,
-      experiences: experiences
+      experiences: experience
         ? {
           deleteMany: {},
-          create: experiences.map((exp) => ({
+          create: experience.map((exp) => ({
             companyName: exp.company,
-            role: exp.title,
+            role: exp.role,
             startDate: exp.startDate ? new Date(exp.startDate) : undefined,
             endDate: exp.endDate ? new Date(exp.endDate) : undefined,
             description: exp.description,
