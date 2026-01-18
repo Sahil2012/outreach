@@ -2,7 +2,7 @@ node_modules
 .env
 package-lock.json
 resume.pdf
-/generated/prisma
+/generated
 dist
 prisma/migrations
 credentials.json
