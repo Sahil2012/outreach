@@ -1,14 +1,14 @@
 import { Prisma } from "@prisma/client";
 import { GenerateMailRequest } from "../types/GenerateMailRequest.js";
 import { log } from "console";
-import EmailType from "../types/EmailType.js";
+import MessageType from "../types/MessageType.js";
 
 export async function upsertEmployee(
   tx: Prisma.TransactionClient,
   req: GenerateMailRequest
 ) {
 
-  if (req.type === EmailType.FOLLOWUP || req.type === EmailType.THANKYOU) {
+  if (req.type === MessageType.FOLLOW_UP || req.type === MessageType.THANK_YOU) {
     return;
   }
 

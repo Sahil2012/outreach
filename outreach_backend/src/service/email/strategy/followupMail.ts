@@ -23,20 +23,20 @@ export const followupEmailStrategy = async (followupRequest: FollowupEmailReques
             throw new Error(`Thread not found for id: ${followupRequest.threadId}`);
         }
 
-        log("Fetched thread with messages count: ", thread.Message.length);
+        log("Fetched thread with messages count: ", thread.messages.length);
 
         const prompt = PromptTemplate.fromTemplate(followUpPromptTemplate);
         const outputParser = StructuredOutputParser.fromZodSchema(emailSchema);
 
         const followUpEmail = await callLLM(
             await prompt.format({
-                email_thread: JSON.stringify(thread.Message.map(m => ({
+                email_thread: JSON.stringify(thread.messages.map(m => ({
                     sender: m.authUserId === followupRequest.userId ? "Me" : "Contact",
                     body: m.body,
                     subject: m.subject
                 }))),
                 user_name: "Sahil Gupta", // TODO: Fetch from user profile
-                contact_name: thread.Employee?.name || 'Recruiter',
+                contact_name: thread.employee?.name || 'Recruiter',
                 follow_up_reason: 'Checking on update',
                 emailSchema: outputParser.getFormatInstructions()
             })

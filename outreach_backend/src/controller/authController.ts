@@ -1,9 +1,10 @@
 import { Request, Response } from "express";
 import { Webhook } from "svix";
 import prisma from "../apis/prismaClient.js";
+import { AuthMeResponse, WebhookResponse } from "../schema/authSchema.js";
 
 // Webhook handler
-export const handleClerkWebhook = async (req: Request, res: Response) => {
+export const handleClerkWebhook = async (req: Request, res: Response<WebhookResponse>) => {
   const SIGNING_SECRET = process.env.CLERK_WEBHOOK_SECRET;
 
   if (!SIGNING_SECRET) {
@@ -50,10 +51,6 @@ export const handleClerkWebhook = async (req: Request, res: Response) => {
     });
     return
   }
-
-  // Do something with the payload
-  // For this guide, log payload to console
-  const { id } = evt.data;
   const eventType = evt.type;
 
   if (eventType === "user.created" || eventType === "user.updated") {
@@ -90,7 +87,7 @@ export const handleClerkWebhook = async (req: Request, res: Response) => {
 
 };
 // Client-side "Lazy Sync" handler
-export const getMe = async (req: Request, res: Response) => {
+export const getMe = async (req: Request, res: Response<AuthMeResponse>) => {
   const user = res.locals.user;
   res.status(200).json({ user, message: "User info retrieved" });
 };

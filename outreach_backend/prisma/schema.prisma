@@ -22,7 +22,6 @@ model UserProfileData {
   status        ProfileCompletenessStatus @default(INCOMPLETE)
   credits       Int                       @default(5)
   experiences   Experience[]
-  messages      Message[]
   profileSkills ProfilSkillMapping[]
   threads       Thread[]
 }
@@ -80,23 +79,22 @@ model Thread {
   id               Int                @id @default(autoincrement())
   authUserId       String
   employeeId       Int
-  type             EmailType
   createdAt        DateTime           @default(now())
   lastUpdated      DateTime
   status           ThreadStatus       @default(PENDING)
   automated        Boolean            @default(false)
   externalThreadId String?
-  Message          Message[]
+  messages         Message[]
   UserProfileData  UserProfileData    @relation(fields: [authUserId], references: [authUserId])
-  Employee         Employee           @relation(fields: [employeeId], references: [id])
-  Job              ThreadJobMapping[]
+  employee         Employee           @relation(fields: [employeeId], references: [id])
+  jobs             ThreadJobMapping[]
 }
 
 model ThreadJobMapping {
   id       Int    @id @default(autoincrement())
   threadId Int
   jobId    Int
-  Job      Job    @relation(fields: [jobId], references: [id])
+  job      Job    @relation(fields: [jobId], references: [id])
   Thread   Thread @relation(fields: [threadId], references: [id])
 
   @@unique([threadId, jobId])
@@ -111,8 +109,7 @@ model Message {
   date              DateTime        @default(now())
   fromUser          Boolean
   externalMessageId String?
-  state             MessageState    @default(DRAFT)
-  UserProfileData   UserProfileData @relation(fields: [authUserId], references: [authUserId])
+  status            MessageStatus   @default(DRAFT)
   thread            Thread          @relation(fields: [threadId], references: [id])
 }
 
@@ -124,13 +121,9 @@ enum RefStatus {
 
 enum ProfileCompletenessStatus {
   INCOMPLETE
+  PROCESSING
   PARTIAL
   COMPLETE
-}
-
-enum EmailType {
-  TAILORED
-  COLD
 }
 
 enum ThreadStatus {
@@ -139,12 +132,12 @@ enum ThreadStatus {
   SECOND_FOLLOW_UP
   THIRD_FOLLOW_UP
   CLOSED
-  REFFERED
+  REFERRED
   SENT
   DELETED
 }
 
-enum MessageState {
+enum MessageStatus {
   SENT
   DRAFT
 }

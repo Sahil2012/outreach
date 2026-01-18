@@ -1,8 +1,8 @@
 import { z } from "zod";
-import EmailType from "../types/EmailType.js";
+import EmailType from "../types/MessageType.js";
+import { MessageSchema } from "./messageSchema.js";
 
-// Common Contact Info Schema
-const ContactInfoSchema = z.object({
+const InceptionSchema = z.object({
     contactName: z.string().min(1, "Contact name is required"),
     contactEmail: z.string().email("Invalid email format").optional(),
     companyName: z.string().min(1, "Company name is required"),
@@ -15,27 +15,27 @@ const EmailRequestBaseSchema = z.object({
 });
 
 // Tailored Email Schema
-const TailoredEmailSchema = EmailRequestBaseSchema.merge(ContactInfoSchema).extend({
+const TailoredEmailSchema = EmailRequestBaseSchema.merge(InceptionSchema).extend({
     type: z.literal(EmailType.TAILORED),
     jobs: z.array(z.string()).min(1, "At least one job is required"),
     jobDescription: z.string().min(1, "Job description is required"),
 });
 
 // Cold Email Schema
-const ColdEmailSchema = EmailRequestBaseSchema.merge(ContactInfoSchema).extend({
+const ColdEmailSchema = EmailRequestBaseSchema.merge(InceptionSchema).extend({
     type: z.literal(EmailType.COLD),
     templateId: z.string().optional(),
 });
 
 // Followup Email Schema
 const FollowupEmailSchema = EmailRequestBaseSchema.extend({
-    type: z.literal(EmailType.FOLLOWUP),
+    type: z.literal(EmailType.FOLLOW_UP),
     threadId: z.number().int().positive("Thread ID must be a positive integer"),
 });
 
 // Thank You Email Schema
 const ThankYouEmailSchema = EmailRequestBaseSchema.extend({
-    type: z.literal(EmailType.THANKYOU),
+    type: z.literal(EmailType.THANK_YOU),
     threadId: z.number().int().positive("Thread ID must be a positive integer"),
 });
 
@@ -47,16 +47,17 @@ export const GenerateMailSchema = z.discriminatedUnion("type", [
     ThankYouEmailSchema,
 ]);
 
+export const DraftMailSchema = MessageSchema.pick({
+    subject: true,
+    body: true,
+    id: true,
+}).extend({
+    threadId: z.number().int().positive("Thread ID must be a positive integer"),
+});
+
+export type DraftMailResponse = z.infer<typeof DraftMailSchema>;
 export type GenerateMailBody = z.infer<typeof GenerateMailSchema>;
 export type TailoredEmailBody = z.infer<typeof TailoredEmailSchema>;
 export type ColdEmailBody = z.infer<typeof ColdEmailSchema>;
 export type FollowupEmailBody = z.infer<typeof FollowupEmailSchema>;
 export type ThankYouEmailBody = z.infer<typeof ThankYouEmailSchema>;
-
-export const SendMailSchema = z.object({
-    threadId: z.number().int().positive(),
-    messageId: z.number().int().positive(),
-    attachResume: z.boolean().optional(),
-});
-
-export type SendMailDto = z.infer<typeof SendMailSchema>;

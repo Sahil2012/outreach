@@ -6,14 +6,17 @@ import { enqueueResumeJob } from "../utils/enqueResume.js";
 import { getAuth } from "@clerk/express";
 import { toProfileDTO } from "../mapper/profileDTOMapper.js";
 import { getUserProfile, updateCredits, updateProfile as updateProfileService } from "../service/profileService.js";
-import { RechargeCreditsRequest, UpdateProfileRequest } from "../schema/profileSchema.js";
-import { ProfileDTO } from "../dto/reponse/ProfileDTO.js";
 import prisma from "../apis/prismaClient.js";
-import { StatsDTO } from "../dto/reponse/StatsDTO.js";
 import { getStats } from "../service/threadService.js";
+import { CreditRequest, CreditResponse, ProfileRequest, ProfileResponse, StatsResponse } from "../schema/profileSchema.js";
 
 // GET /profile
-export const getProfile = async (req: Request, res: Response<ProfileDTO | any>, next: NextFunction) => {
+export const getProfile = async (
+  req: Request,
+  res: Response<ProfileResponse | any>,
+  next: NextFunction
+) => {
+
   try {
     const { userId } = getAuth(req);
 
@@ -36,11 +39,16 @@ export const getProfile = async (req: Request, res: Response<ProfileDTO | any>, 
 };
 
 // PATCH /profile
-export const updateProfile = async (req: Request<{}, {}, UpdateProfileRequest>, res: Response, next: NextFunction) => {
+export const updateProfile = async (
+  req: Request<{}, {}, ProfileRequest>,
+  res: Response,
+  next: NextFunction
+) => {
+
   try {
     const { userId: clerkUserId } = getAuth(req);
 
-    const updatedProfile = await updateProfileService(clerkUserId!, req.body as any);
+    const updatedProfile = await updateProfileService(clerkUserId!, req.body);
 
     logger.info("Profile updated successfully", { userId: clerkUserId });
     res.json({ message: "Profile updated", data: updatedProfile });
@@ -51,7 +59,12 @@ export const updateProfile = async (req: Request<{}, {}, UpdateProfileRequest>, 
 };
 
 // PUT /profile/resume
-export const uploadResume = async (req: Request, res: Response<any>, next: NextFunction) => {
+export const uploadResume = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+
   const { userId: clerkUserId } = getAuth(req);
   logger.info("Starting resume upload", { userId: clerkUserId });
 
@@ -118,16 +131,21 @@ export const uploadResume = async (req: Request, res: Response<any>, next: NextF
 };
 
 // POST /profile/credits/transaction
-export const rechargeCredits = async (req: Request<{}, {}, RechargeCreditsRequest>, res: Response, next: NextFunction) => {
+export const rechargeCredits = async (
+  req: Request<{}, {}, CreditRequest>,
+  res: Response<CreditResponse>,
+  next: NextFunction
+) => {
+
   const { userId: clerkUserId } = getAuth(req);
   const amount = req.body.amount;
 
   logger.info("Initiating credit recharge", { userId: clerkUserId, amount });
 
   try {
-    await updateCredits(clerkUserId!, - amount * 20);
+    const profile = await updateCredits(clerkUserId!, - amount * 20);
     logger.info("Credits recharged successfully", { userId: clerkUserId, amount });
-    res.json({ message: "Credits recharged successfully" });
+    res.status(200).json({ amount: profile.credits });
   } catch (e) {
     logger.error("Error recharging credits", e);
     next(e);
@@ -135,7 +153,11 @@ export const rechargeCredits = async (req: Request<{}, {}, RechargeCreditsReques
 }
 
 // GET /profile/stats
-export const extractStats = async (req: Request, res: Response<StatsDTO | { error: string }>, next: NextFunction) => {
+export const extractStats = async (
+  req: Request,
+  res: Response<StatsResponse | { error: string }>,
+  next: NextFunction
+) => {
   const { userId: clerkUserId } = getAuth(req);
   logger.info("Extracting stats", { userId: clerkUserId });
   try {

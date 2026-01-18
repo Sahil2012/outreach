@@ -1,11 +1,8 @@
-import { EmployeeDTO } from "../dto/reponse/EmployeeDTO.js";
+import { Employee } from "../schema/threadSchema.js";
 
-export const toEmployeeDTO = (employee: any): EmployeeDTO => {
+export const toEmployeeDTO = (employee: any): Employee => {
     return {
-        id: employee.id,
         name: employee.name,
         email: employee.email ?? null,
-        company: employee.company ?? null,
-        position: employee.position ?? null,
     };
 }

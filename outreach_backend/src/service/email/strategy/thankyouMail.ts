@@ -17,7 +17,7 @@ export const thankyouEmailStrategy = async (emailRequest: ThankYouEmailRequest) 
         error("Thread not found");
         throw new Error("Thread not found");
     }
-    const lastMessage = thread?.Message.at(-1);
+    const lastMessage = thread?.messages.at(-1);
     if (!lastMessage) {
         error("Last message not found");
         throw new Error("Last message not found");

@@ -7,7 +7,7 @@ import { upsertEmployee } from "./employeeService.js";
 import { handleTailoredJobs } from "./jobService.js";
 import { saveMessage } from "./messageService.js";
 import { createThread } from "./threadService.js";
-import EmailType from "../types/EmailType.js";
+import MessageType from "../types/MessageType.js";
 
 
 export async function saveDraftEmail(
@@ -47,13 +47,13 @@ async function resolveThread(
   employeeId: number,
   req: GenerateMailRequest
 ) {
-  if (req.type === EmailType.FOLLOWUP || req.type === EmailType.THANKYOU) {
+  if (req.type === MessageType.FOLLOW_UP || req.type === MessageType.THANK_YOU) {
     return { id: req.threadId };
   }
 
   const thread = await createThread(tx, authUserId, employeeId, req.type);
 
-  if (req.type === EmailType.TAILORED) {
+  if (req.type === MessageType.TAILORED) {
     await handleTailoredJobs(tx, thread.id, req.jobs, req.jobDescription);
   }
 

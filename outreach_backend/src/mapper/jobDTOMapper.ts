@@ -1,11 +1,11 @@
-import { JobDTO } from "../dto/reponse/JobDTO.js";
+import { Job } from "../schema/threadSchema.js";
 
-export const toJobDTO = (job: any): JobDTO => {
+export const toJobDTO = (job: any): Job => {
 
     return {
-        id: job.id,
         title: job.title,
         description: job.description ?? null,
         jobId: job.jobId ?? null,
+        company: job.company
     };
 }

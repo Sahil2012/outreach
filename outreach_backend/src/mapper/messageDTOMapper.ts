@@ -1,13 +1,13 @@
-import { MessageDTO } from "../dto/reponse/MessageDTO.js";
+import { Message } from "../schema/messageSchema.js";
 
-export const toMessageDTO = (message: any): MessageDTO => {
+export const toMessageDTO = (message: any): Message => {
     return {
         subject: message.subject,
         body: message.body,
         threadId: message.threadId,
-        messageId: message.id,
-        dateSent: message.date ? message.date.toISOString() : null,
+        id: message.id,
+        date: message.date ? message.date.toISOString() : null,
         fromUser: message.fromUser,
-        state: message.state,
+        status: message.state,
     };
 }

@@ -1,39 +1,37 @@
 import { google } from "googleapis";
 import { log } from "console";
 import nodemailer from "nodemailer";
-import { SendMailDto } from "../dto/request/SendMailDto.js";
 import prisma from "../apis/prismaClient.js";
-import { getThreadById } from "./threadService.js";
-
 import { storageService } from "./storageService.js";
 import { Readable } from "stream";
 import { getGoogleAccessToken } from "../apis/googleOAuth2Client.js";
+import { SendMailRequest } from "../schema/messageSchema.js";
 
 export class MailService {
-  async sendMail(userId: string, mailData: SendMailDto) {
+  async sendMail(userId: string, mailData: SendMailRequest & { messageId: number }) {
     const { threadId, messageId, attachResume } = mailData;
 
     // 1. Fetch & Validate Data
     const thread = await prisma.thread.findUnique({
       where: { id: threadId, authUserId: userId },
       include: {
-        Message: {
+        messages: {
           where: { id: messageId },
         },
-        Employee: true,
+        employee: true,
       },
     });
 
-    if (!thread || !thread.Employee) {
+    if (!thread || !thread.employee) {
       throw new Error("Thread not found or Employee details missing");
     }
 
-    const message = thread.Message[0];
+    const message = thread.messages[0];
     if (!message) {
       throw new Error("Message not found");
     }
 
-    const to = thread.Employee.email;
+    const to = thread.employee.email;
     const { subject, body: text } = message;
 
     if (!to || !subject || !text) {

@@ -1,6 +1,6 @@
 import prisma from "../apis/prismaClient.js";
-import { ProfileDTO } from "../dto/reponse/ProfileDTO.js";
 import { ProfileCompletenessStatus } from "@prisma/client";
+import { ProfileRequest } from "../schema/profileSchema.js";
 
 export const getUserProfile = async (userId: string) => {
   return await prisma.userProfileData.findUnique({
@@ -16,12 +16,12 @@ export const getUserProfile = async (userId: string) => {
   });
 };
 
-export const updateProfile = async (authUserId: string, profile: ProfileDTO) => {
+export const updateProfile = async (authUserId: string, profile: ProfileRequest) => {
   const {
     summary,
     education,
     skills,
-    experiences,
+    experience,
     status,
     firstName,
     lastName,
@@ -35,12 +35,12 @@ export const updateProfile = async (authUserId: string, profile: ProfileDTO) => 
       firstName,
       lastName,
       status: status ? (status as ProfileCompletenessStatus) : undefined,
-      experiences: experiences
+      experiences: experience
         ? {
           deleteMany: {},
-          create: experiences.map((exp) => ({
+          create: experience.map((exp) => ({
             companyName: exp.company,
-            role: exp.title,
+            role: exp.role,
             startDate: exp.startDate ? new Date(exp.startDate) : undefined,
             endDate: exp.endDate ? new Date(exp.endDate) : undefined,
             description: exp.description,

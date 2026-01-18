@@ -1,14 +1,29 @@
-import { z } from "zod";
+import { MessageStatus } from "@prisma/client";
+import z from "zod";
+import MessageType from "../types/MessageType.js";
 
-export const EditMessageSchema = z.object({
-    subject: z.string().min(1, "Subject is required"),
-    body: z.string().min(1, "Body is required"),
+
+export const MessageSchema = z.object({
+    id: z.number(),
+    subject: z.string(),
+    body: z.string(),
+    threadId: z.number(),
+    date: z.string().datetime(),
+    fromUser: z.boolean(),
+    status: z.nativeEnum(MessageStatus)
 });
 
-export type EditMessageRequest = z.infer<typeof EditMessageSchema>;
+const MessageTypeSchema = z.array(z.nativeEnum(MessageType));
 
-export const MarkMessageAsSentSchema = z.object({
-    threadId: z.number().int().positive("Thread ID must be a positive integer"),
+export const SendMailSchema = z.object({
+    threadId: z.number().int().positive(),
+    attachResume: z.boolean().optional(),
 });
 
-export type MarkMessageAsSentRequest = z.infer<typeof MarkMessageAsSentSchema>;
+
+export type SendMailRequest = z.infer<typeof SendMailSchema>;
+
+export type MessageTypeResponse = z.infer<typeof MessageTypeSchema>;
+export type Message = z.infer<typeof MessageSchema>;
+export type MessageRequest = z.infer<typeof MessageSchema>;
+export type MessageResponse = z.infer<typeof MessageSchema>;

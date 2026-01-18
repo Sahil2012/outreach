@@ -4,7 +4,6 @@ import cors from "cors";
 import profileRouter from "./routes/profileRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import { clerkMiddleware } from "@clerk/express"
-import { getEmailTypes } from "./controller/emailController.js";
 import threadRoutes from "./routes/threadRoutes.js";
 import messageRoutes from "./routes/messageRoutes.js";
 import { requireAuth } from "./middlleware/requireAuth.js";

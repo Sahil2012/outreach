@@ -1,42 +1,47 @@
-import { z } from "zod";
+import { ProfileCompletenessStatus } from "@prisma/client";
+import z from "zod";
+import { JSONSchema } from "zod/v4/core";
 
-const EducationSchema = z.object({
-    school: z.string().optional(),
-    degree: z.string().optional(),
-    fieldOfStudy: z.string().optional(),
-    startDate: z.string().optional().nullable(),
-    endDate: z.string().optional().nullable(),
-    description: z.string().optional().nullable(),
+
+const ExperienceSchema = z.object({
+    company: z.string(),
+    role: z.string(),
+    startDate: z.string().datetime().optional(),
+    endDate: z.string().datetime().optional(),
+    description: z.string().optional(),
 });
 
 const SkillSchema = z.object({
-    name: z.string().min(1, "Skill name is required"),
+    name: z.string(),
+    category: z.string().optional(),
 });
 
-const ExperienceSchema = z.object({
-    title: z.string().min(1, "Title is required"),
-    company: z.string().min(1, "Company is required"),
-    startDate: z.string().optional().nullable(),
-    endDate: z.string().optional().nullable(),
-    description: z.string().optional().nullable(),
-});
-
-export const UpdateProfileSchema = z.object({
-    firstName: z.string().optional().nullable(),
-    lastName: z.string().optional().nullable(),
-    summary: z.string().optional().nullable(),
-    education: z.array(EducationSchema).optional().nullable(),
+export const ProfileSchema = z.object({
+    summary: z.string().optional(),
+    education: z.object(JSONSchema).optional(),
+    email: z.string().optional(),
+    firstName: z.string().optional(),
+    lastName: z.string().optional(),
+    phoneNo: z.string().optional(),
+    status: z.enum([ProfileCompletenessStatus.INCOMPLETE, ProfileCompletenessStatus.PARTIAL, ProfileCompletenessStatus.COMPLETE]).optional(),
+    credits: z.number(),
+    experience: z.array(ExperienceSchema).optional(),
     skills: z.array(SkillSchema).optional(),
-    experiences: z.array(ExperienceSchema).optional(),
-    status: z.string().optional().nullable(),
-    resumeUrl: z.string().optional().nullable(),
-    credits: z.number().optional(),
 });
 
-export type UpdateProfileRequest = z.infer<typeof UpdateProfileSchema>;
-
-export const RechargeCreditsSchema = z.object({
-    amount: z.number().int().positive("Amount must be a positive integer"),
+const StatsSchema = z.object({
+    followUp: z.number(),
+    absconded: z.number(),
+    reachedOut: z.number(),
+    referred: z.number()
 });
 
-export type RechargeCreditsRequest = z.infer<typeof RechargeCreditsSchema>;
+export const CreditsSchema = z.object({
+    amount: z.number()
+});
+
+export type ProfileRequest = z.infer<typeof ProfileSchema>;
+export type ProfileResponse = z.infer<typeof ProfileSchema>;
+export type StatsResponse = z.infer<typeof StatsSchema>;
+export type CreditResponse = z.infer<typeof CreditsSchema>;
+export type CreditRequest = z.infer<typeof CreditsSchema>;
