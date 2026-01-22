@@ -12,7 +12,6 @@ import {
   Pencil,
 } from "lucide-react";
 import { format } from "date-fns";
-import { Experience } from "@/lib/types";
 import {
   Popover,
   PopoverContent,
@@ -20,6 +19,7 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
+import { Experience } from "@/api/profile/types";
 
 interface ExperienceSectionProps {
   experiences: Experience[];
@@ -43,7 +43,7 @@ function DateInput({
           variant="outline"
           className={cn(
             "w-full justify-between font-normal",
-            !value && "text-muted-foreground"
+            !value && "text-muted-foreground",
           )}
         >
           {value ? (
@@ -76,13 +76,13 @@ export function ExperienceSection({
 }: Readonly<ExperienceSectionProps>) {
   const [isAddingExperience, setIsAddingExperience] = useState(false);
   const [currentExperience, setCurrentExperience] = useState<Experience>({
-    title: "",
+    role: "",
     company: "",
   });
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
   const saveExperience = () => {
-    if (currentExperience.title && currentExperience.company) {
+    if (currentExperience.role && currentExperience.company) {
       if (editingIndex !== null) {
         const updatedExperience = [...experiences];
         updatedExperience[editingIndex] = currentExperience;
@@ -91,7 +91,7 @@ export function ExperienceSection({
       } else {
         setExperiences([...experiences, currentExperience]);
       }
-      setCurrentExperience({ title: "", company: "" });
+      setCurrentExperience({ role: "", company: "" });
       setIsAddingExperience(false);
     }
   };
@@ -106,7 +106,7 @@ export function ExperienceSection({
     setExperiences(experiences.filter((_, i) => i !== index));
     if (editingIndex === index) {
       setEditingIndex(null);
-      setCurrentExperience({ title: "", company: "" });
+      setCurrentExperience({ role: "", company: "" });
       setIsAddingExperience(false);
     }
   };
@@ -114,7 +114,7 @@ export function ExperienceSection({
   const handleCancel = () => {
     setIsAddingExperience(false);
     setEditingIndex(null);
-    setCurrentExperience({ title: "", company: "" });
+    setCurrentExperience({ role: "", company: "" });
   };
 
   return (
@@ -133,13 +133,11 @@ export function ExperienceSection({
             <Card key={index} className="bg-muted/10 border-border/40">
               <CardContent className="p-4 flex justify-between items-start">
                 <div>
-                  <h4 className="font-semibold">{exp.title}</h4>
+                  <h4 className="font-semibold">{exp.role}</h4>
                   <p className="text-sm text-muted-foreground">{exp.company}</p>
                   <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
                     {exp.startDate && (
-                      <span>
-                        {format(new Date(exp.startDate), "MMM yyyy")}
-                      </span>
+                      <span>{format(new Date(exp.startDate), "MMM yyyy")}</span>
                     )}
                     {(exp.startDate || exp.endDate) && <span>-</span>}
                     {exp.endDate ? (
@@ -179,11 +177,11 @@ export function ExperienceSection({
             <div className="p-4 border border-border/40 rounded-3xl space-y-4 bg-muted/5 animate-in fade-in slide-in-from-top-2">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input
-                  value={currentExperience.title}
+                  value={currentExperience.role}
                   onChange={(e) =>
                     setCurrentExperience({
                       ...currentExperience,
-                      title: e.target.value,
+                      role: e.target.value,
                     })
                   }
                   placeholder="Job Title"
@@ -202,21 +200,21 @@ export function ExperienceSection({
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <DateInput
-                  value={currentExperience.start_date}
+                  value={currentExperience.startDate}
                   onChange={(date) =>
                     setCurrentExperience({
                       ...currentExperience,
-                      start_date: date,
+                      startDate: date?.toLocaleString(),
                     })
                   }
                   placeholder="Start Date"
                 />
                 <DateInput
-                  value={currentExperience.end_date}
+                  value={currentExperience.endDate}
                   onChange={(date) =>
                     setCurrentExperience({
                       ...currentExperience,
-                      end_date: date,
+                      endDate: date?.toLocaleDateString(),
                     })
                   }
                   placeholder="End Date"
@@ -242,7 +240,7 @@ export function ExperienceSection({
                   size="icon"
                   onClick={saveExperience}
                   disabled={
-                    !currentExperience.title || !currentExperience.company
+                    !currentExperience.role || !currentExperience.company
                   }
                 >
                   <Check className="w-4 h-4" />

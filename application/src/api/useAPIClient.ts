@@ -3,11 +3,11 @@ import axios, { AxiosInstance } from 'axios';
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router';
 
-export const useApi = (): AxiosInstance => {
+export const useAPIClient = (): AxiosInstance => {
   const { getToken } = useAuth();
   const navigate = useNavigate();
 
-  const api = useMemo(() => {
+  const client = useMemo(() => {
     const baseURL = import.meta.env.VITE_BACKEND_BASE_URL;
 
     if (!baseURL) {
@@ -24,11 +24,12 @@ export const useApi = (): AxiosInstance => {
     instance.interceptors.request.use(
       async (config) => {
         const token = await getToken();
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
-        } else {
+        if (!token) {
           navigate('/login');
+          return Promise.reject("No auth token");
         }
+
+        config.headers.Authorization = `Bearer ${token}`;
         return config;
       },
       (error) => {
@@ -49,7 +50,7 @@ export const useApi = (): AxiosInstance => {
     );
 
     return instance;
-  }, [getToken]);
+  }, [getToken, navigate]);
 
-  return api;
+  return client;
 };

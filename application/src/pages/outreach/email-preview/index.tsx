@@ -1,37 +1,51 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader } from "@/components/ui/loader";
-import { useOutreach } from "@/hooks/useOutreach";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useNavigate, useParams, useLocation } from "react-router";
 import { GenerateEmailResponse } from "@/lib/types";
 import { EmailEditor } from "./EmailEditor";
 import { toast } from "sonner";
-
+import { useMessage } from "@/api/messages/hooks/useMessageData";
+import { useMessageActions } from "@/api/messages/hooks/useMessageActions";
 
 const EmailPreviewPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   // Parse messageId from URL if available
-  const parsedId = id ? parseInt(id, 10) : undefined;
+  const parsedId = Number(id);
 
   const navigate = useNavigate();
   const location = useLocation();
   const state = location.state as GenerateEmailResponse | undefined;
 
+  // const {
+  //   draft,
+  //   isLoadingDraft,
+  //   draftError,
+  //   isPolling,
+  //   startPolling,
+  //   stopPolling,
+  //   updateDraft,
+  //   updateMessage,
+  //   isUpdating
+  // } = useOutreach(parsedId, { skipFetch: !!state });
   const {
-    draft,
-    isLoadingDraft,
-    draftError,
-    isPolling,
-    startPolling,
-    stopPolling,
-    updateDraft,
-    updateMessage,
-    isUpdating
-  } = useOutreach(parsedId, { skipFetch: !!state });
+    data: draft,
+    isLoading: isLoadingDraft,
+    error: draftError,
+  } = useMessage(parsedId);
+  const { updateDraft } = useMessageActions();
 
-  const [localEmail, setLocalEmail] = useState<{ subject: string; body: string } | null>(null);
-  const [messageId] = useState<number | undefined>(state?.messageId || parsedId);
+  const [localEmail, setLocalEmail] = useState<{
+    subject?: string;
+    body?: string;
+  }>({
+    subject: state?.subject || draft?.subject,
+    body: state?.body || draft?.body,
+  });
+  const [messageId] = useState<number | undefined>(
+    state?.messageId || parsedId,
+  );
 
   // Handle Polling & Initialization
   useEffect(() => {
@@ -43,60 +57,23 @@ const EmailPreviewPage: React.FC = () => {
       if (!localEmail) {
         setLocalEmail({
           subject: state.subject,
-          body: state.body
+          body: state.body,
         });
       }
       return; // Skip polling logic if we have state
     }
-
-    if (!draft) return;
-
-    if (draft.isMailGenerated) {
-      if (isPolling) stopPolling();
-
-      // Initialize local state if not set, or if we just finished generating (transition from null/empty to content)
-      if (!localEmail) {
-        setLocalEmail({
-          subject: draft.email?.subject || "",
-          body: draft.email?.body || ""
-        });
-      }
-    } else {
-      startPolling();
-    }
-  }, [draft, isPolling, startPolling, stopPolling, localEmail, state]);
-
-  useEffect(() => {
-    // Cleanup polling on unmount
-    return () => {
-      stopPolling();
-    };
-  }, [stopPolling]);
-
+  }, [state]);
 
   const handleContinue = async () => {
     if (!id || !localEmail) return;
     try {
       if (messageId) {
-        await updateMessage({
-          messageId,
-          subject: localEmail.subject,
-          body: localEmail.body
+        await updateDraft.mutateAsync({
+          id: parsedId,
+          subject: localEmail.subject || "",
+          body: localEmail.body || "",
         });
-      } else {
-        // Fallback to updateDraft if we somehow don't have a messageId
-        // This path should ideally be unreachable if logic is correct
-        if (id) {
-          await updateDraft({
-            id,
-            payload: {
-              subject: localEmail.subject,
-              body: localEmail.body,
-            }
-          });
-        }
       }
-
       navigate(`/outreach/send/${id}`);
     } catch (error) {
       console.error("Failed to update email", error);
@@ -117,39 +94,49 @@ const EmailPreviewPage: React.FC = () => {
   if (draftError) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
-        <div className="text-destructive font-medium">Failed to load draft.</div>
-        <Button variant="outline" onClick={() => window.location.reload()}>Retry</Button>
+        <div className="text-destructive font-medium">
+          Failed to load draft.
+        </div>
+        <Button variant="outline" onClick={() => window.location.reload()}>
+          Retry
+        </Button>
       </div>
     );
   }
 
-  // Still generating
-  if (draft && !draft.isMailGenerated) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
-        <Loader size="lg" />
-        <p className="text-muted-foreground animate-pulse">Generating your email...</p>
-      </div>
-    );
-  }
-
-  if (!localEmail) return null; // Should be initializing
+  // Still generating - TODO: Not required now. Remove
+  // if (draft && !draft.isMailGenerated) {
+  //   return (
+  //     <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
+  //       <Loader size="lg" />
+  //       <p className="text-muted-foreground animate-pulse">
+  //         Generating your email...
+  //       </p>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="animate-fadeIn space-y-6">
       <EmailEditor
-        subject={localEmail.subject}
-        body={localEmail.body}
-        onSubjectChange={(val) => setLocalEmail(prev => prev ? ({ ...prev, subject: val }) : null)}
-        onBodyChange={(val) => setLocalEmail(prev => prev ? ({ ...prev, body: val }) : null)}
+        subject={localEmail.subject || ""}
+        body={localEmail.body || ""}
+        onSubjectChange={(val) =>
+          setLocalEmail((prev) => ({ ...prev, subject: val }))
+        }
+        onBodyChange={(val) =>
+          setLocalEmail((prev) => ({ ...prev, body: val }))
+        }
       />
 
       <div className="flex justify-between pt-4">
         <Button
           variant="outline"
           size="lg"
-          onClick={() => navigate(`/outreach/recipient-info?templateId=${draft?.type}`)}
-          disabled={isUpdating}
+          onClick={() =>
+            navigate(`/outreach/recipient-info?templateId=${draft?.type}`)
+          }
+          disabled={updateDraft.isPending}
         >
           <ArrowLeft className="w-4 h-4 mr-1 -ml-1" />
           Back
@@ -157,9 +144,9 @@ const EmailPreviewPage: React.FC = () => {
         <Button
           size="lg"
           onClick={handleContinue}
-          disabled={isUpdating}
+          disabled={updateDraft.isPending}
         >
-          {isUpdating ? <Loader className="mr-2" /> : null}
+          {updateDraft.isPending ? <Loader className="mr-2" /> : null}
           Continue
           <ArrowRight className="w-4 h-4 ml-1 -mr-1" />
         </Button>

@@ -1,43 +1,52 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router';
-import { useUser } from '@clerk/clerk-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../components/ui/card';
-import { Button } from '../../components/ui/button';
-import { Input } from '../../components/ui/input';
-import { Loader } from '../../components/ui/loader';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router";
+import { useUser } from "@clerk/clerk-react";
 import {
-  Save,
-  User,
-  Camera,
-} from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '../../components/ui/avatar';
-import { Label } from '../../components/ui/label';
-import { useProfile } from '@/hooks/useProfile';
-import { Project, Education, Experience } from '@/lib/types';
-import { toast } from 'sonner';
-import { SkillsSection } from '../onboarding/professional-info/SkillsSection';
-import { ExperienceSection } from '../onboarding/professional-info/ExperienceSection';
-import { ProjectsSection } from '../onboarding/professional-info/ProjectsSection';
-import { EducationSection } from '../onboarding/professional-info/EducationSection';
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "../../components/ui/card";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import { Loader } from "../../components/ui/loader";
+import { Save, User, Camera } from "lucide-react";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "../../components/ui/avatar";
+import { Label } from "../../components/ui/label";
+// import { useProfile } from '@/hooks/useProfile';
+import { toast } from "sonner";
+import { SkillsSection } from "../onboarding/professional-info/SkillsSection";
+import { ExperienceSection } from "../onboarding/professional-info/ExperienceSection";
+import { ProjectsSection } from "../onboarding/professional-info/ProjectsSection";
+import { EducationSection } from "../onboarding/professional-info/EducationSection";
+import { useProfile } from "@/api/profile/hooks/useProfileData";
+import { useProfileActions } from "@/api/profile/hooks/useProfileActions";
+import { Experience } from "@/api/profile/types";
 
 export default function ProfilePage() {
   const { user, isLoaded: isUserLoaded } = useUser();
-  const { profile, isLoading, updateProfile, isUpdating } = useProfile();
+  const { data: profile, isLoading } = useProfile();
+  const { updateProfile } = useProfileActions();
   const navigate = useNavigate();
 
   const [skills, setSkills] = useState<{ name: string }[]>([]);
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [education, setEducation] = useState<Education[]>([]);
+  const [projects, setProjects] = useState<any[]>([]);
+  const [education, setEducation] = useState<any[]>([]);
   const [experiences, setExperiences] = useState<Experience[]>([]);
 
   // Personal Info State
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
 
   // Track original data for change detection
   const [originalData, setOriginalData] = useState({
-    firstName: '',
-    lastName: '',
+    firstName: "",
+    lastName: "",
     skills: [] as { name: string }[],
     projects: [] as Project[],
     education: [] as Education[],
@@ -47,8 +56,8 @@ export default function ProfilePage() {
   // Initialize from Clerk user
   useEffect(() => {
     if (isUserLoaded && user) {
-      setFirstName(user.firstName || '');
-      setLastName(user.lastName || '');
+      setFirstName(user.firstName || "");
+      setLastName(user.lastName || "");
     }
   }, [isUserLoaded, user]);
 
@@ -56,9 +65,10 @@ export default function ProfilePage() {
   useEffect(() => {
     if (profile) {
       const profileSkills = profile.skills || [];
-      const profileProjects = profile.projects || [];
+      // const profileProjects = profile.projects || [];
+      const profileProjects: any[] = [];
       const profileEducation = profile.education || [];
-      const profileExperiences = profile.experiences || [];
+      const profileExperiences: Experience[] = profile.experiences || [];
 
       setSkills(profileSkills);
       setProjects(profileProjects);
@@ -67,8 +77,8 @@ export default function ProfilePage() {
 
       // Store original data for comparison
       setOriginalData({
-        firstName: user?.firstName || '',
-        lastName: user?.lastName || '',
+        firstName: user?.firstName || "",
+        lastName: user?.lastName || "",
         skills: JSON.parse(JSON.stringify(profileSkills)),
         projects: JSON.parse(JSON.stringify(profileProjects)),
         education: JSON.parse(JSON.stringify(profileEducation)),
@@ -91,16 +101,16 @@ export default function ProfilePage() {
 
   const handleSave = async () => {
     try {
-      await updateProfile({
+      await updateProfile.mutateAsync({
         firstName,
         lastName,
         skills,
-        projects,
+        // projects,
         education,
         experiences,
       });
-      toast.success('Profile updated successfully!');
-      
+      toast.success("Profile updated successfully!");
+
       // Update original data to current state after successful save
       setOriginalData({
         firstName,
@@ -110,11 +120,11 @@ export default function ProfilePage() {
         education: JSON.parse(JSON.stringify(education)),
         experiences: JSON.parse(JSON.stringify(experiences)),
       });
-      
-      navigate('/dashboard');
+
+      navigate("/dashboard");
     } catch (error) {
-      console.error('Failed to save profile:', error);
-      toast.error('Failed to update profile. Please try again.');
+      console.error("Failed to save profile:", error);
+      toast.error("Failed to update profile. Please try again.");
     }
   };
 
@@ -123,10 +133,10 @@ export default function ProfilePage() {
     if (file && user) {
       try {
         await user.setProfileImage({ file });
-        toast.success('Profile image updated successfully!');
+        toast.success("Profile image updated successfully!");
       } catch (error) {
-        console.error('Failed to update profile image:', error);
-        toast.error('Failed to update profile image.');
+        console.error("Failed to update profile image:", error);
+        toast.error("Failed to update profile image.");
       }
     }
   };
@@ -143,16 +153,20 @@ export default function ProfilePage() {
     <div className="max-w-4xl mx-auto space-y-8 pb-12">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Profile & Settings</h1>
-          <p className="text-muted-foreground mt-1">Manage your personal information and professional profile</p>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+            Profile & Settings
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Manage your personal information and professional profile
+          </p>
         </div>
-        <Button 
-          onClick={handleSave} 
-          disabled={!hasChanges() || isUpdating} 
+        <Button
+          onClick={handleSave}
+          disabled={!hasChanges() || updateProfile.isPending}
           className="rounded-full shadow-lg shadow-primary/20"
         >
           <Save className="w-4 h-4 mr-2" />
-          {isUpdating ? 'Saving...' : 'Save Changes'}
+          {updateProfile.isPending ? "Saving..." : "Save Changes"}
         </Button>
       </div>
 
@@ -164,7 +178,9 @@ export default function ProfilePage() {
               <User className="w-5 h-5 text-primary" />
               <CardTitle>Personal Information</CardTitle>
             </div>
-            <CardDescription>Update your photo and personal details</CardDescription>
+            <CardDescription>
+              Update your photo and personal details
+            </CardDescription>
           </CardHeader>
           <CardContent className="p-6 space-y-6">
             <div className="flex items-center gap-6">
@@ -177,13 +193,24 @@ export default function ProfilePage() {
                 </Avatar>
                 <label className="absolute inset-0 flex items-center justify-center bg-black/40 text-white opacity-0 group-hover:opacity-100 transition-opacity rounded-full cursor-pointer backdrop-blur-sm">
                   <Camera className="w-6 h-6" />
-                  <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                  />
                 </label>
               </div>
               <div className="space-y-1">
-                <h3 className="font-medium text-lg">{user?.fullName || 'User'}</h3>
-                <p className="text-sm text-muted-foreground">{user?.primaryEmailAddress?.emailAddress}</p>
-                <p className="text-xs text-muted-foreground">Click the avatar to change your photo</p>
+                <h3 className="font-medium text-lg">
+                  {user?.fullName || "User"}
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  {user?.primaryEmailAddress?.emailAddress}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Click the avatar to change your photo
+                </p>
               </div>
             </div>
 
@@ -214,7 +241,10 @@ export default function ProfilePage() {
         <SkillsSection skills={skills} setSkills={setSkills} />
 
         {/* Experience Section - Using onboarding component */}
-        <ExperienceSection experiences={experiences} setExperiences={setExperiences} />
+        <ExperienceSection
+          experiences={experiences}
+          setExperiences={setExperiences}
+        />
 
         {/* Projects Section - Using onboarding component */}
         <ProjectsSection projects={projects} setProjects={setProjects} />

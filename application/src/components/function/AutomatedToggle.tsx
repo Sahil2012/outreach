@@ -1,7 +1,7 @@
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import useAutomatedToggle from "@/hooks/useAutomatedToggle";
-import { ThreadMetaItem } from "@/lib/types";
+import { ThreadMetaItem } from "@/api/threads/types";
+import { useThreadActions } from "@/api/threads/hooks/useThreadActions";
 
 interface AutomatedToggleProps {
   threadId: number;
@@ -12,15 +12,28 @@ interface AutomatedToggleProps {
   status?: string;
 }
 
-const AutomatedToggle = ({ data, threadId, page, pageSize, search, status }: AutomatedToggleProps) => {
-  const { toggleAutomated, isTogglingAutomated } = useAutomatedToggle(threadId, page, pageSize, search, status);
+const AutomatedToggle = ({
+  data,
+  threadId,
+  // page,
+  // pageSize,
+  // search,
+  // status,
+}: AutomatedToggleProps) => {
+  // const { toggleAutomated, isTogglingAutomated } = useAutomatedToggle(
+  //   threadId,
+  //   page,
+  //   pageSize,
+  //   search,
+  //   status,
+  // );
+  const { toggleAutomated } = useThreadActions();
 
-  const isUpdating = isTogglingAutomated;
   const handleToggleAutomated = async (checked: boolean) => {
     try {
-      await toggleAutomated(checked);
+      await toggleAutomated.mutateAsync({ id: threadId, isAutomated: checked });
       toast.success(
-        `Automated follow-ups ${checked ? "enabled" : "disabled"}.`
+        `Automated follow-ups ${checked ? "enabled" : "disabled"}.`,
       );
     } catch {
       console.error("Failed to update settings.");
@@ -30,9 +43,9 @@ const AutomatedToggle = ({ data, threadId, page, pageSize, search, status }: Aut
 
   return (
     <Switch
-      checked={data?.automated}
+      checked={data?.isAutomated}
       onCheckedChange={handleToggleAutomated}
-      disabled={isUpdating || isTogglingAutomated}
+      disabled={toggleAutomated.isPending}
     />
   );
 };

@@ -14,13 +14,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal, Building2, User, Loader2 } from "lucide-react";
-import { ThreadMetaItem, ThreadStatus } from "@/lib/types";
 import { useNavigate } from "react-router";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 import ThreadStatusBadge from "@/components/function/ThreadStatusBadge";
 import MessageStateBadge from "@/components/function/MessageStateBadge";
 import AutomatedToggle from "@/components/function/AutomatedToggle";
+import { ThreadsMeta, ThreadStatus } from "@/api/threads/types";
 
 const needsAttention = (lastUpdated: string) => {
   const now = new Date();
@@ -31,13 +31,13 @@ const needsAttention = (lastUpdated: string) => {
 };
 
 interface OutreachTableProps {
-  threads: ThreadMetaItem[];
+  threads: ThreadsMeta["threads"];
   isLoading: boolean;
   isGeneratingFollowUp: boolean;
   onAction: (
     id: number,
     action: "follow-up" | "mark-absconded" | "mark-referred" | "mark-sent",
-    threadId: number
+    threadId: number,
   ) => void;
   page: number;
   pageSize: number;
@@ -67,7 +67,7 @@ export const OutreachTable = ({
 
   const canBeFollowedUp = (status: ThreadStatus) => {
     return ["PENDING", "SENT", "FIRST_FOLLOW_UP", "SECOND_FOLLOW_UP"].includes(
-      status
+      status,
     );
   };
 
@@ -102,9 +102,9 @@ export const OutreachTable = ({
                 "relative group hover:bg-muted/70 border-border/40 cursor-pointer",
                 {
                   "bg-green-100 hover:bg-green-200": needsAttention(
-                    thread.lastUpdated
+                    thread.lastUpdated,
                   ),
-                }
+                },
               )}
               onClick={() => navigate(`/outreach/view/${thread.id}`)}
             >
@@ -114,7 +114,7 @@ export const OutreachTable = ({
                     "absolute ml-0.5 xl:ml-2 top-1/2 -translate-y-1/2 rounded-full h-2 w-2 bg-green-500",
                     {
                       hidden: !needsAttention(thread.lastUpdated),
-                    }
+                    },
                   )}
                 />
               </TableCell>
@@ -126,12 +126,12 @@ export const OutreachTable = ({
                   <div className="flex flex-col">
                     <div className="flex items-center gap-2">
                       <span className="font-medium text-sm">
-                        {thread.Employee.name}
+                        {thread.employee.name}
                       </span>
-                      <MessageStateBadge state={thread.Message?.[0]?.state} />
+                      <MessageStateBadge state={thread.messages?.[0].status} />
                     </div>
                     <span className="text-xs text-muted-foreground">
-                      {thread.Employee.email}
+                      {thread.employee.email}
                     </span>
                   </div>
                 </div>
@@ -139,7 +139,7 @@ export const OutreachTable = ({
               <TableCell>
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Building2 className="w-4 h-4" />
-                  <span className="text-sm">{thread.Employee.company}</span>
+                  <span className="text-sm">{thread.jobs?.[0].company}</span>
                 </div>
               </TableCell>
               <TableCell>
@@ -188,28 +188,27 @@ export const OutreachTable = ({
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      {canBeFollowedUp(
-                        thread.status && thread.Message?.[0]?.state === "DRAFT"
-                      ) && (
-                        <DropdownMenuItem
-                          onClick={() =>
-                            onAction(thread.id, "follow-up", thread.id)
-                          }
-                        >
-                          {isGeneratingFollowUp ? (
-                            <Loader2 className="animate-spin" />
-                          ) : (
-                            "Generate Follow Up"
-                          )}
-                        </DropdownMenuItem>
-                      )}
-                      {thread.Message?.[0]?.state === "DRAFT" && (
+                      {canBeFollowedUp(thread.status) &&
+                        thread.messages?.[0]?.status !== "DRAFT" && (
+                          <DropdownMenuItem
+                            onClick={() =>
+                              onAction(thread.id, "follow-up", thread.id)
+                            }
+                          >
+                            {isGeneratingFollowUp ? (
+                              <Loader2 className="animate-spin" />
+                            ) : (
+                              "Generate Follow Up"
+                            )}
+                          </DropdownMenuItem>
+                        )}
+                      {thread.messages?.[0]?.status === "DRAFT" && (
                         <DropdownMenuItem
                           onClick={() =>
                             onAction(
-                              thread.Message?.[0]?.id,
+                              thread.messages?.[0]?.id,
                               "mark-sent",
-                              thread.id
+                              thread.id,
                             )
                           }
                         >

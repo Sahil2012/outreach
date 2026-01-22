@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router";
 import { Loader } from "@/components/ui/loader";
-import { useOutreachDetail } from "@/hooks/useOutreachDetail";
 import { DetailsAndActions } from "./DetailsAndActions";
 import { EmailThread } from "./EmailThread";
 import { toast } from "sonner";
@@ -11,6 +10,10 @@ import {
   isReverificationCancelledError,
 } from "@clerk/clerk-react/errors";
 import { ReverificationDialog } from "./ReverificationDialog";
+import { useThread } from "@/api/threads/hooks/useThreadData";
+import { useThreadActions } from "@/api/threads/hooks/useThreadActions";
+import { useMessageActions } from "@/api/messages/hooks/useMessageActions";
+import { MessageType } from "@/api/messages/types";
 
 const OutreachDetailPage: React.FC = () => {
   const [isGmailAuthLoading, setIsGmailAuthLoading] = useState(false);
@@ -26,28 +29,31 @@ const OutreachDetailPage: React.FC = () => {
   const { user } = useUser();
 
   const idNumber = Number(id);
-  const {
-    data,
-    isLoading,
-    error,
-    updateStatus,
-    toggleAutomated,
-    isUpdatingStatus,
-    isTogglingAutomated,
-    generateFollowUp,
-    isGeneratingFollowUp,
-  } = useOutreachDetail(idNumber);
+  // const {
+  //   data,
+  //   isLoading,
+  //   error,
+  //   updateStatus,
+  //   toggleAutomated,
+  //   isUpdatingStatus,
+  //   isTogglingAutomated,
+  //   generateFollowUp,
+  //   isGeneratingFollowUp,
+  // } = useOutreachDetail(idNumber);
+  const { data, isLoading, error } = useThread(idNumber);
+  const { updateStatus, toggleAutomated } = useThreadActions();
+  const { generateMessage } = useMessageActions();
 
   const isConnectedToGoogle = user?.externalAccounts.some(
-    (account) => account.provider === "google"
+    (account) => account.provider === "google",
   );
 
   const hasGmailScope = user?.externalAccounts.some(
     (account) =>
       account.provider === "google" &&
       account.approvedScopes?.includes(
-        "https://www.googleapis.com/auth/gmail.modify"
-      )
+        "https://www.googleapis.com/auth/gmail.modify",
+      ),
   );
 
   let googleReauthorizationNeeded = false;
@@ -82,7 +88,7 @@ const OutreachDetailPage: React.FC = () => {
         });
       } else {
         const googleAccount = user?.externalAccounts.find(
-          (acc) => acc.provider === "google"
+          (acc) => acc.provider === "google",
         );
         res = await googleAccount?.reauthorize({
           redirectUrl: globalThis.location.href,
@@ -103,7 +109,7 @@ const OutreachDetailPage: React.FC = () => {
         setReverificationHandlers({ complete, cancel });
         setShowReverificationDialog(true);
       },
-    }
+    },
   );
 
   const handleConnectGmail = async () => {
@@ -155,9 +161,12 @@ const OutreachDetailPage: React.FC = () => {
 
   const handleGenerateFollowUp = async () => {
     try {
-      const res = await generateFollowUp();
+      const res = await generateMessage.mutateAsync({
+        type: MessageType.FOLLOW_UP,
+        threadId: idNumber,
+      });
       toast.success("Follow-up generated successfully!");
-      navigate(`/outreach/preview/${res?.messageId}`, { state: res });
+      navigate(`/outreach/preview/${res?.id}`, { state: res });
     } catch {
       toast.error("Failed to generate follow-up.");
     }
@@ -165,7 +174,7 @@ const OutreachDetailPage: React.FC = () => {
 
   const handleMarkAbsconded = async () => {
     try {
-      await updateStatus({ status: 'CLOSED' });
+      await updateStatus.mutateAsync({ id: idNumber, status: "CLOSED" });
       toast.success("Marked as absconded.");
     } catch {
       toast.error("Failed to update status.");
@@ -174,7 +183,7 @@ const OutreachDetailPage: React.FC = () => {
 
   const handleMarkReferred = async () => {
     try {
-      await updateStatus({ status: 'REFFERED' });
+      await updateStatus.mutateAsync({ id: idNumber, status: "REFERRED" });
       toast.success("Marked as referred!");
     } catch {
       console.error("Failed to update status.");
@@ -184,9 +193,9 @@ const OutreachDetailPage: React.FC = () => {
 
   const handleToggleAutomated = async (checked: boolean) => {
     try {
-      await toggleAutomated(checked);
+      await toggleAutomated.mutateAsync({ id: idNumber, isAutomated: checked });
       toast.success(
-        `Automated follow-ups ${checked ? "enabled" : "disabled"}.`
+        `Automated follow-ups ${checked ? "enabled" : "disabled"}.`,
       );
     } catch {
       console.error("Failed to update settings.");
@@ -202,8 +211,8 @@ const OutreachDetailPage: React.FC = () => {
           <div className="lg:col-span-4 h-full overflow-hidden">
             <DetailsAndActions
               data={data}
-              isGeneratingFollowUp={isGeneratingFollowUp}
-              isUpdating={isUpdatingStatus || isTogglingAutomated}
+              isGeneratingFollowUp={generateMessage.isPending}
+              isUpdating={updateStatus.isPending || toggleAutomated.isPending}
               onGenerateFollowUp={handleGenerateFollowUp}
               onMarkAbsconded={handleMarkAbsconded}
               onMarkReferred={handleMarkReferred}

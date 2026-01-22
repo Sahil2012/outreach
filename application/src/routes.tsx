@@ -19,16 +19,16 @@ import EmailPreviewPage from "@/pages/outreach/email-preview";
 import SendEmailPage from "@/pages/outreach/send-email";
 import DraftsPage from "@/pages/drafts";
 import NotFound from "@/pages/not-found";
-import { useProfile } from "@/hooks/useProfile";
 import { useLocation } from "react-router";
 import { useState } from "react";
 import SettingsPage from "./pages/settings";
 import ProfilePage from "./pages/profile";
 import GlobalError from "./components/function/global-error";
+import { useProfile } from "./api/profile/hooks/useProfileData";
 
 function ProtectedRoute() {
   const { user, isLoaded: isUserLoaded } = useUser();
-  const { profile, isLoading, error } = useProfile();
+  const { data: profile, isLoading, error } = useProfile();
   const location = useLocation();
   const [firstLoad, setFirstLoad] = useState(true);
 

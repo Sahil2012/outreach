@@ -1,10 +1,10 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Mail, MessageCircle, Clock, UserX } from "lucide-react";
-import { OutreachStats } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ProfileStats } from "@/api/profile/types";
 
 interface StatsCardsProps {
-  stats?: OutreachStats;
+  stats?: ProfileStats;
   isLoading: boolean;
 }
 
@@ -19,21 +19,21 @@ export const StatsCards = ({ stats, isLoading }: StatsCardsProps) => {
     },
     {
       label: "Referred",
-      value: stats?.reffered,
+      value: stats?.referred,
       icon: MessageCircle,
       color: "text-green-600",
       bgColor: "bg-green-50",
     },
     {
       label: "Follow Ups",
-      value: stats?.followUps,
+      value: stats?.followUp,
       icon: Clock,
       color: "text-orange-600",
       bgColor: "bg-orange-50",
     },
     {
       label: "Absconded",
-      value: stats?.absonded,
+      value: stats?.absconded,
       icon: UserX,
       color: "text-red-600",
       bgColor: "bg-red-50",

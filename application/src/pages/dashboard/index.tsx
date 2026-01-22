@@ -25,54 +25,73 @@ import {
   ChevronRight,
   RefreshCw,
 } from "lucide-react";
-import { useOutreachDashboard } from "@/hooks/useOutreachDashboard";
 import { useDebounce } from "@/hooks/useDebounce";
 import { StatsCards } from "./StatsCards";
 import { OutreachTable } from "./OutreachTable";
-import { THREAD_STATUS_VALUES } from "@/lib/types";
 import { toast } from "sonner";
-import useStats from "@/hooks/useStats";
+import { useThreads } from "@/api/threads/hooks/useThreadData";
+import { ThreadsParams } from "@/api/threads/types";
+import { useThreadActions } from "@/api/threads/hooks/useThreadActions";
+import { useMessageActions } from "@/api/messages/hooks/useMessageActions";
+import { MessageType } from "@/api/messages/types";
+import { useProfileStats } from "@/api/profile/hooks/useProfileData";
+import { THREAD_STATUS_VALUES } from "@/api/threads/consts";
 
 export default function DashboardPage() {
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("All");
+  const [statusFilter, setStatusFilter] =
+    useState<ThreadsParams["status"]>("ALL");
 
   const debouncedSearch = useDebounce(searchQuery, 500);
   const pageSize = 10;
 
+  // const {
+  //   data: listData,
+  //   isLoadingList,
+  //   markAsSent,
+  //   isMarkingAsSent,
+  //   updateOutreach,
+  //   refreshData,
+  //   generateFollowUp,
+  //   isGeneratingFollowUp,
+  // } = useOutreachDashboard(page, pageSize, debouncedSearch, statusFilter);
   const {
     data: listData,
-    isLoadingList,
-    markAsSent,
-    isMarkingAsSent,
-    updateOutreach,
-    refreshData,
-    generateFollowUp,
-    isGeneratingFollowUp,
-  } = useOutreachDashboard(page, pageSize, debouncedSearch, statusFilter);
-
-  const { stats, isLoadingStats } = useStats();
+    isLoading: isLoadingList,
+    refetch,
+  } = useThreads({
+    page,
+    pageSize,
+    search: debouncedSearch,
+    status: statusFilter,
+  });
+  const { updateStatus } = useThreadActions();
+  const { markAsSent, generateMessage } = useMessageActions();
+  const { data: stats, isLoading: isLoadingStats } = useProfileStats();
 
   const handleAction = async (
     id: number,
     action: "follow-up" | "mark-absconded" | "mark-referred" | "mark-sent",
-    threadId: number
+    threadId: number,
   ) => {
     try {
       if (action === "follow-up") {
-        const res = await generateFollowUp(id);
-        navigate(`/outreach/preview/${res?.messageId}`, { state: res });
+        const res = await generateMessage.mutateAsync({
+          type: MessageType.FOLLOW_UP,
+          threadId: threadId,
+        });
+        navigate(`/outreach/preview/${res?.id}`, { state: res });
         toast.success("Follow-up generated successfully.");
       } else if (action === "mark-absconded") {
-        await updateOutreach({ id, payload: { status: "CLOSED" } });
+        await updateStatus.mutateAsync({ id, status: "CLOSED" });
         toast.success("Thread marked as absconded successfully.");
       } else if (action === "mark-referred") {
-        await updateOutreach({ id, payload: { status: "REFFERED" } });
+        await updateStatus.mutateAsync({ id, status: "REFERRED" });
         toast.success("Thread marked as referred successfully.");
       } else if (action === "mark-sent") {
-        await markAsSent({ id, threadId });
+        await markAsSent.mutateAsync({ id });
         toast.success("Draft marked as sent");
       }
     } catch (err: any) {
@@ -120,7 +139,7 @@ export default function DashboardPage() {
                 variant="outline"
                 size="icon"
                 className="rounded-full relative"
-                onClick={() => refreshData()}
+                onClick={() => refetch()}
               >
                 <RefreshCw className="h-4 w-4" />
               </Button>
@@ -142,7 +161,7 @@ export default function DashboardPage() {
                     className="rounded-full relative"
                   >
                     <Filter className="h-4 w-4" />
-                    {statusFilter !== "All" && (
+                    {statusFilter !== "ALL" && (
                       <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-primary rounded-full border-2 border-background" />
                     )}
                   </Button>
@@ -150,9 +169,9 @@ export default function DashboardPage() {
                 <DropdownMenuContent align="end" className="w-48">
                   <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => setStatusFilter("All")}>
+                  <DropdownMenuItem onClick={() => setStatusFilter("ALL")}>
                     All Statuses
-                    {statusFilter === "All" && (
+                    {statusFilter === "ALL" && (
                       <span className="ml-auto text-primary">✓</span>
                     )}
                   </DropdownMenuItem>
@@ -177,7 +196,7 @@ export default function DashboardPage() {
             threads={listData?.threads || []}
             isLoading={isLoadingList}
             onAction={handleAction}
-            isGeneratingFollowUp={isGeneratingFollowUp}
+            isGeneratingFollowUp={generateMessage.isPending}
             page={page}
             pageSize={pageSize}
             search={searchQuery}
@@ -211,7 +230,7 @@ export default function DashboardPage() {
                     >
                       {p}
                     </Button>
-                  )
+                  ),
                 )}
                 <Button
                   variant="outline"

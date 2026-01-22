@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { isAxiosError } from "axios";
 import { Button } from "@/components/ui/button";
-import { useOutreach } from "@/hooks/useOutreach";
 import { RecipientInfo } from "@/lib/types";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useLocation, useNavigate, useSearchParams } from "react-router";
@@ -10,9 +9,10 @@ import { RecipientForm } from "./RecipientForm";
 import { Loader } from "@/components/ui/loader";
 import { templates } from "../template-selection";
 import { CreditInfo } from "@/components/function/CreditInfo";
+import { useMessageActions } from "@/api/messages/hooks/useMessageActions";
+import { MessageType } from "@/api/messages/types";
 
 const RecipientInfoPage: React.FC = () => {
-  const { generateEmail, isGenerating } = useOutreach();
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
@@ -27,6 +27,8 @@ const RecipientInfoPage: React.FC = () => {
     jobIds: [],
     jobDescription: "",
   });
+
+  const { generateMessage } = useMessageActions();
 
   const [errors, setErrors] = useState<
     Partial<Record<keyof RecipientInfo, string>>
@@ -80,17 +82,28 @@ const RecipientInfoPage: React.FC = () => {
     }
 
     try {
-      const res = await generateEmail({
-        companyName: recipientInfo.companyName,
-        contactEmail: recipientInfo.employeeEmail,
-        contactName: recipientInfo.employeeName,
-        role: recipientInfo.role,
-        jobs: recipientInfo.jobIds,
-        jobDescription: recipientInfo.jobDescription || "",
-        type: templateId,
-      });
-
-      navigate(`/outreach/preview/${res?.messageId}`, { state: res });
+      if (templateId === "TAILORED") {
+        const res = await generateMessage.mutateAsync({
+          type: MessageType.TAILORED,
+          companyName: recipientInfo.companyName,
+          contactEmail: recipientInfo.employeeEmail,
+          contactName: recipientInfo.employeeName,
+          role: recipientInfo.role,
+          jobs: recipientInfo.jobIds,
+          jobDescription: recipientInfo.jobDescription || "",
+        });
+        navigate(`/outreach/preview/${res?.id}`, { state: res });
+      }
+      if (templateId === "COLD") {
+        const res = await generateMessage.mutateAsync({
+          type: MessageType.COLD,
+          companyName: recipientInfo.companyName,
+          contactEmail: recipientInfo.employeeEmail,
+          contactName: recipientInfo.employeeName,
+          role: recipientInfo.role,
+        });
+        navigate(`/outreach/preview/${res?.id}`, { state: res });
+      }
     } catch (error: Error | unknown) {
       if (isAxiosError(error)) {
         if (error.response?.status === 429) {
@@ -132,17 +145,23 @@ const RecipientInfoPage: React.FC = () => {
           variant="outline"
           size="lg"
           onClick={() => navigate("/outreach/templates")}
-          disabled={isGenerating}
+          disabled={generateMessage.isPending}
         >
           <ArrowLeft className="w-4 h-4 mr-1 -ml-1" />
           Back
         </Button>
         <div className="flex flex-col gap-1.5">
           <CreditInfo className="mt-4" />
-          <Button size="lg" onClick={handleGenerate} disabled={isGenerating}>
-            {isGenerating ? <Loader className="mr-2" /> : null}
-            {isGenerating ? "Generating..." : "Generate Email"}
-            {!isGenerating && <ArrowRight className="w-4 h-4 ml-1 -mr-1" />}
+          <Button
+            size="lg"
+            onClick={handleGenerate}
+            disabled={generateMessage.isPending}
+          >
+            {generateMessage.isPending ? <Loader className="mr-2" /> : null}
+            {generateMessage.isPending ? "Generating..." : "Generate Email"}
+            {!generateMessage.isPending && (
+              <ArrowRight className="w-4 h-4 ml-1 -mr-1" />
+            )}
           </Button>
         </div>
       </div>

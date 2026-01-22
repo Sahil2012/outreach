@@ -1,13 +1,13 @@
 import React from "react";
 import { Coins } from "lucide-react";
-import { useProfile } from "@/hooks/useProfile";
+import { useProfile } from "@/api/profile/hooks/useProfileData";
 
 interface CreditInfoProps {
   className?: string;
 }
 
 export const CreditInfo: React.FC<CreditInfoProps> = ({ className = "" }) => {
-  const { profile, isLoading } = useProfile();
+  const { data: profile, isLoading } = useProfile();
 
   if (isLoading || !profile) {
     return null;

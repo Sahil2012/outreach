@@ -3,15 +3,15 @@ import { Button } from "@/components/ui/button";
 import { Loader } from "@/components/ui/loader";
 import { ArrowLeft, Send, UserX, MessageCircle } from "lucide-react";
 import { Label } from "@/components/ui/label";
-import { OutreachDetail } from "@/hooks/useOutreachDetail";
 import { formatDistanceToNow } from "date-fns";
 import { Separator } from "@/components/ui/separator";
 import ThreadStatusBadge from "@/components/function/ThreadStatusBadge";
 import AutomatedToggle from "@/components/function/AutomatedToggle";
 import { CreditInfo } from "@/components/function/CreditInfo";
+import { Thread } from "@/api/threads/types";
 
 interface DetailsAndActionsProps {
-  data: OutreachDetail;
+  data: Thread;
   isGeneratingFollowUp: boolean;
   isUpdating: boolean;
   isGmailConnected: boolean;
@@ -122,7 +122,7 @@ export const DetailsAndActions: React.FC<DetailsAndActionsProps> = ({
                 AI handles follow-ups
               </p>
             </div>
-            <AutomatedToggle data={data} threadId={data.threadId} />
+            <AutomatedToggle data={data} threadId={data.id} />
           </div>
 
           <CreditInfo className="mb-2" />

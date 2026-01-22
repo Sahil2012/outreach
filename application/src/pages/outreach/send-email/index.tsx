@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader } from "@/components/ui/loader";
-import { useOutreach } from "@/hooks/useOutreach";
 import { useUser, useReverification } from "@clerk/clerk-react";
 import { useNavigate, useParams, useSearchParams } from "react-router";
 import { toast } from "sonner";
@@ -12,6 +11,8 @@ import {
   isClerkRuntimeError,
   isReverificationCancelledError,
 } from "@clerk/clerk-react/errors";
+import { useMessage } from "@/api/messages/hooks/useMessageData";
+import { useMessageActions } from "@/api/messages/hooks/useMessageActions";
 
 const SendEmailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -19,8 +20,16 @@ const SendEmailPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const { user } = useUser();
 
-  const { draft, isLoadingDraft, draftError, sendEmail, isSending } =
-    useOutreach(id);
+  const parsedId = Number(id);
+
+  // const { draft, isLoadingDraft, draftError, sendEmail, isSending } =
+  //   useOutreach(id);
+  const {
+    data: draft,
+    isLoading: isLoadingDraft,
+    error: draftError,
+  } = useMessage(parsedId);
+  const { sendMessage } = useMessageActions();
 
   const [isGmailAuthLoading, setIsGmailAuthLoading] = useState(false);
   const [manageThread, setManageThread] = useState(true);
@@ -34,20 +43,20 @@ const SendEmailPage: React.FC = () => {
 
   // Check if Gmail scope is present
   const isConnectedToGoogle = user?.externalAccounts.some(
-    (account) => account.provider === "google"
+    (account) => account.provider === "google",
   );
 
   const hasGmailScope = user?.externalAccounts.some(
     (account) =>
       account.provider === "google" &&
       account.approvedScopes?.includes(
-        "https://www.googleapis.com/auth/gmail.modify"
-      )
+        "https://www.googleapis.com/auth/gmail.modify",
+      ),
   );
 
   // Auto-redirect if already completed
   useEffect(() => {
-    if (draft?.isMailSent && !alreadySent) {
+    if (draft?.status === "SENT" && !alreadySent) {
       setAlreadySent(true);
       toast.success("Email Already Sent!");
       setTimeout(() => {
@@ -79,7 +88,7 @@ const SendEmailPage: React.FC = () => {
         });
       } else {
         const googleAccount = user?.externalAccounts.find(
-          (acc) => acc.provider === "google"
+          (acc) => acc.provider === "google",
         );
         res = await googleAccount?.reauthorize({
           redirectUrl: globalThis.location.href,
@@ -100,7 +109,7 @@ const SendEmailPage: React.FC = () => {
         setReverificationHandlers({ complete, cancel });
         setShowReverificationDialog(true);
       },
-    }
+    },
   );
 
   const handleConnectGmail = async () => {
@@ -123,12 +132,16 @@ const SendEmailPage: React.FC = () => {
 
   const handleSendEmail = async () => {
     if (!id) return;
-    if (!draft || !draft.threadId || !draft.messageId) {
+    if (!draft || !draft.threadId || !draft.id) {
       toast.error("Missing thread or message ID. Cannot send email.");
       return;
     }
     try {
-      await sendEmail({ threadId: draft.threadId, messageId: draft.messageId });
+      await sendMessage.mutateAsync({
+        threadId: draft.threadId,
+        id: draft.id,
+        attachResume: true,
+      });
       toast.success("Email sent successfully!");
       setAlreadySent(true);
       setTimeout(() => navigate("/dashboard"), 3000);
@@ -140,7 +153,7 @@ const SendEmailPage: React.FC = () => {
           error?.response?.data?.error?.code === "oauth_missing_refresh_token")
       ) {
         const externalAccount = user?.externalAccounts.find(
-          (acc) => acc.provider === "google"
+          (acc) => acc.provider === "google",
         );
         const res = await externalAccount?.reauthorize({
           oidcPrompt: "consent",
@@ -210,10 +223,7 @@ const SendEmailPage: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
           {/* Left Side: Preview */}
           <div className="lg:col-span-3">
-            <EmailPreviewStatic
-              subject={draft.email.subject}
-              body={draft.email.body}
-            />
+            <EmailPreviewStatic subject={draft.subject} body={draft.body} />
           </div>
 
           {/* Right Side: Actions */}
@@ -221,8 +231,8 @@ const SendEmailPage: React.FC = () => {
             <SendOptions
               isGmailConnected={!!hasGmailScope}
               isGmailAuthLoading={isGmailAuthLoading}
-              emailBody={draft.email.body}
-              isSending={isSending}
+              emailBody={draft.body}
+              isSending={sendMessage.isPending}
               manageThread={manageThread}
               setManageThread={setManageThread}
               onConnectGmail={handleConnectGmail}

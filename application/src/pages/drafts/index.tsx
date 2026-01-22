@@ -1,3 +1,6 @@
+import { THREAD_STATUS_VALUES } from "@/api/threads/consts";
+import { useThreads } from "@/api/threads/hooks/useThreadData";
+import { ThreadsParams } from "@/api/threads/types";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -16,30 +19,48 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { useDebounce } from "@/hooks/useDebounce";
-import { useOutreachDashboard } from "@/hooks/useOutreachDashboard";
-import { THREAD_STATUS_VALUES } from "@/lib/types";
-import { ChevronLeft, ChevronRight, Filter, RefreshCw, Search } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Filter,
+  RefreshCw,
+  Search,
+} from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { DraftsTable } from "./DraftsTable";
+import { useMessageActions } from "@/api/messages/hooks/useMessageActions";
 
 const DraftsPage = () => {
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("All");
+  const [statusFilter, setStatusFilter] =
+    useState<ThreadsParams["status"]>("ALL");
 
   const debouncedSearch = useDebounce(searchQuery, 500);
   const pageSize = 10;
 
+  // const {
+  //   data: listData,
+  //   isLoadingList: isLoading,
+  //   deleteDraft,
+  //   isDeletingDraft: isDeleting,
+  //   refreshData,
+  //   markAsSent,
+  //   isMarkingAsSent,
+  // } = useOutreachDashboard(page, pageSize, debouncedSearch, statusFilter, "DRAFT");
   const {
     data: listData,
-    isLoadingList: isLoading,
-    deleteDraft,
-    isDeletingDraft: isDeleting,
-    refreshData,
-    markAsSent,
-    isMarkingAsSent,
-  } = useOutreachDashboard(page, pageSize, debouncedSearch, statusFilter, "DRAFT");
+    isLoading,
+    refetch,
+  } = useThreads({
+    page,
+    pageSize,
+    search: debouncedSearch,
+    status: statusFilter,
+    messageStatus: "DRAFT",
+  });
+  const { markAsSent, deleteDraft } = useMessageActions();
 
   const drafts = listData?.threads || [];
 
@@ -47,16 +68,16 @@ const DraftsPage = () => {
 
   const handleDelete = async (id: number) => {
     try {
-      await deleteDraft(id);
+      await deleteDraft.mutateAsync({ id });
       toast.success("Draft deleted successfully");
     } catch {
       toast.error("Failed to delete draft");
     }
   };
 
-  const handleMarkAsSent = async (id: number, threadId: number) => {
+  const handleMarkAsSent = async (id: number) => {
     try {
-      await markAsSent({ id, threadId });
+      await markAsSent.mutateAsync({ id });
       toast.success("Draft marked as sent");
     } catch {
       toast.error("Failed to mark draft as sent");
@@ -89,7 +110,7 @@ const DraftsPage = () => {
                 variant="outline"
                 size="icon"
                 className="rounded-full relative"
-                onClick={() => refreshData()}
+                onClick={() => refetch()}
               >
                 <RefreshCw className="h-4 w-4" />
               </Button>
@@ -114,7 +135,7 @@ const DraftsPage = () => {
                     className="rounded-full relative"
                   >
                     <Filter className="h-4 w-4" />
-                    {statusFilter !== "All" && (
+                    {statusFilter !== "ALL" && (
                       <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-primary rounded-full border-2 border-background" />
                     )}
                   </Button>
@@ -124,12 +145,12 @@ const DraftsPage = () => {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={() => {
-                      setStatusFilter("All");
+                      setStatusFilter("ALL");
                       setPage(1);
                     }}
                   >
                     All Statuses
-                    {statusFilter === "All" && (
+                    {statusFilter === "ALL" && (
                       <span className="ml-auto text-primary">✓</span>
                     )}
                   </DropdownMenuItem>
@@ -158,8 +179,8 @@ const DraftsPage = () => {
             isLoading={isLoading}
             onDelete={handleDelete}
             onMarkAsSent={handleMarkAsSent}
-            isDeleting={isDeleting}
-            isMarkingSent={isMarkingAsSent}
+            isDeleting={deleteDraft.isPending}
+            isMarkingSent={markAsSent.isPending}
           />
 
           {/* Pagination */}
@@ -191,7 +212,7 @@ const DraftsPage = () => {
                       >
                         {p}
                       </Button>
-                    )
+                    ),
                   )}
                 <Button
                   variant="outline"

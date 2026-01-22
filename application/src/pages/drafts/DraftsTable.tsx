@@ -23,11 +23,11 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router";
 import { formatDistanceToNow } from "date-fns";
-import { ThreadMetaItem } from "@/lib/types";
 import ThreadStatusBadge from "@/components/function/ThreadStatusBadge";
+import { ThreadMetaItem, ThreadsMeta } from "@/api/threads/types";
 
 interface DraftsTableProps {
-  data: ThreadMetaItem[];
+  data: ThreadsMeta["threads"];
   isLoading: boolean;
   onMarkAsSent: (id: number, threadId: number) => void;
   onDelete: (id: number) => void;
@@ -54,7 +54,7 @@ export const DraftsTable = ({
   }
 
   const handleRowClick = (item: ThreadMetaItem) => {
-    navigate(`/outreach/preview/${item.Message[0].id}`);
+    navigate(`/outreach/preview/${item.messages[0].id}`);
   };
 
   return (
@@ -92,10 +92,10 @@ export const DraftsTable = ({
                   </div>
                   <div className="flex flex-col">
                     <span className="font-medium text-sm">
-                      {item.Employee.name}
+                      {item.employee.name}
                     </span>
                     <span className="text-xs text-muted-foreground">
-                      {item.Employee.email}
+                      {item.employee.email}
                     </span>
                   </div>
                 </div>
@@ -103,7 +103,7 @@ export const DraftsTable = ({
               <TableCell>
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Building2 className="w-4 h-4" />
-                  <span className="text-sm">{item.Employee.company}</span>
+                  <span className="text-sm">{item.jobs?.[0].company}</span>
                 </div>
               </TableCell>
               <TableCell>
@@ -113,8 +113,8 @@ export const DraftsTable = ({
                 <span className="text-sm text-muted-foreground">
                   {item.lastUpdated
                     ? formatDistanceToNow(new Date(item.lastUpdated), {
-                      addSuffix: true,
-                    })
+                        addSuffix: true,
+                      })
                     : "-"}
                 </span>
               </TableCell>
@@ -138,13 +138,15 @@ export const DraftsTable = ({
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem
-                        onClick={() => onMarkAsSent(item.Message[0].id, item.id)}
+                        onClick={() =>
+                          onMarkAsSent(item.messages[0].id, item.id)
+                        }
                       >
                         <Send className="mr-2 h-4 w-4" />
                         Mark as Sent
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onClick={() => onDelete(item.Message[0].id)}
+                        onClick={() => onDelete(item.messages[0].id)}
                         className="text-destructive focus:text-destructive focus:bg-destructive/10"
                       >
                         <Trash2 className="mr-2 h-4 w-4" />

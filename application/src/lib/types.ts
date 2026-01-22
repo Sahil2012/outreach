@@ -91,10 +91,6 @@ export interface SendEmail {
   messageId: number;
 }
 
-export const THREAD_STATUS_VALUES = ['PENDING', 'FIRST_FOLLOW_UP', 'SECOND_FOLLOW_UP', 'THIRD_FOLLOW_UP', 'CLOSED', 'SENT', 'REFFERED', 'DELETED'] as const;
-
-export type ThreadStatus = typeof THREAD_STATUS_VALUES[number];
-
 export interface OutreachStats {
   reachedOut: number;
   reffered: number;

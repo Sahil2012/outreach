@@ -2,11 +2,11 @@ import React from "react";
 import { formatDistanceToNow } from "date-fns";
 import DOMPurify from "dompurify";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Message } from "@/hooks/useOutreachDetail";
 import { useUser } from "@clerk/clerk-react";
 import MessageStateBadge from "@/components/function/MessageStateBadge";
 import { useNavigate } from "react-router";
 import { cn } from "@/lib/utils";
+import { Message } from "@/api/messages/types";
 
 interface EmailThreadProps {
   thread: Message[];
@@ -29,11 +29,11 @@ export const EmailThread: React.FC<EmailThreadProps> = ({ thread }) => {
       {thread.map((email) => {
         const isMe = email.fromUser;
         const avatarFallback = "";
-        const isDraft = email.state === "DRAFT";
+        const isDraft = email.status === "DRAFT";
 
         return (
           <div
-            key={email.messageId}
+            key={email.id}
             className={cn("p-8 rounded-3xl border transition-colors", {
               // User message styling
               "bg-primary/5 border-primary/20": isMe,
@@ -45,7 +45,7 @@ export const EmailThread: React.FC<EmailThreadProps> = ({ thread }) => {
             })}
             onClick={() => {
               if (isDraft) {
-                navigate(`/outreach/preview/${email.messageId}`);
+                navigate(`/outreach/preview/${email.id}`);
               }
             }}
           >
@@ -72,9 +72,9 @@ export const EmailThread: React.FC<EmailThreadProps> = ({ thread }) => {
                   </div>
                 </div>
                 <div className="flex flex-col items-end gap-2">
-                  <MessageStateBadge state={email.state} />
+                  <MessageStateBadge state={email.status} />
                   <div className="text-xs text-muted-foreground whitespace-nowrap mt-1">
-                    {formatDistanceToNow(new Date(email.dateSent), {
+                    {formatDistanceToNow(new Date(email.date), {
                       addSuffix: true,
                     })}
                   </div>

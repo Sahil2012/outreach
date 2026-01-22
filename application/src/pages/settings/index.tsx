@@ -30,13 +30,14 @@ import {
   DialogTitle,
 } from "../../components/ui/dialog";
 import { toast } from "sonner";
-import { useProfile } from "../../hooks/useProfile";
-import { useRechargeCredits } from "../../hooks/useRechargeCredits";
+import { useProfile } from "@/api/profile/hooks/useProfileData";
+// import { useProfile } from "../../hooks/useProfile";
+// import { useRechargeCredits } from "../../hooks/useRechargeCredits";
 
 export default function SettingsPage() {
   const { user, isLoaded: isUserLoaded } = useUser();
-  const { profile, isLoading: isProfileLoading } = useProfile();
-  const { rechargeCredits, isRecharging } = useRechargeCredits();
+  const { data: profile, isLoading: isProfileLoading } = useProfile();
+  // const { rechargeCredits, isRecharging } = useRechargeCredits();
 
   // Password State
   const [currentPassword, setCurrentPassword] = useState("");
@@ -115,7 +116,7 @@ export default function SettingsPage() {
     }
 
     try {
-      await rechargeCredits(amount);
+      // await rechargeCredits(amount);
       toast.success(`Successfully recharged ${amount * 20} credits!`);
       setIsRechargeDialogOpen(false);
       setSelectedPackage(null);
@@ -430,17 +431,18 @@ export default function SettingsPage() {
                   setSelectedPackage(null);
                   setCustomAmount("");
                 }}
-                disabled={isRecharging}
+                // disabled={isRecharging}
                 className="rounded-full"
               >
                 Cancel
               </Button>
               <Button
                 onClick={handleRecharge}
-                disabled={isRecharging || (!selectedPackage && !customAmount)}
+                // disabled={isRecharging || (!selectedPackage && !customAmount)}
                 className="rounded-full shadow-lg shadow-primary/20"
               >
-                {isRecharging ? (
+                {/* {isRecharging ? ( */}
+                (
                   <>
                     <Loader className="w-4 h-4 mr-2" />
                     Processing...
@@ -450,7 +452,7 @@ export default function SettingsPage() {
                     <Wallet className="w-4 h-4 mr-2" />
                     Proceed to Payment
                   </>
-                )}
+                )
               </Button>
             </DialogFooter>
           </DialogContent>
