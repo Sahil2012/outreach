@@ -23,12 +23,7 @@ export const editMessage = async (
     res: Response<MessageResponse | { error: string }>
 ) => {
 
-    const messageId = parseInt(req.params.id, 10);
-
-    if (isNaN(messageId)) {
-        logger.error(`Invalid message ID ${messageId}`);
-        return res.status(400).json({ error: "Invalid message ID" });
-    }
+    const messageId = req.params.id as unknown as number;
 
     const { userId: clerkUserId } = getAuth(req);
 
@@ -54,12 +49,8 @@ export const getMessage = async (
     req: Request,
     res: Response<MessageResponse | { error: string }>
 ) => {
-    const messageId = parseInt(req.params.id as string, 10);
 
-    if (isNaN(messageId)) {
-        logger.error(`Invalid message ID ${messageId}`);
-        return res.status(400).json({ error: "Invalid message ID" });
-    }
+    const messageId = req.params.id as unknown as number;
 
     const { userId: clerkUserId } = getAuth(req);
 
@@ -83,12 +74,7 @@ export const deleteMessage = async (
     res: Response<MessageResponse | { error: string }>
 ) => {
 
-    const messageId = parseInt(req.params.id as string, 10);
-
-    if (isNaN(messageId)) {
-        logger.error(`Invalid message ID ${messageId}`);
-        return res.status(400).json({ error: "Invalid message ID" });
-    }
+    const messageId = req.params.id as unknown as number;
 
     const { userId: clerkUserId } = getAuth(req);
 
@@ -174,12 +160,7 @@ export const sendMessageViaGmail = async (
 ) => {
     try {
 
-        const messageId = parseInt(req.params.id, 10);
-
-        if (!messageId) {
-            logger.error(`Invalid message ID ${messageId}`);
-            return res.status(400).json({ error: "Invalid message ID" });
-        }
+        const messageId = req.params.id as unknown as number;
 
         const { userId } = getAuth(req);
 

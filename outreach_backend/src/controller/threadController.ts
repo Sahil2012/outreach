@@ -33,12 +33,7 @@ export const getThread = async (
   res: Response<ThreadDetailResponse | { error: string }>,
   next: NextFunction
 ) => {
-  const threadId = parseInt(req.params.id as string, 10);
-
-  if (isNaN(threadId)) {
-    logger.error("Invalid thread ID", { threadId: req.params.id });
-    return res.status(400).json({ error: "Invalid thread ID" });
-  }
+  const threadId = req.params.id as unknown as number;
 
   const { userId: clerkUserId } = getAuth(req) as { userId: string | null };
   logger.info("Fetching single thread", { userId: clerkUserId, threadId });
@@ -101,12 +96,7 @@ export const patchThread = async (
   res: Response<UpdateThreadResponse | { error: string }>,
   next: NextFunction
 ) => {
-  const threadId = parseInt(req.params.id, 10);
-
-  if (isNaN(threadId)) {
-    logger.error("Invalid thread ID", { threadId: req.params.id });
-    return res.status(400).json({ error: "Invalid thread ID" });
-  }
+  const threadId = req.params.id as unknown as number;
 
   try {
     let updatedThread;
@@ -117,7 +107,12 @@ export const patchThread = async (
     logger.info(`Thread updated successfully for user ${clerkUserId} with patch ${JSON.stringify(req.body)}`);
 
     return res.status(200).json(toThreadDTO(updatedThread));
-  } catch (error) {
+  } catch (error: any) {
+    if (error.code === 'P2025') {
+      logger.error(`Thread ${threadId} not found for user`);
+      return res.status(404).json({ error: "Thread not found" });
+    }
+
     logger.error("Error updating thread status", error);
     next(error);
   }
