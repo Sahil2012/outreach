@@ -143,8 +143,9 @@ export const generateMessage = async (
 
 // POST /messages/:id/send
 export const sendMessageViaGmail = async (
-    req: Request<any, {}, SendMailRequest>,
-    res: Response<any | { error: any }>
+    req: Request<{ id: string }, {}, SendMailRequest>,
+    res: Response<any | { error: any }>,
+    next: NextFunction
 ) => {
     try {
 
@@ -183,7 +184,6 @@ export const sendMessageViaGmail = async (
                 .json({ error: { code: "oauth_missing_refresh_token", message: "Please re-authenticate with Google" } });
         }
         logger.error(`Send email error:`, error);
-        const statusCode = error.message.includes("User not connected") ? 400 : 500;
-        return res.status(statusCode).json({ error: error.message });
+        next(error);
     }
 };

@@ -1,11 +1,12 @@
 import { google } from "googleapis";
-import { log } from "console";
 import nodemailer from "nodemailer";
 import prisma from "../apis/prismaClient.js";
 import { storageService } from "./storageService.js";
 import { Readable } from "stream";
 import { getGoogleAccessToken } from "../apis/googleOAuth2Client.js";
 import { SendMailRequest } from "../schema/messageSchema.js";
+import { logger } from "../utils/logger.js";
+import { BadRequestError, NotFoundError } from "../types/HttpError.js";
 
 export class MailService {
     async sendMail(userId: string, mailData: SendMailRequest & { messageId: number }) {
@@ -21,27 +22,32 @@ export class MailService {
                 employee: true,
             },
         });
+        logger.info(`Thread fetched for user ${userId} with id ${threadId}`);
 
         if (!thread || !thread.employee) {
-            throw new Error("Thread not found or Employee details missing");
+            logger.error(`Thread not found or Employee details missing for user ${userId} with id ${threadId}`);
+            throw new NotFoundError("Thread not found or Employee details missing");
         }
 
         const message = thread.messages[0];
         if (!message) {
-            throw new Error("Message not found");
+            logger.error(`Message not found for user ${userId} with id ${messageId}`);
+            throw new NotFoundError("Message not found");
         }
 
         const to = thread.employee.email;
         const { subject, body: text } = message;
 
         if (!to || !subject || !text) {
-            throw new Error("Incomplete email data (missing recipient, subject, or body)");
+            logger.error(`Incomplete email data for user ${userId} with id ${messageId}`);
+            throw new BadRequestError("Incomplete email data (missing recipient, subject, or body)");
         }
 
         // 2. Fetch Resume if requested
         let attachments: any[] = [];
         if (attachResume) {
             await this.getResumeStream(userId, attachments);
+            logger.info(`Resume attachment stream prepared for user ${userId}`);
         }
 
         // 3. Get User Info (From address)
@@ -49,9 +55,11 @@ export class MailService {
             where: { authUserId: userId },
             select: { email: true },
         }))?.email;
+        logger.info(`User email found for user ${userId}: ${fromEmail}`);
 
         if (!fromEmail) {
-            throw new Error("User email not found");
+            logger.error(`User email not found for user ${userId}`);
+            throw new NotFoundError("User email not found");
         }
 
         // 4. Construct MIME Stream using Nodemailer
@@ -62,6 +70,7 @@ export class MailService {
             html: text.replace(/\n/g, "<br>"), // Preserve formatting
             attachments
         });
+        logger.info(`MIME stream prepared for user ${userId}`);
 
         // 5. Send via Gmail Media Upload
         return this.sendViaGmail(userId, mimeStream);
@@ -80,12 +89,12 @@ export class MailService {
                     filename: "Resume.pdf",
                     content: stream,
                 });
-                log("Resume attachment stream prepared successfully");
+                logger.info(`Resume attachment stream prepared successfully for user ${userId}`);
             } catch (error) {
-                log("Failed to prepare resume stream:", error);
+                logger.error(`Failed to prepare resume stream for user ${userId}:`, error);
             }
         } else {
-            log("Attach resume requested but no resume URL found for user");
+            logger.warn(`Attach resume requested but no resume URL found for user ${userId}`);
         }
     }
 
@@ -95,7 +104,7 @@ export class MailService {
             newline: 'unix',
             buffer: false // Disable buffering
         });
-
+        logger.info(`MIME stream prepared`);
         const info = await transporter.sendMail(mailOptions);
         return info.message as Readable;
     }
@@ -117,7 +126,7 @@ export class MailService {
             });
             return response.data;
         } catch (error: any) {
-            log("Gmail API Error:", error);
+            logger.error(`Failed to send email for user ${userId}:`, error);
             throw new Error(`Failed to send email: ${error.message}`);
         }
     }
