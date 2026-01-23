@@ -2,12 +2,13 @@ import { Request, Response, NextFunction } from "express";
 import { ZodTypeAny } from "zod";
 
 export const schemaValidator = (schema: ZodTypeAny) => {
-    return (req: Request, res: Response, next: NextFunction) => {
-        const validated = schema.safeParse(req.body);
+    return async (req: Request, res: Response, next: NextFunction) => {
+        const validated = await schema.safeParseAsync(req.body);
 
         if (!validated.success) {
             return res.status(400).json({
-                message: validated.error.errors[0].message
+                error: validated.error.errors.map(e => e.message).join(", "),
+                details: validated.error.errors
             })
         }
 

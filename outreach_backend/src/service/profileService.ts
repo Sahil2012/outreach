@@ -75,12 +75,23 @@ export const updateProfile = async (authUserId: string, profile: ProfileRequest)
   });
 };
 
-export const updateCredits = async (authUserId: string, deltaCredits: number) => {
+export const deductCredits = async (authUserId: string, deltaCredits: number) => {
+  return await prisma.userProfileData.update({
+    where: { authUserId, credits: { gt: 0 } },
+    data: {
+      credits: {
+        decrement: deltaCredits,
+      },
+    },
+  });
+};
+
+export const addCredits = async (authUserId: string, deltaCredits: number) => {
   return await prisma.userProfileData.update({
     where: { authUserId },
     data: {
       credits: {
-        decrement: deltaCredits,
+        increment: deltaCredits,
       },
     },
   });

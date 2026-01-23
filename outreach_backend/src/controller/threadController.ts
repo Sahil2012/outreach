@@ -82,6 +82,7 @@ export const getThreads = async (
         } else {
           // invalid status provided, return empty result immediately
           // Need to conform to ThreadMetaResponse if returning 200
+          logger.warn("Invalid thread status provided", { userId: clerkUserId, threadStatus });
           return res.status(200).json({
             threads: [],
             total: 0,
