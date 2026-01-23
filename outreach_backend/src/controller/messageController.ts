@@ -4,7 +4,6 @@ import { getAuth } from "@clerk/express";
 import prisma from "../apis/prismaClient.js";
 import { GenerateMailRequest } from "../types/GenerateMailRequest.js";
 import { toMessageDTO } from "../mapper/messageDTOMapper.js";
-import { mailService } from "../service/mailService.js";
 import {
     linkToExternalThread,
     upgradeThreadStatus,
@@ -16,11 +15,13 @@ import MessageType from "../types/MessageType.js";
 import { MessageStatus } from "@prisma/client";
 import { DraftMailResponse, GenerateMailBody } from "../schema/mailSchema.js";
 import { logger } from "../utils/logger.js";
+import { mailService } from "../service/mailService.js";
 
 //PATCH /messages/:id
 export const editMessage = async (
     req: Request<any, {}, MessageRequest>,
-    res: Response<MessageResponse | { error: string }>
+    res: Response<MessageResponse | { error: string }>,
+    next: NextFunction
 ) => {
 
     const messageId = req.params.id as unknown as number;
@@ -37,17 +38,15 @@ export const editMessage = async (
         return res.status(200).json(toMessageDTO(updatedMessage));
     } catch (error) {
         logger.error(`Error updating message for user ${clerkUserId} and message ID ${messageId}`, error);
-        if (error instanceof Error && error.message === "No valid fields provided to update") {
-            return res.status(400).json({ error: "No valid fields provided to update." });
-        }
-        return res.status(500).json({ error: "Internal server error" });
+        return next(error);
     }
 }
 
 // GET /messages/:id
 export const getMessage = async (
     req: Request,
-    res: Response<MessageResponse | { error: string }>
+    res: Response<MessageResponse | { error: string }>,
+    next: NextFunction
 ) => {
 
     const messageId = req.params.id as unknown as number;
@@ -64,14 +63,15 @@ export const getMessage = async (
         return res.status(200).json(toMessageDTO(message));
     } catch (error) {
         logger.error(`Error retrieving message for user ${clerkUserId} and message ID ${messageId}`, error);
-        return res.status(500).json({ error: "Internal server error" });
+        next(error);
     }
 }
 
 // DELETE /messages/:id
 export const deleteMessage = async (
     req: Request,
-    res: Response<MessageResponse | { error: string }>
+    res: Response<MessageResponse | { error: string }>,
+    next: NextFunction
 ) => {
 
     const messageId = req.params.id as unknown as number;
@@ -88,17 +88,15 @@ export const deleteMessage = async (
         return res.status(200).json(toMessageDTO(deletedMessage));
     } catch (error: any) {
         logger.error(`Error deleting message for user ${clerkUserId} and message ID ${messageId}`, error);
-        if (error.message === "Message cannot be deleted unless it is in DRAFT state") {
-            return res.status(400).json({ error: error.message });
-        }
-        return res.status(500).json({ error: "Internal server error" });
+        next(error);
     }
 }
 
 // GET /messages/types
 export const getMessageTypes = (
     req: Request,
-    res: Response<MessageTypeResponse | { error: string; detail?: string }>
+    res: Response<MessageTypeResponse | { error: string; detail?: string }>,
+    next: NextFunction
 ) => {
     try {
         const dto = Object.values(MessageType);
@@ -106,10 +104,7 @@ export const getMessageTypes = (
         return res.status(200).json(dto);
     } catch (error) {
         logger.error("Error returning email types:", error);
-        return res.status(500).json({
-            error: "Internal server error",
-            detail: (error as any).message,
-        });
+        next(error);
     }
 };
 

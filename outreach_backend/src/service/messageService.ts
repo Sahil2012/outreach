@@ -2,6 +2,7 @@ import { MessageStatus, Prisma } from "@prisma/client";
 import { log } from "console";
 import { MessageRequest } from "../schema/messageSchema.js";
 import { logger } from "../utils/logger.js";
+import { BadRequestError, NotFoundError } from "../types/HttpError.js";
 
 export async function saveMessage(
   tx: Prisma.TransactionClient,
@@ -58,7 +59,7 @@ export async function updateMessage(
   authUserId: string,
   message: MessageRequest
 ) {
-  console.log("Editing message ID:", messageId, "by user:", authUserId);
+  logger.info(`Editing message ID: ${messageId} by user: ${authUserId}`);
 
   const updateData: any = {};
   if (typeof message.subject === "string" && message.subject.length != 0) updateData.subject = message.subject;
@@ -66,16 +67,26 @@ export async function updateMessage(
   if (typeof message.status === "string" && message.status.length != 0) updateData.status = MessageStatus[message.status];
 
   if (Object.keys(updateData).length === 0) {
-    throw new Error("No valid fields provided to update");
+    logger.error(`No valid fields provided to update for message ID: ${messageId} by user: ${authUserId}`)
+    throw new BadRequestError("No valid fields provided to update");
   }
 
-  return tx.message.update({
-    where: {
-      id: messageId,
-      authUserId: authUserId,
-    },
-    data: updateData,
-  });
+  try {
+    return tx.message.update({
+      where: {
+        id: messageId,
+        authUserId: authUserId,
+      },
+      data: updateData,
+    });
+  } catch (error: any) {
+    if (error.code === 'P2025') {
+      logger.error(`Message not found for message ID: ${messageId} by user: ${authUserId}`);
+      throw new NotFoundError("Message not found");
+    }
+    logger.error(`Error updating message ID: ${messageId} by user: ${authUserId}`, error);
+    throw error;
+  }
 }
 
 export async function getMessageById(
@@ -83,7 +94,7 @@ export async function getMessageById(
   messageId: number,
   authUserId: string
 ) {
-  log("Retrieving message ID:", messageId, "for user:", authUserId);
+  logger.info(`Retrieving message ID: ${messageId} for user: ${authUserId}`);
   return tx.message.findFirst({
     where: {
       id: messageId,
@@ -131,7 +142,7 @@ export async function populateMessagesForThread(tx: Prisma.TransactionClient, th
 }
 
 export async function deleteMessage(tx: Prisma.TransactionClient, messageId: number, authUserId: string) {
-  console.log("Deleting message ID:", messageId, "for user:", authUserId);
+  logger.info(`Deleting message ID: ${messageId} for user: ${authUserId}`);
 
   const message = await tx.message.findFirst({
     where: {
@@ -141,11 +152,13 @@ export async function deleteMessage(tx: Prisma.TransactionClient, messageId: num
   });
 
   if (!message) {
-    return null;
+    logger.error(`Message not found for message ID: ${messageId} for user: ${authUserId}`);
+    throw new NotFoundError("Message not found");
   }
 
   if (message.status !== MessageStatus.DRAFT) {
-    throw new Error("Message cannot be deleted unless it is in DRAFT state");
+    logger.error(`Message cannot be deleted unless it is in DRAFT state for message ID: ${messageId} for user: ${authUserId}`);
+    throw new BadRequestError("Message cannot be deleted unless it is in DRAFT state");
   }
 
   return tx.message.delete({
