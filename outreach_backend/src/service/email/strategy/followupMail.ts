@@ -1,29 +1,31 @@
 import { PromptTemplate } from "@langchain/core/prompts";
 import { FollowupEmailRequest } from "../../../types/GenerateMailRequest.js";
 import { followUpPromptTemplate } from "../../../utils/prompts/followUpPromptTemplate.js";
-import { log } from "console";
 import { getThreadById } from "../../threadService.js";
 import prisma from "../../../apis/prismaClient.js";
 import { StructuredOutputParser } from "langchain/output_parsers";
 import { emailSchema } from "../../../schema/schema.js";
 import callLLM from "../../../apis/geminichat.js";
+import { logger } from "../../../utils/logger.js";
+import { BadRequestError, NotFoundError } from "../../../types/HttpError.js";
+import { getUserProfile } from "../../profileService.js";
 
 export const followupEmailStrategy = async (followupRequest: FollowupEmailRequest) => {
-    log("Generating followup email for threadId: ", followupRequest.threadId);
+    logger.info(`Generating followup email for threadId: ${followupRequest.threadId}`);
 
     if (!followupRequest.threadId || !followupRequest.userId) {
-        throw new Error("Missing threadId or userId in followup request");
+        throw new BadRequestError("Missing threadId or userId in followup request");
     }
 
     try {
-        log("Fetching messages for threadId: ", followupRequest.threadId);
+        logger.info(`Fetching messages for threadId: ${followupRequest.threadId}`);
         const thread = await getThreadById(prisma, followupRequest.userId, followupRequest.threadId);
-
+        const profileDetails = await getUserProfile(followupRequest.userId);
         if (!thread) {
-            throw new Error(`Thread not found for id: ${followupRequest.threadId}`);
+            throw new NotFoundError(`Thread not found for id: ${followupRequest.threadId}`);
         }
 
-        log("Fetched thread with messages count: ", thread.messages.length);
+        logger.info(`Fetched thread with messages count: ${thread.messages.length}`);
 
         const prompt = PromptTemplate.fromTemplate(followUpPromptTemplate);
         const outputParser = StructuredOutputParser.fromZodSchema(emailSchema);
@@ -35,17 +37,17 @@ export const followupEmailStrategy = async (followupRequest: FollowupEmailReques
                     body: m.body,
                     subject: m.subject
                 }))),
-                user_name: "Sahil Gupta", // TODO: Fetch from user profile
+                user_name: profileDetails?.firstName + " " + profileDetails?.lastName,
                 contact_name: thread.employee?.name || 'Recruiter',
                 follow_up_reason: 'Checking on update',
                 emailSchema: outputParser.getFormatInstructions()
             })
         );
 
-        log("AI response received for followup email");
+        logger.info("AI response received for followup email");
         return outputParser.parse(followUpEmail);
     } catch (error) {
-        log("Error generating followup email:", error);
+        logger.error("Error generating followup email:", error);
         throw error;
     }
 }

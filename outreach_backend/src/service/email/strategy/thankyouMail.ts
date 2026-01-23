@@ -3,10 +3,11 @@ import prisma from "../../../apis/prismaClient.js";
 import { ThankYouEmailRequest } from "../../../types/GenerateMailRequest.js";
 import { getThreadById } from "../../threadService.js";
 import { thankyouPromptTemplate } from "../../../utils/prompts/thankYouPromptTemplate.js";
-import { error, log } from "console";
 import callLLM from "../../../apis/geminichat.js";
 import { StructuredOutputParser } from "langchain/output_parsers";
 import { emailSchema } from "../../../schema/schema.js";
+import { logger } from "../../../utils/logger.js";
+import { NotFoundError } from "../../../types/HttpError.js";
 
 export const thankyouEmailStrategy = async (emailRequest: ThankYouEmailRequest) => {
 
@@ -14,16 +15,16 @@ export const thankyouEmailStrategy = async (emailRequest: ThankYouEmailRequest) 
     const thread = await getThreadById(prisma, emailRequest.userId, emailRequest.threadId);
 
     if (!thread) {
-        error("Thread not found");
-        throw new Error("Thread not found");
+        logger.error("Thread not found");
+        throw new NotFoundError("Thread not found");
     }
     const lastMessage = thread?.messages.at(-1);
     if (!lastMessage) {
-        error("Last message not found");
-        throw new Error("Last message not found");
+        logger.error("Last message not found");
+        throw new NotFoundError("Last message not found");
     }
 
-    log("Initiating thankyou email strategy for thread", emailRequest.threadId);
+    logger.info(`Initiating thankyou email strategy for thread ${emailRequest.threadId}`);
 
     // prepare the prompt template
     const promptTemplate = PromptTemplate.fromTemplate(thankyouPromptTemplate);
@@ -38,7 +39,7 @@ export const thankyouEmailStrategy = async (emailRequest: ThankYouEmailRequest) 
         })
     );
 
-    log("RAW email", email);
+    logger.info(`RAW email: ${email}`);
 
     return outputFormat.parse(email);
 }

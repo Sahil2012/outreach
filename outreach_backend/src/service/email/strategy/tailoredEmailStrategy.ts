@@ -4,8 +4,9 @@ import { referralEmailPrompt } from "../../../utils/prompts/referralPromptTempla
 import { StructuredOutputParser } from "langchain/output_parsers";
 import { emailSchema } from "../../../schema/schema.js";
 import callLLM from "../../../apis/geminichat.js";
-import { log } from "console";
 import { TailoredEmailRequest } from "../../../types/GenerateMailRequest.js";
+import prisma from "../../../apis/prismaClient.js";
+import { logger } from "../../../utils/logger.js";
 
 export const tailoredEmailStrategy = async (
   emailRequest: TailoredEmailRequest
@@ -14,9 +15,9 @@ export const tailoredEmailStrategy = async (
   const jobDescription = emailRequest.jobDescription;
 
   // extract user profile details using userId
-  const profileDetails = await getCandidateProfile(userId || "");
+  const profileDetails = await getCandidateProfile(prisma, userId || "");
 
-  log("Profile Details:", profileDetails);
+  logger.info(`Profile Details: ${profileDetails}`);
 
   const referralPrompt = PromptTemplate.fromTemplate(referralEmailPrompt);
 
@@ -35,6 +36,6 @@ export const tailoredEmailStrategy = async (
       emailSchema: parser.getFormatInstructions(),
     })
   );
-  log("RAW LLM response:", res);
+  logger.info(`RAW LLM response: ${res}`);
   return await parser.parse(res);
 };
