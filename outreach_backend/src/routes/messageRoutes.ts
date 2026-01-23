@@ -3,7 +3,7 @@ import { deleteMessage, editMessage, generateNewMailTrail, getEmailTypes, getMes
 
 import { schemaValidator } from "../middlleware/schemaValidator.js";
 import { GenerateMailSchema } from "../schema/mailSchema.js";
-import { MessageSchema, SendMailSchema } from "../schema/messageSchema.js";
+import { MessageRequestSchema, SendMailSchema } from "../schema/messageSchema.js";
 
 const messageRoutes = Router();
 
@@ -14,7 +14,7 @@ messageRoutes.get("/types", getEmailTypes);
 // NOTE: This just sends the mail to the user via gmail and updates the status of the message to sent
 messageRoutes.post("/:id/send", schemaValidator(SendMailSchema), sendMailUsingClerkToken);
 
-messageRoutes.patch("/:id", schemaValidator(MessageSchema), editMessage);
+messageRoutes.patch("/:id", schemaValidator(MessageRequestSchema), editMessage);
 messageRoutes.get("/:id", getMessage);
 messageRoutes.delete("/:id", deleteMessage);
 

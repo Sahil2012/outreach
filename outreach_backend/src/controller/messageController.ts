@@ -10,9 +10,9 @@ import {
     upgradeThreadStatus,
 } from "../service/threadService.js";
 import { generateAndSaveEmail } from "../service/emailService.js";
-import { getUserCredits, updateCredits } from "../service/profileService.js";
+import { addCredits, deductCredits } from "../service/profileService.js";
 import { log } from "console";
-import { MessageRequest, MessageResponse, MessageTypeResponse, SendMailRequest } from "../schema/messageSchema.js";
+import { MessageResponse, MessageTypeResponse, SendMailRequest, MessageRequest } from "../schema/messageSchema.js";
 import MessageType from "../types/MessageType.js";
 import { MessageStatus } from "@prisma/client";
 import { DraftMailResponse, GenerateMailBody } from "../schema/mailSchema.js";
@@ -22,7 +22,7 @@ export const editMessage = async (
     res: Response<MessageResponse | { error: string }>
 ) => {
 
-    const messageId = parseInt(req.params.messageId, 10);
+    const messageId = parseInt(req.params.id, 10);
 
     if (isNaN(messageId)) {
         return res.status(400).json({ error: "Invalid message ID" });
@@ -33,13 +33,16 @@ export const editMessage = async (
     const { userId: clerkUserId } = getAuth(req);
 
     try {
-        const updatedMessage = await updateMessage(prisma, messageId, clerkUserId!, subject!, body!);
+        const updatedMessage = await updateMessage(prisma, messageId, clerkUserId!, subject, body);
         if (!updatedMessage) {
             return res.status(404).json({ error: "Message not found" });
         }
         return res.status(200).json(toMessageDTO(updatedMessage));
     } catch (error) {
         console.error("Error updating message:", error);
+        if (error instanceof Error && error.message === "No valid fields provided to update") {
+            return res.status(400).json({ error: "No valid fields provided to update." });
+        }
         return res.status(500).json({ error: "Internal server error" });
     }
 }
@@ -48,7 +51,7 @@ export const getMessage = async (
     req: Request,
     res: Response<MessageResponse | { error: string }>
 ) => {
-    const messageId = parseInt(req.params.messageId as string, 10);
+    const messageId = parseInt(req.params.id as string, 10);
 
     if (isNaN(messageId)) {
         return res.status(400).json({ error: "Invalid message ID" });
@@ -58,7 +61,9 @@ export const getMessage = async (
 
     try {
         const message = await getMessageById(prisma, messageId, clerkUserId!);
-
+        if (!message) {
+            return res.status(404).json({ error: "Message not found" });
+        }
         return res.status(200).json(toMessageDTO(message));
     } catch (error) {
         console.error("Error retrieving message:", error);
@@ -71,7 +76,7 @@ export const deleteMessage = async (
     res: Response<MessageResponse | { error: string }>
 ) => {
 
-    const messageId = parseInt(req.params.messageId as string, 10);
+    const messageId = parseInt(req.params.id as string, 10);
 
     if (isNaN(messageId)) {
         return res.status(400).json({ error: "Invalid message ID" });
@@ -121,29 +126,31 @@ export const generateNewMailTrail = async (
     res: Response<DraftMailResponse | { error: string }>,
     next: NextFunction
 ) => {
+    const { userId: clerkUserId } = getAuth(req);
+    let creditsDeducted = false;
+
+    if (!clerkUserId) {
+        log("Unauthorized access attempt to mail generator");
+        return res.status(401).json({ error: "Unauthorized" });
+    }
     try {
-        const { userId: clerkUserId } = getAuth(req);
-
-        if (!clerkUserId) {
-            log("Unauthorized access attempt to mail generator");
-            return res.status(401).json({ error: "Unauthorized" });
-        }
-
         const requestWithUser: GenerateMailRequest = { ...req.body, userId: clerkUserId };
-
-        const profile = await getUserCredits(clerkUserId);
-        if (!profile || profile.credits <= 0) {
-            log("User has no credits");
-            return res.status(429).json({ error: "No credits available" });
-        }
+        const profile = await deductCredits(clerkUserId, 1);
+        creditsDeducted = true;
         log("User has credits:", profile.credits);
 
         const result = await generateAndSaveEmail(clerkUserId, requestWithUser);
 
-        await updateCredits(clerkUserId, 1);
         res.status(200).json(result);
     } catch (error: any) {
         console.error("Error generating email:", error);
+        if (creditsDeducted) {
+            await addCredits(clerkUserId, 1).catch(e => console.error("CRITICAL: Failed to refund credit!", e));
+        } else {
+            if (error.code === 'P2025' || error.message?.includes("Record to update not found")) {
+                return res.status(429).json({ error: "No credits available" });
+            }
+        }
         // Return 400 for bad requests (like invalid type), 500 otherwise
         const status = error.message.includes("No email strategy") ? 400 : 500;
         res.status(status).json({ error: error.message });
@@ -156,7 +163,7 @@ export const sendMailUsingClerkToken = async (
 ) => {
     try {
 
-        const messageId = parseInt(req.params.messageId, 10);
+        const messageId = parseInt(req.params.id, 10);
 
         if (!messageId) {
             return res.status(400).json({ error: "Invalid message ID" });

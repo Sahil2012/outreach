@@ -64,7 +64,7 @@ export async function updateMessage(
   if (typeof newBody === "string" && newBody.length != 0) updateData.body = newBody;
 
   if (Object.keys(updateData).length === 0) {
-    throw new Error("No valid fields provided to update.");
+    throw new Error("No valid fields provided to update");
   }
 
   return tx.message.update({
