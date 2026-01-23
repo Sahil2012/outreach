@@ -1,34 +1,30 @@
 import { Request, Response, NextFunction } from "express";
-import { ZodTypeAny } from "zod";
+import { ZodSchema } from "zod";
 
-export const bodyValidator = (schema: ZodTypeAny) => {
-    return async (req: Request, res: Response, next: NextFunction) => {
-        const validated = await schema.safeParseAsync(req.body);
-
-        if (!validated.success) {
-            return res.status(400).json({
-                error: validated.error.errors.map(e => e.message).join(", "),
-                details: validated.error.errors
-            })
-        }
-
-        req.body = validated.data;
-        next();
-    }
+interface RequestValidationSchema {
+    body?: ZodSchema;
+    query?: ZodSchema;
+    params?: ZodSchema;
 }
 
-export const queryValidator = (schema: ZodTypeAny) => {
+export const validate = (schemas: RequestValidationSchema) => {
     return async (req: Request, res: Response, next: NextFunction) => {
-        const validated = await schema.safeParseAsync(req.query);
-
-        if (!validated.success) {
+        try {
+            if (schemas.body) {
+                req.body = await schemas.body.parseAsync(req.body);
+            }
+            if (schemas.query) {
+                req.query = await schemas.query.parseAsync(req.query);
+            }
+            if (schemas.params) {
+                req.params = await schemas.params.parseAsync(req.params);
+            }
+            next();
+        } catch (error: any) {
             return res.status(400).json({
-                error: validated.error.errors.map(e => e.message).join(", "),
-                details: validated.error.errors
-            })
+                error: "Validation failed",
+                details: JSON.parse(error.message)
+            });
         }
-
-        req.query = validated.data;
-        next();
-    }
-}
+    };
+};
