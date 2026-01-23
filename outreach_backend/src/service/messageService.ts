@@ -1,5 +1,6 @@
 import { MessageStatus, Prisma } from "@prisma/client";
 import { log } from "console";
+import { MessageRequest } from "../schema/messageSchema.js";
 
 export async function saveMessage(
   tx: Prisma.TransactionClient,
@@ -54,14 +55,14 @@ export async function updateMessage(
   tx: Prisma.TransactionClient,
   messageId: number,
   authUserId: string,
-  newSubject?: string,
-  newBody?: string
+  message: MessageRequest
 ) {
   console.log("Editing message ID:", messageId, "by user:", authUserId);
 
   const updateData: any = {};
-  if (typeof newSubject === "string" && newSubject.length != 0) updateData.subject = newSubject;
-  if (typeof newBody === "string" && newBody.length != 0) updateData.body = newBody;
+  if (typeof message.subject === "string" && message.subject.length != 0) updateData.subject = message.subject;
+  if (typeof message.body === "string" && message.body.length != 0) updateData.body = message.body;
+  if (typeof message.status === "string" && message.status.length != 0) updateData.status = MessageStatus[message.status];
 
   if (Object.keys(updateData).length === 0) {
     throw new Error("No valid fields provided to update");
@@ -73,25 +74,6 @@ export async function updateMessage(
       authUserId: authUserId,
     },
     data: updateData,
-  });
-}
-
-export async function updateState(
-  tx: Prisma.TransactionClient,
-  messageId: number,
-  status: MessageStatus,
-  authUserId: string
-) {
-  console.log("Updating message ID:", messageId, "to status:", status);
-
-  return tx.message.update({
-    where: {
-      id: messageId,
-      authUserId: authUserId,
-    },
-    data: {
-      status
-    },
   });
 }
 

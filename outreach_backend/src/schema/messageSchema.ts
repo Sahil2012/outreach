@@ -23,7 +23,8 @@ export const SendMailSchema = z.object({
 export const MessageRequestSchema = MessageSchema.omit({
     id: true,
     date: true,
-    fromUser: true
+    fromUser: true,
+    threadId: true
 }).partial();
 
 export type SendMailRequest = z.infer<typeof SendMailSchema>;
