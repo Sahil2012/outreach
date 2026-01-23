@@ -3,6 +3,8 @@ import { log } from "console";
 import EmailType from "../types/MessageType.js";
 import externalMailService from "./externalMailService.js";
 import { getLastMessage, populateMessagesForThread } from "./messageService.js";
+import { ThreadDetailResponse, UpdateThreadRequest } from "../schema/threadSchema.js";
+import { logger } from "../utils/logger.js";
 
 const status = [
   ThreadStatus.PENDING,
@@ -164,7 +166,7 @@ export async function extractThreadMeta(
   pageSize: number,
   search?: string[],
   messageState?: MessageStatus[],
-  status?: ThreadStatus[]
+  status?: (ThreadStatus | "FOLLOW_UP")[]
 ) {
   const skip = (page - 1) * pageSize;
   const limit = pageSize;
@@ -181,8 +183,16 @@ export async function extractThreadMeta(
   }
 
   if (status && status.length > 0) {
-    log("Filtering by statuses:", status);
-    whereClause.status = { in: status };
+    const dbStatus: ThreadStatus[] = [];
+    for (const s of status) {
+      if (s === "FOLLOW_UP") {
+        dbStatus.push(ThreadStatus.FIRST_FOLLOW_UP, ThreadStatus.SECOND_FOLLOW_UP, ThreadStatus.THIRD_FOLLOW_UP);
+      } else {
+        dbStatus.push(s);
+      }
+    }
+    log("Filtering by statuses:", dbStatus);
+    whereClause.status = { in: dbStatus };
   }
 
   if (messageState && messageState.length > 0) {
@@ -266,16 +276,6 @@ export async function linkToExternalThread(tx: Prisma.TransactionClient, threadI
   })
 }
 
-export async function updateStatus(tx: Prisma.TransactionClient, threadId: number, status: ThreadStatus, authUserId: string) {
-  log("Updating status of thread", threadId, "to", status);
-  return await tx.thread.update({
-    where: { id: threadId, authUserId },
-    data: {
-      status
-    }
-  });
-}
-
 export async function upgradeThreadStatus(tx: Prisma.TransactionClient, threadId: number, userId: string) {
   log("Upgrading status of thread", threadId);
 
@@ -296,17 +296,33 @@ export async function upgradeThreadStatus(tx: Prisma.TransactionClient, threadId
     return;
   }
 
-  return await updateStatus(tx, threadId, calculateNextState(currentStatus.status), userId);
+  return await updateThread(tx, threadId, userId, { status: calculateNextState(currentStatus.status) });
 }
 
-export async function updateAutomated(tx: Prisma.TransactionClient, threadId: number, automated: boolean) {
-  log("Updating automated status of thread", threadId, "to", automated);
+export async function updateThread(tx: Prisma.TransactionClient, threadId: number, userId: string, data: UpdateThreadRequest) {
+  log(`Updating thread ${threadId} with data ${JSON.stringify(data)}`);
   return tx.thread.update({
-    where: { id: threadId },
+    where: { id: threadId, authUserId: userId },
     data: {
-      automated,
+      automated: data.isAutomated,
+      status: data.status,
     }
   });
+}
+
+export async function getSyncedThread(tx: Prisma.TransactionClient, threadId: number, userId: string) {
+  // shoulkd we move this to a new endpoint it will create a delay
+  const sync = await syncThreadWithGoogle(tx, userId, threadId);
+  logger.info(`Thread synced with Gmail for user ${userId} and thread ${threadId}`);
+  const thread = await getThreadById(tx, userId, threadId);
+
+  if (!thread) {
+    logger.error(`Thread not found for user ${userId} and thread ${threadId}`);
+    return null;
+  }
+
+  logger.info(`Thread fetched successfully for user ${userId} and thread ${threadId}`);
+  return { ...thread, sync };
 }
 
 function buildEmployeeFilter(

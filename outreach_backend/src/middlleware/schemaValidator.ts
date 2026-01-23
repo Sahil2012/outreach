@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { ZodTypeAny } from "zod";
 
-export const schemaValidator = (schema: ZodTypeAny) => {
+export const bodyValidator = (schema: ZodTypeAny) => {
     return async (req: Request, res: Response, next: NextFunction) => {
         const validated = await schema.safeParseAsync(req.body);
 
@@ -13,6 +13,22 @@ export const schemaValidator = (schema: ZodTypeAny) => {
         }
 
         req.body = validated.data;
+        next();
+    }
+}
+
+export const queryValidator = (schema: ZodTypeAny) => {
+    return async (req: Request, res: Response, next: NextFunction) => {
+        const validated = await schema.safeParseAsync(req.query);
+
+        if (!validated.success) {
+            return res.status(400).json({
+                error: validated.error.errors.map(e => e.message).join(", "),
+                details: validated.error.errors
+            })
+        }
+
+        req.query = validated.data;
         next();
     }
 }
