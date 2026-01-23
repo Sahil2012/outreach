@@ -1,11 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import { logger } from "../utils/logger.js";
-import busboy from "busboy";
-import { storageService } from "../service/storageService.js";
-import { enqueueResumeJob } from "../utils/enqueResume.js";
 import { getAuth } from "@clerk/express";
 import { toProfileDTO } from "../mapper/profileDTOMapper.js";
-import { addCredits, getUserProfile, updateProfile as updateProfileService } from "../service/profileService.js";
+import { addCredits, getUserProfile, handleResumeUpload, updateProfile as updateProfileService } from "../service/profileService.js";
 import prisma from "../apis/prismaClient.js";
 import { getStats } from "../service/threadService.js";
 import { CreditRequest, CreditResponse, ProfileRequest, ProfileResponse, StatsResponse } from "../schema/profileSchema.js";
@@ -64,70 +61,16 @@ export const uploadResume = async (
   res: Response,
   next: NextFunction
 ) => {
-
   const { userId: clerkUserId } = getAuth(req);
   logger.info("Starting resume upload", { userId: clerkUserId });
 
-  const bb = busboy({ headers: req.headers });
-  let autofill = false;
-  let fileUploadPromise: Promise<void> | null = null;
-
-  bb.on("field", (name, val) => {
-    if (name === "autofill") {
-      autofill = val === "true";
-    }
-  });
-
-  bb.on("file", (name, file, info) => {
-    const { filename, mimeType } = info;
-    const filePath = `user_${clerkUserId!}/${filename}`;
-
-    // Store the promise so we can wait for it in 'close'
-    fileUploadPromise = (async () => {
-      try {
-        const uploadPath = await storageService.uploadFileStream(filePath, file, mimeType);
-
-        await prisma.userProfileData.update({
-          where: { authUserId: clerkUserId! },
-          data: { resumeUrl: uploadPath },
-        });
-
-        logger.info("Resume uploaded successfully", { userId: clerkUserId, path: uploadPath });
-
-        if (autofill) {
-          logger.info("Enqueuing resume parsing job", { userId: clerkUserId });
-          await enqueueResumeJob(clerkUserId!, uploadPath);
-        }
-      } catch (err) {
-        logger.error("Stream upload error:", err);
-        throw err; // Propagate error
-      }
-    })();
-  });
-
-  bb.on("close", async () => {
-    try {
-      if (fileUploadPromise) {
-        // Wait for the file processing to complete
-        await fileUploadPromise;
-
-        res.json({
-          message: autofill
-            ? "Resume uploaded and sent for parsing"
-            : "Resume uploaded successfully",
-        });
-      } else {
-        res.status(400).json({ message: "No file uploaded or file processing failed." });
-      }
-    } catch (error) {
-      logger.error("Upload failed in close handler", error);
-      if (!res.headersSent) {
-        next(error);
-      }
-    }
-  });
-
-  req.pipe(bb);
+  try {
+    const result = await handleResumeUpload(req, clerkUserId!);
+    res.json(result);
+  } catch (error) {
+    logger.error("Upload failed", error);
+    next(error);
+  }
 };
 
 // POST /profile/credits/transaction
