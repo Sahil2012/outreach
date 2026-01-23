@@ -2,6 +2,7 @@ import { google } from "googleapis";
 import prisma from "../apis/prismaClient.js";
 import * as cheerio from "cheerio";
 import { getGoogleAccessToken } from "../apis/googleOAuth2Client.js";
+import { logger } from "../utils/logger.js";
 
 
 export class ExternalMailService {
@@ -16,7 +17,9 @@ export class ExternalMailService {
 
     try {
       accessToken = await getGoogleAccessToken(clerkUserId);
+      logger.info(`Access token fetched for user ${clerkUserId}`);
     } catch (error: any) {
+      logger.error(`Error fetching access token for user ${clerkUserId}: ${error.message}`);
       throw new Error("refresh_token_not_found");
     }
     const thread = await prisma.thread.findUnique({
@@ -25,6 +28,7 @@ export class ExternalMailService {
       }
     });
     if (!thread) {
+      logger.error(`Thread not found for user ${clerkUserId} with thread ID ${threadId}`);
       throw new Error("thread_not_found");
     }
 
@@ -47,11 +51,13 @@ export class ExternalMailService {
       const result = t.data.messages.map((message) => {
         const a = this.extractMessageBody(message.payload);
         const fromUser = message.labelIds?.includes("SENT") || false;
+        logger.info(`Message fetched for user ${clerkUserId} with thread ID ${threadId}`);
         return { id: message.id, threadId: message.threadId, body: a, fromUser };
       });
 
       return result;
     } catch (error: any) {
+      logger.error(`Error fetching thread messages for user ${clerkUserId} with thread ID ${threadId}: ${error.message}`);
       throw new Error(error.code == 403 ? "insufficient_permissions" : "thread_not_found_in_external_source");
     }
 

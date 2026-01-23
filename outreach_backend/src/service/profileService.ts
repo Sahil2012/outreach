@@ -211,9 +211,9 @@ export const handleResumeUpload = (req: Request, authUserId: string): Promise<{ 
           });
         } else {
           if (!fileFound) {
-            reject(new Error("No file uploaded"));
+            reject(new BadRequestError("No file uploaded"));
           } else {
-            reject(new Error("File processing failed"));
+            reject(new BadRequestError("File processing failed"));
           }
         }
       } catch (error) {

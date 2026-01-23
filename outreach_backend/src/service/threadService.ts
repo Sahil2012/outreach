@@ -1,10 +1,10 @@
 import { MessageStatus, Prisma, ThreadStatus } from "@prisma/client";
-import { log } from "console";
 import EmailType from "../types/MessageType.js";
 import externalMailService from "./externalMailService.js";
 import { getLastMessage, populateMessagesForThread } from "./messageService.js";
-import { ThreadDetailResponse, UpdateThreadRequest } from "../schema/threadSchema.js";
+import { UpdateThreadRequest } from "../schema/threadSchema.js";
 import { logger } from "../utils/logger.js";
+import { BadRequestError, NotFoundError } from "../types/HttpError.js";
 
 const status = [
   ThreadStatus.PENDING,
@@ -20,104 +20,52 @@ export async function createThread(
   employeeId: number,
   type: EmailType.COLD | EmailType.TAILORED
 ) {
-  log(
-    "Creating thread for user:",
-    authUserId,
-    "and employee:",
-    employeeId,
-    "of type:",
-    type
-  );
-  return tx.thread.create({
-    data: {
-      authUserId,
-      employeeId,
-      lastUpdated: new Date(),
-    },
-  });
-}
-
-export async function getThreadPreview(
-  tx: Prisma.TransactionClient,
-  authUserId: string,
-  threadId: number
-) {
-  log("Fetching preview for thread ID:", threadId);
-  return tx.thread.findUnique({
-    where: { id: threadId, AND: { authUserId: authUserId } },
-    include: {
-      messages: {
-        orderBy: {
-          date: "desc",
-        },
-        take: 1,
-      },
-    },
-  });
-}
-
-export async function getThreadById(
-  tx: Prisma.TransactionClient,
-  authUserId: string,
-  threadId: number
-) {
-  log("Fetching full thread for thread ID:", threadId);
-  return tx.thread.findUnique({
-    where: { id: threadId, AND: { authUserId: authUserId } },
-    include: {
-      messages: {
-        orderBy: {
-          date: "asc",
-        },
-      },
-      employee: true,
-      jobs: {
-        select: {
-          job: true,
-        },
-      },
-    },
-  });
-}
-
-export async function syncThreadWithGoogle(
-  tx: Prisma.TransactionClient,
-  authUserId: string,
-  threadId: number
-) {
-  log("Fetching thread messages for thread ID from external source:", threadId);
-  let messages: any[] = [];
-  let status = true;
-  let code = "";
+  logger.info(`Creating thread for user: ${authUserId} and employee: ${employeeId} of type: ${type}`);
 
   try {
-    messages = await externalMailService.getThreadMessage(threadId, authUserId);
-  } catch (err: any) {
-    console.error("Error fetching thread messages from external source:", err.message);
-    status = false;
-    code = err.message;
+    return tx.thread.create({
+      data: {
+        authUserId,
+        employeeId,
+        lastUpdated: new Date(),
+      },
+    });
+  } catch (error: any) {
+    if (error.code === 'P2002') {
+      throw new BadRequestError("Thread already exists");
+    }
+    throw error;
+  }
+}
+
+export async function upgradeThreadStatus(tx: Prisma.TransactionClient, threadId: number, userId: string) {
+  logger.info(`Upgrading status of thread ${threadId}`);
+
+  const currentStatus = await tx.thread.findUnique({ where: { id: threadId } });
+  if (!currentStatus
+    || currentStatus.status === ThreadStatus.CLOSED
+    || currentStatus.status === ThreadStatus.REFERRED
+    || currentStatus.status === ThreadStatus.DELETED
+    || currentStatus.status === ThreadStatus.THIRD_FOLLOW_UP
+  ) {
+    throw new BadRequestError("Thread not found or already in unupgradable state");
   }
 
-  log("Populating messages for thread ID:", threadId);
-  try {
-    await populateMessagesForThread(tx, threadId, authUserId, messages);
-  } catch (err: any) {
-    console.error("Error populating messages for thread ID:", threadId, err.message);
-    status = false;
-    code = err.message;
+  const lastMessage = await getLastMessage(tx, threadId, userId);
+
+  if (lastMessage?.status === MessageStatus.SENT) {
+    logger.info(`Thread ${threadId} is already in SENT state`);
+    throw new BadRequestError("Thread is already in SENT state");
   }
 
-  return {
-    status,
-    code: status ? undefined : code
-  };
+  return await updateThread(tx, threadId, userId, { status: calculateNextState(currentStatus.status) });
 }
 
 export async function getStats(
   tx: Prisma.TransactionClient,
   authUserId: string
 ) {
-  console.log("Calculating stats for user:", authUserId);
+  logger.info(`Calculating stats for user: ${authUserId}`);
 
   const statQueries = {
     followUps: {
@@ -157,6 +105,116 @@ export async function getStats(
     reachedOut,
     referred,
   };
+
+}
+
+export async function linkToExternalThread(tx: Prisma.TransactionClient, threadId: number, externalThreadId: string, externalMessageId: string) {
+  logger.info(`Linking thread ${threadId} to external thread ${externalThreadId}`);
+  try {
+    return await tx.thread.update({
+      where: { id: threadId },
+      data: {
+        externalThreadId,
+        messages: {
+          updateMany: {
+            where: {
+              threadId: threadId
+            },
+            data: {
+              externalMessageId: externalMessageId
+            }
+          }
+        }
+      }
+    });
+  } catch (error: any) {
+    if (error.code === 'P2025') {
+      throw new NotFoundError("Thread not found");
+    }
+    throw error;
+  }
+}
+
+export async function updateThread(tx: Prisma.TransactionClient, threadId: number, userId: string, data: UpdateThreadRequest) {
+  logger.info(`Updating thread ${threadId} with data ${JSON.stringify(data)}`);
+  try {
+    return await tx.thread.update({
+      where: { id: threadId, authUserId: userId },
+      data: {
+        automated: data.isAutomated,
+        status: data.status,
+      }
+    });
+  } catch (error: any) {
+    if (error.code === 'P2025') {
+      throw new NotFoundError("Thread not found");
+    }
+    throw error;
+  }
+}
+
+export async function getThreadById(
+  tx: Prisma.TransactionClient,
+  authUserId: string,
+  threadId: number
+) {
+  logger.info(`Fetching full thread for user ${authUserId} with thread ID ${threadId}`);
+  try {
+    return tx.thread.findUnique({
+      where: { id: threadId, AND: { authUserId: authUserId } },
+      include: {
+        messages: {
+          orderBy: {
+            date: "asc",
+          },
+        },
+        employee: true,
+        jobs: {
+          select: {
+            job: true,
+          },
+        },
+      },
+    });
+  } catch (error: any) {
+    if (error.code === 'P2025') {
+      throw new NotFoundError("Thread not found");
+    }
+    throw error;
+  }
+}
+
+export async function syncThreadWithGoogle(
+  tx: Prisma.TransactionClient,
+  authUserId: string,
+  threadId: number
+) {
+  logger.info(`Fetching thread messages for user ${authUserId} with thread ID ${threadId} from external source`);
+  let messages: any[] = [];
+  let status = true;
+  let code = "";
+
+  try {
+    messages = await externalMailService.getThreadMessage(threadId, authUserId);
+  } catch (err: any) {
+    logger.error(`Error fetching thread messages from external source: ${err.message}`);
+    status = false;
+    code = err.message;
+  }
+
+  try {
+    logger.info(`Populating messages for user ${authUserId} from external source to db with thread ID ${threadId}`);
+    await populateMessagesForThread(tx, threadId, authUserId, messages);
+  } catch (err: any) {
+    logger.error(`Error populating messages for thread ID: ${threadId}, ${err.message}`);
+    status = false;
+    code = err.message;
+  }
+
+  return {
+    status,
+    code: status ? undefined : code
+  };
 }
 
 export async function extractThreadMeta(
@@ -178,7 +236,7 @@ export async function extractThreadMeta(
   const employeeFilter: Prisma.EmployeeWhereInput | undefined = buildEmployeeFilter(search, search);
 
   if (employeeFilter) {
-    log("Applying employee filters:", employeeFilter);
+    logger.info(`Applying employee filters: ${employeeFilter}`);
     whereClause.employee = employeeFilter;
   }
 
@@ -191,16 +249,16 @@ export async function extractThreadMeta(
         dbStatus.push(s);
       }
     }
-    log("Filtering by statuses:", dbStatus);
+    logger.info(`Filtering by statuses: ${dbStatus}`);
     whereClause.status = { in: dbStatus };
   }
 
   if (messageState && messageState.length > 0) {
-    log("Filtering by message states:", messageState);
+    logger.info(`Filtering by message states: ${messageState}`);
     whereClause.messages = { some: { status: { in: messageState } } };
   }
 
-  log("Fetching threads for user:", authUserId);
+  logger.info(`Fetching threads for user: ${authUserId}`);
 
   const [threads, total] = await Promise.all([
     tx.thread.findMany({
@@ -256,60 +314,6 @@ export async function extractThreadMeta(
   };
 }
 
-export async function linkToExternalThread(tx: Prisma.TransactionClient, threadId: number, externalThreadId: string, externalMessageId: string) {
-  log("Linking thread", threadId, "to external thread", externalThreadId);
-  return tx.thread.update({
-    where: { id: threadId },
-    data: {
-      externalThreadId,
-      messages: {
-        updateMany: {
-          where: {
-            threadId: threadId
-          },
-          data: {
-            externalMessageId: externalMessageId
-          }
-        }
-      }
-    }
-  })
-}
-
-export async function upgradeThreadStatus(tx: Prisma.TransactionClient, threadId: number, userId: string) {
-  log("Upgrading status of thread", threadId);
-
-  const currentStatus = await tx.thread.findUnique({ where: { id: threadId } });
-  if (!currentStatus
-    || currentStatus.status === ThreadStatus.CLOSED
-    || currentStatus.status === ThreadStatus.REFERRED
-    || currentStatus.status === ThreadStatus.DELETED
-    || currentStatus.status === ThreadStatus.THIRD_FOLLOW_UP
-  ) {
-    throw new Error("Thread not found or already in unupgradable state");
-  }
-
-  const lastMessage = await getLastMessage(tx, threadId, userId);
-
-  if (lastMessage?.status === MessageStatus.SENT) {
-    log("Thread", threadId, "is already in SENT state");
-    return;
-  }
-
-  return await updateThread(tx, threadId, userId, { status: calculateNextState(currentStatus.status) });
-}
-
-export async function updateThread(tx: Prisma.TransactionClient, threadId: number, userId: string, data: UpdateThreadRequest) {
-  log(`Updating thread ${threadId} with data ${JSON.stringify(data)}`);
-  return tx.thread.update({
-    where: { id: threadId, authUserId: userId },
-    data: {
-      automated: data.isAutomated,
-      status: data.status,
-    }
-  });
-}
-
 export async function getSyncedThread(tx: Prisma.TransactionClient, threadId: number, userId: string) {
   // shoulkd we move this to a new endpoint it will create a delay
   const sync = await syncThreadWithGoogle(tx, userId, threadId);
@@ -318,7 +322,7 @@ export async function getSyncedThread(tx: Prisma.TransactionClient, threadId: nu
 
   if (!thread) {
     logger.error(`Thread not found for user ${userId} and thread ${threadId}`);
-    return null;
+    throw new NotFoundError("Thread not found");
   }
 
   logger.info(`Thread fetched successfully for user ${userId} and thread ${threadId}`);
@@ -332,14 +336,14 @@ function buildEmployeeFilter(
   let employeeFilter: Prisma.EmployeeWhereInput[] = [];
 
   if (companyName && companyName.length > 0) {
-    log("Filtering by company names:", companyName);
+    logger.info(`Filtering by company names: ${companyName}`);
     employeeFilter.push({
       company: { in: companyName, mode: "insensitive" },
     });
   }
 
   if (employeeName && employeeName.length > 0) {
-    log("Filtering by employee names:", employeeName);
+    logger.info(`Filtering by employee names: ${employeeName}`);
     employeeFilter.push({
       OR: employeeName.map((n) => ({
         name: { contains: n, mode: "insensitive" },

@@ -75,8 +75,6 @@ export const getThreads = async (
       messageStatus,
       threadStatus as (ThreadStatus | "FOLLOW_UP")[]
     );
-    logger.info(`Thread meta fetched successfully for user ${clerkUserId}`, { meta });
-
     const threads = meta.threads.map(toThreadDTO);
 
     logger.info(`Threads list fetched successfully for user ${clerkUserId}`, { count: threads.length });
@@ -108,11 +106,6 @@ export const patchThread = async (
 
     return res.status(200).json(toThreadDTO(updatedThread));
   } catch (error: any) {
-    if (error.code === 'P2025') {
-      logger.error(`Thread ${threadId} not found for user`);
-      return res.status(404).json({ error: "Thread not found" });
-    }
-
     logger.error("Error updating thread status", error);
     next(error);
   }

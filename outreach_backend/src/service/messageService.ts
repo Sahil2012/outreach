@@ -1,6 +1,7 @@
 import { MessageStatus, Prisma } from "@prisma/client";
 import { log } from "console";
 import { MessageRequest } from "../schema/messageSchema.js";
+import { logger } from "../utils/logger.js";
 
 export async function saveMessage(
   tx: Prisma.TransactionClient,
@@ -92,8 +93,7 @@ export async function getMessageById(
 }
 
 export async function populateMessagesForThread(tx: Prisma.TransactionClient, threadId: number, authUserId: string, messages: any[]) {
-
-  // Get all existing messages for this thread
+  logger.info(`Populating messages for user ${authUserId} from external source to db with thread ID ${threadId}`);
   const existingMessages = await tx.message.findMany({
     where: {
       threadId,
@@ -108,15 +108,14 @@ export async function populateMessagesForThread(tx: Prisma.TransactionClient, th
 
   const existingIds = new Set(existingMessages.map((m: any) => m.externalMessageId));
 
-  // Filter out messages that already exist
   const newMessages = messages.filter((m: any) => !existingIds.has(m.id));
 
   if (newMessages.length === 0) {
-    log("No new messages to save for thread:", threadId);
+    logger.info(`No new messages to save for user ${authUserId} with thread ID ${threadId}`);
     return;
   }
 
-  log("Saving", newMessages.length, "new messages for thread:", threadId);
+  logger.info(`Saving ${newMessages.length} new messages for user ${authUserId} with thread ID ${threadId}`);
 
   // Bulk insert new messages
   await tx.message.createMany({
