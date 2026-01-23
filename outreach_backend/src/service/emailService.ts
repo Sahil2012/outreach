@@ -8,6 +8,8 @@ import { handleTailoredJobs } from "./jobService.js";
 import { saveMessage } from "./messageService.js";
 import { createThread } from "./threadService.js";
 import MessageType from "../types/MessageType.js";
+import { BadRequestError } from "../types/HttpError.js";
+import { logger } from "../utils/logger.js";
 
 
 export async function saveDraftEmail(
@@ -16,11 +18,10 @@ export async function saveDraftEmail(
   body: string,
   subject: string
 ) {
-  if (!authUserId) throw new Error("Missing authUserId");
-  if (!body.trim()) throw new Error("Empty mail body");
-  if (!subject.trim()) throw new Error("Empty subject");
+  if (!body.trim()) throw new BadRequestError("Empty mail body");
+  if (!subject.trim()) throw new BadRequestError("Empty subject");
 
-  log("Saving draft email for user:", authUserId);
+  logger.info(`Saving draft email for user: ${authUserId}`);
 
   return prisma.$transaction(async (tx) => {
     const employee = await upsertEmployee(tx, req);
@@ -33,7 +34,7 @@ export async function saveDraftEmail(
       subject,
       body
     );
-
+    logger.info(`Draft email saved for user: ${authUserId} with message ID: ${message.id}`);
     return {
       messageId: message.id,
       ...('isNew' in threadContext ? threadContext : {})
@@ -48,6 +49,7 @@ async function resolveThread(
   req: GenerateMailRequest
 ) {
   if (req.type === MessageType.FOLLOW_UP || req.type === MessageType.THANK_YOU) {
+    logger.info(`Resolving thread for follow-up or thank you email for user: ${authUserId}`);
     return { id: req.threadId };
   }
 
@@ -66,14 +68,14 @@ export async function generateAndSaveEmail(
 ) {
   const strategy = emailStrategy[req.type.toLowerCase()];
   if (!strategy) {
-    throw new Error(`No email strategy found for type: ${req.type}`);
+    logger.error(`No email strategy found for type: ${req.type}`);
+    throw new BadRequestError(`No email strategy found for type: ${req.type}`);
   }
 
-  log("Generating email using strategy for:", req.type);
+  logger.info(`Generating email using strategy for: ${req.type}`);
   const emailContent = await strategy(req);
 
   let responseData: any = { ...emailContent };
-
 
   const draft = await saveDraftEmail(
     authUserId,
@@ -83,7 +85,6 @@ export async function generateAndSaveEmail(
   );
   responseData.threadId = draft.id;
   responseData.messageId = draft.messageId;
-
 
   return responseData;
 }

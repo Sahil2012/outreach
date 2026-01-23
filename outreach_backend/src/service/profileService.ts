@@ -120,11 +120,10 @@ export const deductCredits = async (authUserId: string, deltaCredits: number) =>
     });
   } catch (error: any) {
     if (error.code === 'P2025') {
-      // This could mean user not found OR insufficient credits.
-      // Since authUserId is authenticated, it's likely insufficient credits.
-      logger.warn(`Failed to deduct credits for user ${authUserId}. Likely insufficient balance.`);
+      logger.error(`Failed to deduct credits for user ${authUserId}. Likely insufficient balance.`);
       throw new BadRequestError("Insufficient credits or profile not found");
     }
+    logger.error(`Error deducting credits for user ${authUserId}`, error);
     throw error;
   }
 };
@@ -142,8 +141,10 @@ export const addCredits = async (authUserId: string, deltaCredits: number) => {
     });
   } catch (error: any) {
     if (error.code === 'P2025') {
+      logger.error(`Failed to add credits for user ${authUserId}. Profile not found.`);
       throw new NotFoundError("Profile not found");
     }
+    logger.error(`Error adding credits for user ${authUserId}`, error);
     throw error;
   }
 };

@@ -1,5 +1,4 @@
 import { MessageStatus, Prisma } from "@prisma/client";
-import { log } from "console";
 import { MessageRequest } from "../schema/messageSchema.js";
 import { logger } from "../utils/logger.js";
 import { BadRequestError, NotFoundError } from "../types/HttpError.js";
@@ -15,20 +14,29 @@ export async function saveMessage(
   const lastMessage = await getLastMessage(tx, threadId, authUserId);
 
   if (lastMessage && lastMessage.status == MessageStatus.DRAFT) {
-    log("Updating draft message for thread:", threadId, " by user:", authUserId);
-    return tx.message.update({
-      where: {
-        id: lastMessage.id,
-        authUserId: authUserId,
-      },
-      data: {
-        subject,
-        body,
-      },
-    });
+    logger.info(`Updating draft message for thread: ${threadId} by user: ${authUserId}`);
+    try {
+      return tx.message.update({
+        where: {
+          id: lastMessage.id,
+          authUserId: authUserId,
+        },
+        data: {
+          subject,
+          body,
+        },
+      });
+    } catch (error: any) {
+      if (error.code === 'P2025') {
+        logger.error(`Message not found for message ID: ${lastMessage.id} by user: ${authUserId}`);
+        throw new NotFoundError("Message not found");
+      }
+      logger.error(`Error updating message ID: ${lastMessage.id} by user: ${authUserId}`, error);
+      throw error;
+    }
   }
 
-  log("Saving message for thread:", threadId, " by user:", authUserId);
+  logger.info(`Saving message for thread: ${threadId} by user: ${authUserId}`);
   return tx.message.create({
     data: {
       threadId,
@@ -41,6 +49,7 @@ export async function saveMessage(
 }
 
 export async function getLastMessage(tx: Prisma.TransactionClient, threadId: number, authUserId: string) {
+  logger.info(`Getting last message for thread: ${threadId} by user: ${authUserId}`);
   return tx.message.findFirst({
     where: {
       threadId,

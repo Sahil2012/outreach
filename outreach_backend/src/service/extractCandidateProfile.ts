@@ -1,12 +1,11 @@
-import { PrismaClient } from "@prisma/client";
+import { Prisma } from "@prisma/client";
+import { logger } from "../utils/logger.js";
+import { NotFoundError } from "../types/HttpError.js";
 
-const prisma = new PrismaClient();
 
-export async function getCandidateProfile(authUserId: string) {
+export async function getCandidateProfile(tx: Prisma.TransactionClient, authUserId: string) {
   try {
-    await prisma.$connect();
-    
-    const profileData = await prisma.userProfileData.findUnique({
+    const profileData = await tx.userProfileData.findUnique({
       where: { authUserId: authUserId },
       include: {
         profileSkills: {
@@ -17,10 +16,11 @@ export async function getCandidateProfile(authUserId: string) {
         experiences: true,
       },
     });
+    logger.info(`Profile data fetched successfully for user: ${authUserId}`);
 
     if (!profileData) {
-      console.warn("Profile data is missing");
-      return { success: false, message: "Profile data not found for user" };
+      logger.warn("Profile data is missing");
+      throw new NotFoundError("Profile data not found for user");
     }
 
     // Flatten skills and experiences
@@ -34,7 +34,7 @@ export async function getCandidateProfile(authUserId: string) {
         )
         .join(", ") || "No experience listed";
 
-    console.log("Profile fetched successfully for:", profileData.authUserId);
+    logger.info(`Profile fetched successfully for user: ${profileData.authUserId}`);
 
     return {
       success: true,
@@ -47,14 +47,7 @@ export async function getCandidateProfile(authUserId: string) {
       experiences,
     };
   } catch (err: any) {
-    console.error("Error fetching candidate profile:", err.message);
-    return {
-      success: false,
-      message: "Failed to fetch candidate profile",
-      error: err.message,
-    };
-  } finally {
-    // optional for scripts; skip this in long-lived apps (like Express)
-    await prisma.$disconnect();
+    logger.error(`Error fetching candidate profile for user: ${authUserId}`, err);
+    throw err;
   }
 }

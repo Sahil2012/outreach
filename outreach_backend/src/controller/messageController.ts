@@ -135,16 +135,9 @@ export const generateMessage = async (
         if (creditsDeducted) {
             await addCredits(clerkUserId!, 1).catch(e => logger.error("CRITICAL: Failed to refund credit!", e));
             logger.info(`Refunded credit for user ${clerkUserId}`);
-        } else {
-            if (error.code === 'P2025' || error.message?.includes("Record to update not found")) {
-                logger.info(`User ${clerkUserId} has no credits`);
-                return res.status(429).json({ error: "Insufficient credits" });
-            }
         }
-        // Return 400 for bad requests (like invalid type), 500 otherwise
-        const status = error.message.includes("No email strategy") ? 400 : 500;
         logger.error(`Error generating email for user ${clerkUserId}`, error);
-        res.status(status).json({ error: error.message });
+        next(error);
     }
 };
 
