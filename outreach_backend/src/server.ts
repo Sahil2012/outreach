@@ -1,5 +1,5 @@
 import { configDotenv } from "dotenv";
-import express, { ErrorRequestHandler } from "express";
+import express from "express";
 import cors from "cors";
 import profileRouter from "./routes/profileRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
@@ -7,6 +7,7 @@ import { clerkMiddleware } from "@clerk/express"
 import threadRoutes from "./routes/threadRoutes.js";
 import messageRoutes from "./routes/messageRoutes.js";
 import { requireAuth } from "./middlleware/requireAuth.js";
+import { errorHandler, notFoundHandler } from "./middlleware/errorHandler.js";
 configDotenv();
 
 const PORT = process.env.PORT;
@@ -29,11 +30,10 @@ app.use("/profile", requireAuth, profileRouter);
 app.use("/threads", requireAuth, threadRoutes);
 app.use("/messages", requireAuth, messageRoutes);
 
-// Global error handler
-const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
-  console.error("Unhandled error:", err);
-  res.status(err.status || 500).json({ error: err.message });
-};
+// 404 handler for undefined routes (must be after all route definitions)
+app.use(notFoundHandler);
+
+// Global error handler (must be the last middleware)
 app.use(errorHandler);
 
 // Start the server
