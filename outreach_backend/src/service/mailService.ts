@@ -6,7 +6,8 @@ import { Readable } from "stream";
 import { getGoogleAccessToken } from "../apis/googleOAuth2Client.js";
 import { SendMailRequest } from "../schema/messageSchema.js";
 import { logger } from "../utils/logger.js";
-import { BadRequestError, NotFoundError } from "../types/HttpError.js";
+import { BadRequestError, NotFoundError, ExternalServiceError } from "../types/HttpError.js";
+import { ErrorCode } from "../types/errorCodes.js";
 
 export class MailService {
     async sendMail(userId: string, mailData: SendMailRequest & { messageId: number }) {
@@ -26,13 +27,17 @@ export class MailService {
 
         if (!thread || !thread.employee) {
             logger.error(`Thread not found or Employee details missing for user ${userId} with id ${threadId}`);
-            throw new NotFoundError("Thread not found or Employee details missing");
+            throw new NotFoundError(
+                "Thread not found or Employee details missing",
+                ErrorCode.THREAD_NOT_FOUND,
+                { threadId, userId }
+            );
         }
 
         const message = thread.messages[0];
         if (!message) {
             logger.error(`Message not found for user ${userId} with id ${messageId}`);
-            throw new NotFoundError("Message not found");
+            throw new NotFoundError("Message not found", ErrorCode.MESSAGE_NOT_FOUND, { messageId, userId });
         }
 
         const to = thread.employee.email;
@@ -40,7 +45,10 @@ export class MailService {
 
         if (!to || !subject || !text) {
             logger.error(`Incomplete email data for user ${userId} with id ${messageId}`);
-            throw new BadRequestError("Incomplete email data (missing recipient, subject, or body)");
+            throw new BadRequestError(
+                "Incomplete email data (missing recipient, subject, or body)",
+                ErrorCode.VALIDATION_FAILED
+            );
         }
 
         // 2. Fetch Resume if requested
@@ -59,7 +67,7 @@ export class MailService {
 
         if (!fromEmail) {
             logger.error(`User email not found for user ${userId}`);
-            throw new NotFoundError("User email not found");
+            throw new NotFoundError("User email not found", ErrorCode.USER_NOT_FOUND, { userId });
         }
 
         // 4. Construct MIME Stream using Nodemailer
@@ -127,7 +135,11 @@ export class MailService {
             return response.data;
         } catch (error: any) {
             logger.error(`Failed to send email for user ${userId}:`, error);
-            throw new Error(`Failed to send email: ${error.message}`);
+            throw new ExternalServiceError(
+                `Failed to send email: ${error.message}`,
+                ErrorCode.EMAIL_SEND_FAILED,
+                { userId, errorDetails: error.message }
+            );
         }
     }
 }

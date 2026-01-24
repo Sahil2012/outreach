@@ -1,7 +1,8 @@
 import { MessageStatus, Prisma } from "@prisma/client";
 import { MessageRequest } from "../schema/messageSchema.js";
 import { logger } from "../utils/logger.js";
-import { BadRequestError, NotFoundError } from "../types/HttpError.js";
+import { BadRequestError, NotFoundError, UnprocessableEntityError } from "../types/HttpError.js";
+import { ErrorCode } from "../types/errorCodes.js";
 
 export async function saveMessage(
   tx: Prisma.TransactionClient,
@@ -29,7 +30,7 @@ export async function saveMessage(
     } catch (error: any) {
       if (error.code === 'P2025') {
         logger.error(`Message not found for message ID: ${lastMessage.id} by user: ${authUserId}`);
-        throw new NotFoundError("Message not found");
+        throw new NotFoundError("Message not found", ErrorCode.MESSAGE_NOT_FOUND, { messageId: lastMessage.id });
       }
       logger.error(`Error updating message ID: ${lastMessage.id} by user: ${authUserId}`, error);
       throw error;
@@ -77,7 +78,7 @@ export async function updateMessage(
 
   if (Object.keys(updateData).length === 0) {
     logger.error(`No valid fields provided to update for message ID: ${messageId} by user: ${authUserId}`)
-    throw new BadRequestError("No valid fields provided to update");
+    throw new BadRequestError("No valid fields provided to update", ErrorCode.NO_VALID_FIELDS, { messageId });
   }
 
   try {
@@ -91,7 +92,7 @@ export async function updateMessage(
   } catch (error: any) {
     if (error.code === 'P2025') {
       logger.error(`Message not found for message ID: ${messageId} by user: ${authUserId}`);
-      throw new NotFoundError("Message not found");
+      throw new NotFoundError("Message not found", ErrorCode.MESSAGE_NOT_FOUND, { messageId });
     }
     logger.error(`Error updating message ID: ${messageId} by user: ${authUserId}`, error);
     throw error;
@@ -162,12 +163,16 @@ export async function deleteMessage(tx: Prisma.TransactionClient, messageId: num
 
   if (!message) {
     logger.error(`Message not found for message ID: ${messageId} for user: ${authUserId}`);
-    throw new NotFoundError("Message not found");
+    throw new NotFoundError("Message not found", ErrorCode.MESSAGE_NOT_FOUND, { messageId });
   }
 
   if (message.status !== MessageStatus.DRAFT) {
     logger.error(`Message cannot be deleted unless it is in DRAFT state for message ID: ${messageId} for user: ${authUserId}`);
-    throw new BadRequestError("Message cannot be deleted unless it is in DRAFT state");
+    throw new UnprocessableEntityError(
+      "Message cannot be deleted unless it is in DRAFT state",
+      ErrorCode.MESSAGE_NOT_DRAFT,
+      { messageId, currentStatus: message.status }
+    );
   }
 
   return tx.message.delete({

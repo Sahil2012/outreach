@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from "express";
-import { ZodSchema } from "zod";
+import { ZodSchema, ZodError } from "zod";
+import { BadRequestError } from "../types/HttpError.js";
+import { ErrorCode } from "../types/errorCodes.js";
 
 interface RequestValidationSchema {
     body?: ZodSchema;
@@ -21,10 +23,10 @@ export const validate = (schemas: RequestValidationSchema) => {
             }
             next();
         } catch (error: any) {
-            return res.status(400).json({
-                error: "Validation failed",
-                details: JSON.parse(error.message)
-            });
+            if (error instanceof ZodError) {
+                return next(new BadRequestError("Validation failed", ErrorCode.VALIDATION_FAILED, { issues: error.errors }));
+            }
+            next(error);
         }
     };
 };

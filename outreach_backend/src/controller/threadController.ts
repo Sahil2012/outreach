@@ -7,6 +7,8 @@ import { getAuth } from "@clerk/express";
 import { toThreadDTO } from "../mapper/threadDTOMapper.js";
 import { MessageStatus, ThreadStatus } from "@prisma/client";
 import { ThreadDetailResponse, ThreadMetaResponse, ThreadMetaParams, UpdateThreadRequest, UpdateThreadResponse } from "../schema/threadSchema.js";
+import { ErrorCode } from "../types/errorCodes.js";
+import { NotFoundError } from "../types/HttpError.js";
 
 function parseCSVQuery(q?: string | string[] | undefined): string[] | undefined {
   if (!q) return undefined;
@@ -42,7 +44,7 @@ export const getThread = async (
     const thread = await getSyncedThread(prisma, threadId, clerkUserId!);
     if (!thread) {
       logger.error(`Thread not found for user ${clerkUserId} and thread ${threadId}`);
-      return res.status(404).json({ error: "Thread not found" });
+      return next(new NotFoundError("Thread not found for user", ErrorCode.RESOURCE_NOT_FOUND, { threadId, clerkUserId }));
     }
     const threadDTO = toThreadDTO(thread);
     return res.status(200).json({ ...threadDTO, sync: thread.sync });

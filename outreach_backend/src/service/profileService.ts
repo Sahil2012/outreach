@@ -6,7 +6,8 @@ import busboy from "busboy";
 import { Request } from "express";
 import { storageService } from "./storageService.js";
 import { enqueueResumeJob } from "../utils/enqueResume.js";
-import { BadRequestError, NotFoundError } from "../types/HttpError.js";
+import { BadRequestError, NotFoundError, UnprocessableEntityError } from "../types/HttpError.js";
+import { ErrorCode } from "../types/errorCodes.js";
 
 export const getUserProfile = async (authUserId: string) => {
   logger.info(`Fetching user profile for user ${authUserId}`);
@@ -38,7 +39,7 @@ export const updateProfile = async (authUserId: string, profile: ProfileRequest)
   try {
     if (status && !Object.values(ProfileCompletenessStatus).includes(status as ProfileCompletenessStatus)) {
       logger.error(`Invalid status: ${status}`);
-      throw new BadRequestError(`Invalid status: ${status}`);
+      throw new BadRequestError(`Invalid status: ${status}`, ErrorCode.INVALID_PROFILE_STATUS);
     }
 
     logger.info(`Updating user profile for user ${authUserId} with profile ${JSON.stringify(profile)}`);
@@ -58,7 +59,7 @@ export const updateProfile = async (authUserId: string, profile: ProfileRequest)
               const endDate = exp.endDate ? new Date(exp.endDate) : undefined;
 
               if ((startDate && isNaN(startDate.getTime())) || (endDate && isNaN(endDate.getTime()))) {
-                throw new BadRequestError("Invalid date format in experience");
+                throw new BadRequestError("Invalid date format in experience", ErrorCode.INVALID_DATE_FORMAT);
               }
 
               return {
@@ -100,7 +101,7 @@ export const updateProfile = async (authUserId: string, profile: ProfileRequest)
   } catch (error: any) {
     if (error.code === "P2025") {
       logger.error(`Profile not found for user ${authUserId}`);
-      throw new NotFoundError("Profile not found");
+      throw new NotFoundError("Profile not found", ErrorCode.PROFILE_NOT_FOUND, { authUserId });
     }
     logger.error(`Error updating profile for user ${authUserId}`, error);
     throw error;
@@ -121,7 +122,11 @@ export const deductCredits = async (authUserId: string, deltaCredits: number) =>
   } catch (error: any) {
     if (error.code === 'P2025') {
       logger.error(`Failed to deduct credits for user ${authUserId}. Likely insufficient balance.`);
-      throw new BadRequestError("Insufficient credits or profile not found");
+      throw new UnprocessableEntityError(
+        "Insufficient credits or profile not found",
+        ErrorCode.INSUFFICIENT_CREDITS,
+        { authUserId, requestedAmount: deltaCredits }
+      );
     }
     logger.error(`Error deducting credits for user ${authUserId}`, error);
     throw error;
@@ -142,7 +147,7 @@ export const addCredits = async (authUserId: string, deltaCredits: number) => {
   } catch (error: any) {
     if (error.code === 'P2025') {
       logger.error(`Failed to add credits for user ${authUserId}. Profile not found.`);
-      throw new NotFoundError("Profile not found");
+      throw new NotFoundError("Profile not found", ErrorCode.PROFILE_NOT_FOUND, { authUserId });
     }
     logger.error(`Error adding credits for user ${authUserId}`, error);
     throw error;
@@ -172,7 +177,7 @@ export const handleResumeUpload = (req: Request, authUserId: string): Promise<{ 
     bb.on("file", (name, file, info) => {
       if (fileUploadPromise) {
         file.resume(); // Consume stream
-        return reject(new BadRequestError("Only one file is allowed"));
+        return reject(new BadRequestError("Only one file is allowed", ErrorCode.FILE_TOO_LARGE));
       }
 
       fileFound = true;
@@ -212,9 +217,9 @@ export const handleResumeUpload = (req: Request, authUserId: string): Promise<{ 
           });
         } else {
           if (!fileFound) {
-            reject(new BadRequestError("No file uploaded"));
+            reject(new BadRequestError("No file uploaded", ErrorCode.NO_FILE_UPLOADED));
           } else {
-            reject(new BadRequestError("File processing failed"));
+            reject(new BadRequestError("File processing failed", ErrorCode.FILE_PROCESSING_FAILED));
           }
         }
       } catch (error) {

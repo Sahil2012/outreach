@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { logger } from "../utils/logger.js";
-import { NotFoundError } from "../types/HttpError.js";
+import { InternalServerError, NotFoundError } from "../types/HttpError.js";
+import { ErrorCode } from "../types/errorCodes.js";
 
 
 export async function getCandidateProfile(tx: Prisma.TransactionClient, authUserId: string) {
@@ -20,7 +21,7 @@ export async function getCandidateProfile(tx: Prisma.TransactionClient, authUser
 
     if (!profileData) {
       logger.warn("Profile data is missing");
-      throw new NotFoundError("Profile data not found for user");
+      throw new NotFoundError("Profile data not found for user", ErrorCode.RESOURCE_NOT_FOUND);
     }
 
     // Flatten skills and experiences
@@ -48,6 +49,6 @@ export async function getCandidateProfile(tx: Prisma.TransactionClient, authUser
     };
   } catch (err: any) {
     logger.error(`Error fetching candidate profile for user: ${authUserId}`, err);
-    throw err;
+    throw new InternalServerError(err.message, ErrorCode.INTERNAL_SERVER_ERROR);
   }
 }

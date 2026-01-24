@@ -11,6 +11,7 @@ import { logger } from "../../../utils/logger.js";
 export const tailoredEmailStrategy = async (
   emailRequest: TailoredEmailRequest
 ) => {
+  logger.info(`Generating tailored message for user ${emailRequest.userId} with these details ${JSON.stringify(emailRequest)}`);
   const userId = emailRequest.userId;
   const jobDescription = emailRequest.jobDescription;
 

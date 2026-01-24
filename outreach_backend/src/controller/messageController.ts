@@ -16,6 +16,8 @@ import { MessageStatus } from "@prisma/client";
 import { DraftMailResponse, GenerateMailBody } from "../schema/mailSchema.js";
 import { logger } from "../utils/logger.js";
 import { mailService } from "../service/mailService.js";
+import { NotFoundError, UnprocessableEntityError } from "../types/HttpError.js";
+import { ErrorCode } from "../types/errorCodes.js";
 
 //PATCH /messages/:id
 export const editMessage = async (
@@ -32,7 +34,7 @@ export const editMessage = async (
         const updatedMessage = await updateMessage(prisma, messageId, clerkUserId!, req.body);
         if (!updatedMessage) {
             logger.error(`Message not found for user ${clerkUserId} and message ID ${messageId}`);
-            return res.status(404).json({ error: "Message not found" });
+            return next(new NotFoundError("Message not found for user", ErrorCode.RESOURCE_NOT_FOUND, { messageId, clerkUserId }));
         }
         logger.info(`Message updated for user ${clerkUserId} and message ID ${messageId}`);
         return res.status(200).json(toMessageDTO(updatedMessage));
@@ -57,7 +59,7 @@ export const getMessage = async (
         const message = await getMessageById(prisma, messageId, clerkUserId!);
         if (!message) {
             logger.error(`Message not found for user ${clerkUserId} and message ID ${messageId}`);
-            return res.status(404).json({ error: "Message not found" });
+            return next(new NotFoundError("Message not found for user", ErrorCode.RESOURCE_NOT_FOUND, { messageId, clerkUserId }));
         }
         logger.info(`Message retrieved for user ${clerkUserId} and message ID ${messageId}`);
         return res.status(200).json(toMessageDTO(message));
@@ -82,7 +84,7 @@ export const deleteMessage = async (
         const deletedMessage = await removeMessage(prisma, messageId, clerkUserId!);
         if (!deletedMessage) {
             logger.error(`Message not found for user ${clerkUserId} and message ID ${messageId}`);
-            return res.status(404).json({ error: "Message not found" });
+            return next(new NotFoundError("Message not found for user", ErrorCode.RESOURCE_NOT_FOUND, { messageId, clerkUserId }));
         }
         logger.info(`Message deleted for user ${clerkUserId} and message ID ${messageId}`);
         return res.status(200).json(toMessageDTO(deletedMessage));
@@ -179,9 +181,7 @@ export const sendMessageViaGmail = async (
             error.errors.some((e: any) => e.code === "oauth_missing_refresh_token")
         ) {
             logger.error(`User has no refresh token`);
-            return res
-                .status(422)
-                .json({ error: { code: "oauth_missing_refresh_token", message: "Please re-authenticate with Google" } });
+            return next(new UnprocessableEntityError("Please re-authenticate with Google", ErrorCode.OAUTH_MISSING_REFRESH_TOKEN));
         }
         logger.error(`Send email error:`, error);
         next(error);

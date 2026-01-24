@@ -1,7 +1,9 @@
 import { clerkClient, getAuth } from "@clerk/express";
-import { log } from "console";
 import prisma from "../apis/prismaClient.js";
 import { Request, Response, NextFunction } from "express";
+import { logger } from "../utils/logger.js";
+import { ErrorCode } from "../types/errorCodes.js";
+import { InternalServerError } from "../types/HttpError.js";
 
 export const ensureProfileCreated = async (
   req: Request,
@@ -9,7 +11,7 @@ export const ensureProfileCreated = async (
   next: NextFunction
 ) => {
   let { userId: clerkUserId } = getAuth(req);
-  log("Authenticated User ID:", clerkUserId);
+  logger.info(`Authenticated User ID: ${clerkUserId}`);
 
   const clerkUser = await clerkClient.users.getUser(clerkUserId || "");
 
@@ -18,7 +20,7 @@ export const ensureProfileCreated = async (
   });
 
   if (!appUser) {
-    log("User not found, creating new user with ID:", clerkUserId);
+    logger.info(`User not found, creating new user with ID: ${clerkUserId}`);
 
     try {
       appUser = await prisma.userProfileData.create({
@@ -29,11 +31,11 @@ export const ensureProfileCreated = async (
           lastName: clerkUser.lastName || "",
         },
       });
-      log("User created successfully with ID:", clerkUser.id);
+      logger.info(`User created successfully with ID: ${clerkUser.id}`);
       next();
     } catch (err: any) {
-      log("Error creating user:", err.message);
-      res.status(500).json({ error: "Failed to initialize the user." });
+      logger.error(`Error creating user: ${err.message}`);
+      return next(new InternalServerError("Failed to initialize the user.", ErrorCode.INTERNAL_SERVER_ERROR));
     }
   }
 

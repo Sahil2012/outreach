@@ -9,12 +9,13 @@ import callLLM from "../../../apis/geminichat.js";
 import { logger } from "../../../utils/logger.js";
 import { BadRequestError, NotFoundError } from "../../../types/HttpError.js";
 import { getUserProfile } from "../../profileService.js";
+import { ErrorCode } from "../../../types/errorCodes.js";
 
 export const followupEmailStrategy = async (followupRequest: FollowupEmailRequest) => {
-    logger.info(`Generating followup email for threadId: ${followupRequest.threadId}`);
+    logger.info(`Generating followup email for user ${followupRequest.userId} with threadId: ${followupRequest.threadId}`);
 
     if (!followupRequest.threadId || !followupRequest.userId) {
-        throw new BadRequestError("Missing threadId or userId in followup request");
+        throw new BadRequestError("Missing threadId or userId in followup request", ErrorCode.VALIDATION_FAILED);
     }
 
     try {
@@ -22,7 +23,7 @@ export const followupEmailStrategy = async (followupRequest: FollowupEmailReques
         const thread = await getThreadById(prisma, followupRequest.userId, followupRequest.threadId);
         const profileDetails = await getUserProfile(followupRequest.userId);
         if (!thread) {
-            throw new NotFoundError(`Thread not found for id: ${followupRequest.threadId}`);
+            throw new NotFoundError(`Thread not found for id: ${followupRequest.threadId}`, ErrorCode.THREAD_NOT_FOUND, { threadId: followupRequest.threadId });
         }
 
         logger.info(`Fetched thread with messages count: ${thread.messages.length}`);

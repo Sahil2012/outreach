@@ -10,6 +10,7 @@ import prisma from "../../../apis/prismaClient.js";
 
 export const coldEmailStrategy = async (emailRequest: ColdEmailRequest) => {
 
+    logger.info(`Generating cold email for user ${emailRequest.userId} with ${JSON.stringify(emailRequest)}`);
     const userId = emailRequest.userId;
     let template;
 

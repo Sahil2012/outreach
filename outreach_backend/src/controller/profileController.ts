@@ -6,6 +6,8 @@ import { addCredits, getUserProfile, handleResumeUpload, updateProfile as update
 import prisma from "../apis/prismaClient.js";
 import { getStats } from "../service/threadService.js";
 import { CreditRequest, CreditResponse, ProfileRequest, ProfileResponse, StatsResponse } from "../schema/profileSchema.js";
+import { NotFoundError } from "../types/HttpError.js";
+import { ErrorCode } from "../types/errorCodes.js";
 
 // GET /profile
 export const getProfile = async (
@@ -21,10 +23,7 @@ export const getProfile = async (
 
     if (!profile) {
       logger.info("Profile not found for user", { userId });
-      return res.status(404).json({
-        error: "NOT_FOUND",
-        message: "Profile does not exist for this user",
-      });
+      return next(new NotFoundError("Profile not found for user", ErrorCode.RESOURCE_NOT_FOUND, { userId }));
     }
 
     return res.status(200).json(toProfileDTO(profile));

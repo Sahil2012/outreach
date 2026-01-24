@@ -4,7 +4,8 @@ import externalMailService from "./externalMailService.js";
 import { getLastMessage, populateMessagesForThread } from "./messageService.js";
 import { UpdateThreadRequest } from "../schema/threadSchema.js";
 import { logger } from "../utils/logger.js";
-import { BadRequestError, NotFoundError } from "../types/HttpError.js";
+import { NotFoundError, ConflictError, UnprocessableEntityError } from "../types/HttpError.js";
+import { ErrorCode } from "../types/errorCodes.js";
 
 const status = [
   ThreadStatus.PENDING,
@@ -32,8 +33,10 @@ export async function createThread(
     });
   } catch (error: any) {
     if (error.code === 'P2002') {
-      throw new BadRequestError("Thread already exists");
+      logger.error(`Thread already exists: ${error.message}`);
+      throw new ConflictError("Thread already exists", ErrorCode.THREAD_ALREADY_EXISTS, { employeeId });
     }
+    logger.error(`Error creating thread: ${error.message}`);
     throw error;
   }
 }
@@ -48,14 +51,22 @@ export async function upgradeThreadStatus(tx: Prisma.TransactionClient, threadId
     || currentStatus.status === ThreadStatus.DELETED
     || currentStatus.status === ThreadStatus.THIRD_FOLLOW_UP
   ) {
-    throw new BadRequestError("Thread not found or already in unupgradable state");
+    throw new UnprocessableEntityError(
+      "Thread not found or already in unupgradable state",
+      ErrorCode.THREAD_NOT_UPGRADABLE,
+      { threadId, currentStatus: currentStatus?.status }
+    );
   }
 
   const lastMessage = await getLastMessage(tx, threadId, userId);
 
   if (lastMessage?.status === MessageStatus.SENT) {
     logger.info(`Thread ${threadId} is already in SENT state`);
-    throw new BadRequestError("Thread is already in SENT state");
+    throw new UnprocessableEntityError(
+      "Thread is already in SENT state",
+      ErrorCode.THREAD_ALREADY_SENT,
+      { threadId }
+    );
   }
 
   return await updateThread(tx, threadId, userId, { status: calculateNextState(currentStatus.status) });
@@ -129,8 +140,10 @@ export async function linkToExternalThread(tx: Prisma.TransactionClient, threadI
     });
   } catch (error: any) {
     if (error.code === 'P2025') {
-      throw new NotFoundError("Thread not found");
+      logger.error(`Thread not found: ${error.message}`);
+      throw new NotFoundError("Thread not found", ErrorCode.THREAD_NOT_FOUND, { threadId });
     }
+    logger.error(`Error linking thread: ${error.message}`);
     throw error;
   }
 }
@@ -147,8 +160,10 @@ export async function updateThread(tx: Prisma.TransactionClient, threadId: numbe
     });
   } catch (error: any) {
     if (error.code === 'P2025') {
-      throw new NotFoundError("Thread not found");
+      logger.error(`Thread not found: ${error.message}`);
+      throw new NotFoundError("Thread not found", ErrorCode.THREAD_NOT_FOUND, { threadId, userId });
     }
+    logger.error(`Error updating thread: ${error.message}`);
     throw error;
   }
 }
@@ -178,8 +193,10 @@ export async function getThreadById(
     });
   } catch (error: any) {
     if (error.code === 'P2025') {
-      throw new NotFoundError("Thread not found");
+      logger.error(`Thread not found: ${error.message}`);
+      throw new NotFoundError("Thread not found", ErrorCode.THREAD_NOT_FOUND, { threadId, authUserId });
     }
+    logger.error(`Error fetching thread: ${error.message}`);
     throw error;
   }
 }
@@ -322,7 +339,7 @@ export async function getSyncedThread(tx: Prisma.TransactionClient, threadId: nu
 
   if (!thread) {
     logger.error(`Thread not found for user ${userId} and thread ${threadId}`);
-    throw new NotFoundError("Thread not found");
+    throw new NotFoundError("Thread not found", ErrorCode.THREAD_NOT_FOUND, { threadId, userId });
   }
 
   logger.info(`Thread fetched successfully for user ${userId} and thread ${threadId}`);

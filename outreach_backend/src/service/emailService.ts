@@ -10,6 +10,7 @@ import { createThread } from "./threadService.js";
 import MessageType from "../types/MessageType.js";
 import { BadRequestError } from "../types/HttpError.js";
 import { logger } from "../utils/logger.js";
+import { ErrorCode } from "../types/errorCodes.js";
 
 
 export async function saveDraftEmail(
@@ -18,8 +19,8 @@ export async function saveDraftEmail(
   body: string,
   subject: string
 ) {
-  if (!body.trim()) throw new BadRequestError("Empty mail body");
-  if (!subject.trim()) throw new BadRequestError("Empty subject");
+  if (!body.trim()) throw new BadRequestError("Empty mail body", ErrorCode.EMPTY_FIELD);
+  if (!subject.trim()) throw new BadRequestError("Empty subject", ErrorCode.EMPTY_FIELD);
 
   logger.info(`Saving draft email for user: ${authUserId}`);
 
@@ -69,7 +70,7 @@ export async function generateAndSaveEmail(
   const strategy = emailStrategy[req.type.toLowerCase()];
   if (!strategy) {
     logger.error(`No email strategy found for type: ${req.type}`);
-    throw new BadRequestError(`No email strategy found for type: ${req.type}`);
+    throw new BadRequestError(`No email strategy found for type: ${req.type}`, ErrorCode.INVALID_EMAIL_STRATEGY);
   }
 
   logger.info(`Generating email using strategy for: ${req.type}`);
