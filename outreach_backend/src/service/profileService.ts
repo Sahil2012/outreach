@@ -176,7 +176,7 @@ export const handleResumeUpload = (req: Request, authUserId: string): Promise<{ 
 
     bb.on("file", (name, file, info) => {
       if (fileUploadPromise) {
-        file.resume(); // Consume stream
+        file.resume();
         return reject(new BadRequestError("Only one file is allowed", ErrorCode.FILE_TOO_LARGE));
       }
 
@@ -190,7 +190,7 @@ export const handleResumeUpload = (req: Request, authUserId: string): Promise<{ 
 
           await prisma.userProfileData.update({
             where: { authUserId },
-            data: { resumeUrl: uploadPath },
+            data: { resumeUrl: uploadPath, status: ProfileCompletenessStatus.PARTIAL },
           });
 
           logger.info("Resume uploaded successfully", { userId: authUserId, path: uploadPath });
@@ -198,6 +198,10 @@ export const handleResumeUpload = (req: Request, authUserId: string): Promise<{ 
           if (autofill) {
             logger.info("Enqueuing resume parsing job", { userId: authUserId });
             await enqueueResumeJob(authUserId, uploadPath);
+            await prisma.userProfileData.update({
+              where: { authUserId },
+              data: { status: ProfileCompletenessStatus.PROCESSING },
+            });
           }
         } catch (err) {
           logger.error("Stream upload error:", err);

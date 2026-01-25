@@ -37,7 +37,7 @@ export const getProfile = async (
 // PATCH /profile
 export const updateProfile = async (
   req: Request<{}, {}, ProfileRequest>,
-  res: Response,
+  res: Response<ProfileResponse | any>,
   next: NextFunction
 ) => {
 
@@ -47,7 +47,7 @@ export const updateProfile = async (
     const updatedProfile = await updateProfileService(clerkUserId!, req.body);
 
     logger.info("Profile updated successfully", { userId: clerkUserId });
-    res.json({ message: "Profile updated", data: updatedProfile });
+    res.json(toProfileDTO(updatedProfile));
   } catch (err: any) {
     logger.error("Error updating profile", err);
     next(err);

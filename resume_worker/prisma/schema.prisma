@@ -21,7 +21,6 @@ model UserProfileData {
   status        ProfileCompletenessStatus @default(INCOMPLETE)
   credits       Int                       @default(5)
   experiences   Experience[]
-  Message       Message[]
   profileSkills ProfilSkillMapping[]
   Thread        Thread[]
 }
@@ -58,7 +57,6 @@ model Thread {
   id               Int                @id @default(autoincrement())
   authUserId       String
   employeeId       Int
-  type             EmailType
   createdAt        DateTime           @default(now())
   lastUpdated      DateTime
   status           ThreadStatus       @default(PENDING)
@@ -92,17 +90,16 @@ model Job {
 }
 
 model Message {
-  id                Int             @id @default(autoincrement())
+  id                Int           @id @default(autoincrement())
   body              String
   subject           String?
   authUserId        String
-  threadId          Int?
-  date              DateTime        @default(now())
+  threadId          Int
+  date              DateTime      @default(now())
   fromUser          Boolean
   externalMessageId String?
-  state             MessageState    @default(DRAFT)
-  UserTable         UserProfileData @relation(fields: [authUserId], references: [authUserId])
-  Thread            Thread?         @relation(fields: [threadId], references: [id])
+  status            MessageStatus @default(DRAFT)
+  Thread            Thread        @relation(fields: [threadId], references: [id])
 }
 
 model ThreadJobMapping {
@@ -123,13 +120,9 @@ enum RefStatus {
 
 enum ProfileCompletenessStatus {
   INCOMPLETE
+  PROCESSING
   PARTIAL
   COMPLETE
-}
-
-enum EmailType {
-  TAILORED
-  COLD
 }
 
 enum ThreadStatus {
@@ -138,12 +131,12 @@ enum ThreadStatus {
   SECOND_FOLLOW_UP
   THIRD_FOLLOW_UP
   CLOSED
-  REFFERED
+  REFERRED
   SENT
   DELETED
 }
 
-enum MessageState {
+enum MessageStatus {
   SENT
   DRAFT
 }
