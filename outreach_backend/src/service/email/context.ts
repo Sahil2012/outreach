@@ -9,6 +9,6 @@ type EmailStrategyFunction = (req: GenerateMailRequest) => Promise<any>;
 export const emailStrategy: Record<string, EmailStrategyFunction> = {
     cold: coldEmailStrategy as unknown as EmailStrategyFunction,
     tailored: tailoredEmailStrategy as unknown as EmailStrategyFunction,
-    followup: followupEmailStrategy as unknown as EmailStrategyFunction, // Assuming you add this export
-    thankyou: thankyouEmailStrategy as unknown as EmailStrategyFunction, // And this one
+    followup: followupEmailStrategy as unknown as EmailStrategyFunction,
+    thankyou: thankyouEmailStrategy as unknown as EmailStrategyFunction,
 };

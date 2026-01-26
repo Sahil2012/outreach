@@ -35,12 +35,21 @@ const ThreadDetailSchema = ThreadSchema.extend({
     })
 });
 
-const ThreadMetaParamsSchema = z.object({
+export const ThreadMetaParamsSchema = z.object({
     page: z.string().optional(),
     pageSize: z.string().optional(),
-    status: z.nativeEnum(ThreadStatus).optional(),
-    search: z.string().optional(),
-    messageState: z.nativeEnum(MessageStatus).optional()
+    status: z.preprocess(
+        (val) => (typeof val === "string" ? val.split(",").map(s => s.trim()) : val),
+        z.array(z.nativeEnum(ThreadStatus).or(z.literal("FOLLOW_UP"))).optional()
+    ),
+    search: z.preprocess(
+        (val) => (typeof val === "string" ? val.split(",").map(s => s.trim()) : val),
+        z.array(z.string()).optional()
+    ),
+    messageStatus: z.preprocess(
+        (val) => (typeof val === "string" ? val.split(",").map(s => s.trim()) : val),
+        z.array(z.nativeEnum(MessageStatus)).optional()
+    )
 });
 
 const ThreadMetaSchema = z.object({

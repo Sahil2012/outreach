@@ -1,4 +1,3 @@
-import { log } from "console";
 import { getCandidateProfile } from "../../extractCandidateProfile.js";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { coldPromptTemplate } from "../../../utils/prompts/coldPromptTemplate.js";
@@ -6,20 +5,22 @@ import { StructuredOutputParser } from "langchain/output_parsers";
 import { emailSchema } from "../../../schema/schema.js";
 import callLLM from "../../../apis/geminichat.js";
 import { ColdEmailRequest } from "../../../types/GenerateMailRequest.js";
+import { logger } from "../../../utils/logger.js";
+import prisma from "../../../apis/prismaClient.js";
 
 export const coldEmailStrategy = async (emailRequest: ColdEmailRequest) => {
 
+    logger.info(`Generating cold email for user ${emailRequest.userId} with ${JSON.stringify(emailRequest)}`);
     const userId = emailRequest.userId;
     let template;
 
     if (!emailRequest.templateId) {
-        log("No template provided for cold email strategy.");
+        logger.info("No template provided for cold email strategy.");
     } else {
-        log("Using provided template for cold email strategy.");
-        // fetch and use the template
+        logger.info("Using provided template for cold email strategy.");
     }
 
-    const profileDetails = await getCandidateProfile(userId || "");
+    const profileDetails = await getCandidateProfile(prisma, userId || "");
 
     const coldEmailPrompt = PromptTemplate.fromTemplate(coldPromptTemplate);
 
@@ -38,7 +39,7 @@ export const coldEmailStrategy = async (emailRequest: ColdEmailRequest) => {
         })
     );
 
-    log("RAW LLM response:", emailContent);
+    logger.info("RAW LLM response:", emailContent);
 
     return await parser.parse(emailContent);
 }

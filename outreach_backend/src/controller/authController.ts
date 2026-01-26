@@ -2,14 +2,17 @@ import { Request, Response } from "express";
 import { Webhook } from "svix";
 import prisma from "../apis/prismaClient.js";
 import { AuthMeResponse, WebhookResponse } from "../schema/authSchema.js";
+import { InternalServerError } from "../types/HttpError.js";
+import { ErrorCode } from "../types/errorCodes.js";
 
 // Webhook handler
 export const handleClerkWebhook = async (req: Request, res: Response<WebhookResponse>) => {
   const SIGNING_SECRET = process.env.CLERK_WEBHOOK_SECRET;
 
   if (!SIGNING_SECRET) {
-    throw new Error(
-      "Error: Please add CLERK_WEBHOOK_SECRET from Clerk Dashboard to .env"
+    throw new InternalServerError(
+      "Error: Please add CLERK_WEBHOOK_SECRET from Clerk Dashboard to .env",
+      ErrorCode.INTERNAL_SERVER_ERROR
     );
   }
 

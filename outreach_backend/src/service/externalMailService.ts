@@ -2,6 +2,9 @@ import { google } from "googleapis";
 import prisma from "../apis/prismaClient.js";
 import * as cheerio from "cheerio";
 import { getGoogleAccessToken } from "../apis/googleOAuth2Client.js";
+import { logger } from "../utils/logger.js";
+import { UnauthorizedError, NotFoundError, ForbiddenError, ExternalServiceError } from "../types/HttpError.js";
+import { ErrorCode } from "../types/errorCodes.js";
 
 
 export class ExternalMailService {
@@ -16,8 +19,10 @@ export class ExternalMailService {
 
     try {
       accessToken = await getGoogleAccessToken(clerkUserId);
+      logger.info(`Access token fetched for user ${clerkUserId}`);
     } catch (error: any) {
-      throw new Error("refresh_token_not_found");
+      logger.error(`Error fetching access token for user ${clerkUserId}: ${error.message}`);
+      throw new UnauthorizedError("Refresh token not found", ErrorCode.REFRESH_TOKEN_NOT_FOUND, { clerkUserId });
     }
     const thread = await prisma.thread.findUnique({
       where: {
@@ -25,7 +30,8 @@ export class ExternalMailService {
       }
     });
     if (!thread) {
-      throw new Error("thread_not_found");
+      logger.error(`Thread not found for user ${clerkUserId} with thread ID ${threadId}`);
+      throw new NotFoundError("Thread not found", ErrorCode.THREAD_NOT_FOUND, { threadId, clerkUserId });
     }
 
     const auth = new google.auth.OAuth2();
@@ -47,12 +53,21 @@ export class ExternalMailService {
       const result = t.data.messages.map((message) => {
         const a = this.extractMessageBody(message.payload);
         const fromUser = message.labelIds?.includes("SENT") || false;
+        logger.info(`Message fetched for user ${clerkUserId} with thread ID ${threadId}`);
         return { id: message.id, threadId: message.threadId, body: a, fromUser };
       });
 
       return result;
     } catch (error: any) {
-      throw new Error(error.code == 403 ? "insufficient_permissions" : "thread_not_found_in_external_source");
+      logger.error(`Error fetching thread messages for user ${clerkUserId} with thread ID ${threadId}: ${error.message}`);
+      if (error.code === 403) {
+        throw new ForbiddenError("Insufficient permissions", ErrorCode.INSUFFICIENT_PERMISSIONS, { threadId });
+      }
+      throw new ExternalServiceError(
+        "Thread not found in external source",
+        ErrorCode.GMAIL_API_ERROR,
+        { threadId, externalError: error.message }
+      );
     }
 
   }

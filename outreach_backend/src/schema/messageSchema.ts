@@ -20,10 +20,16 @@ export const SendMailSchema = z.object({
     attachResume: z.boolean().optional(),
 });
 
+export const MessageRequestSchema = MessageSchema.omit({
+    id: true,
+    date: true,
+    fromUser: true,
+    threadId: true
+}).partial();
 
 export type SendMailRequest = z.infer<typeof SendMailSchema>;
 
 export type MessageTypeResponse = z.infer<typeof MessageTypeSchema>;
 export type Message = z.infer<typeof MessageSchema>;
-export type MessageRequest = z.infer<typeof MessageSchema>;
+export type MessageRequest = z.infer<typeof MessageRequestSchema>;
 export type MessageResponse = z.infer<typeof MessageSchema>;

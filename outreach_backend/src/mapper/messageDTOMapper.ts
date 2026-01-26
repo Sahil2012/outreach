@@ -8,6 +8,6 @@ export const toMessageDTO = (message: any): Message => {
         id: message.id,
         date: message.date ? message.date.toISOString() : null,
         fromUser: message.fromUser,
-        status: message.state,
+        status: message.status,
     };
 }
