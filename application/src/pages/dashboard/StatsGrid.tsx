@@ -1,14 +1,11 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Mail, MessageCircle, Clock, UserX } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ProfileStats } from "@/api/profile/types";
+import { useProfileStats } from "@/api/profile/hooks/useProfileData";
 
-interface StatsCardsProps {
-  stats?: ProfileStats;
-  isLoading: boolean;
-}
+export const StatsGrid = () => {
+  const { data: stats, isLoading } = useProfileStats();
 
-export const StatsCards = ({ stats, isLoading }: StatsCardsProps) => {
   const data = [
     {
       label: "Reached Out",

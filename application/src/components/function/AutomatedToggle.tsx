@@ -6,27 +6,9 @@ import { useThreadActions } from "@/api/threads/hooks/useThreadActions";
 interface AutomatedToggleProps {
   threadId: number;
   data: ThreadMetaItem;
-  page?: number;
-  pageSize?: number;
-  search?: string;
-  status?: string;
 }
 
-const AutomatedToggle = ({
-  data,
-  threadId,
-  // page,
-  // pageSize,
-  // search,
-  // status,
-}: AutomatedToggleProps) => {
-  // const { toggleAutomated, isTogglingAutomated } = useAutomatedToggle(
-  //   threadId,
-  //   page,
-  //   pageSize,
-  //   search,
-  //   status,
-  // );
+const AutomatedToggle = ({ data, threadId }: AutomatedToggleProps) => {
   const { toggleAutomated } = useThreadActions();
 
   const handleToggleAutomated = async (checked: boolean) => {

@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { GraduationCap, Plus, Trash2, Check, Pencil } from "lucide-react";
-import { Education } from "@/lib/types";
+import { Education } from "@/api/profile/types";
 
 interface EducationSectionProps {
   education: Education[];

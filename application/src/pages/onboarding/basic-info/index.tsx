@@ -7,24 +7,22 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader } from "@/components/ui/loader";
 import { ArrowRight } from "lucide-react";
-// import { useProfile } from '@/hooks/useProfile';
 import { ResumeUpload } from "./ResumeUpload";
-import { toast } from "sonner";
-import { useResume } from "@/hooks/useResume";
-import { useProfile } from "@/api/profile/hooks/useProfileData";
 import { useProfileActions } from "@/api/profile/hooks/useProfileActions";
+import { Checkbox } from "@/components/ui/checkbox";
+import Layout from "../Layout";
 
 export default function BasicInfoPage() {
   const navigate = useNavigate();
   const { user, isLoaded } = useUser();
-  // const { updateProfile, isUpdating } = useProfile();
-  // const { uploadResume, isLoading } = useResume();
   const { updateProfile, uploadResume } = useProfileActions();
+  const isLoading = uploadResume.isPending || updateProfile.isPending;
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
   const [resume, setResume] = useState<File | null>(null);
+  const [autofill, setAutofill] = useState(false);
 
   useEffect(() => {
     if (isLoaded && user) {
@@ -36,21 +34,14 @@ export default function BasicInfoPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      if (!user) {
-        throw new Error("User not found");
+      if (resume) {
+        await uploadResume.mutateAsync({ resume, autofill });
       }
 
-      if (resume) {
-        await uploadResume.mutateAsync({ resume, attachResume: true });
-      }
-      await updateProfile.mutateAsync({
-        firstName,
-        lastName,
-      });
+      await updateProfile.mutateAsync({ firstName, lastName });
       navigate("/onboarding/professional-info");
-    } catch (error) {
-      console.error("Failed to update basic info", error);
-      toast.error("Some error occurred. Please try again later");
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -63,16 +54,10 @@ export default function BasicInfoPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">
-          Welcome to Outreach
-        </h1>
-        <p className="text-muted-foreground">
-          Let's get you set up. First, tell us a bit about yourself.
-        </p>
-      </div>
-
+    <Layout
+      header="Welcome to Outreach"
+      description="Let's get you set up. First, tell us a bit about yourself."
+    >
       <Card>
         <CardContent className="py-6">
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -121,25 +106,33 @@ export default function BasicInfoPage() {
             </div>
 
             <ResumeUpload
-              onUpload={(file) => setResume(file)}
-              onRemove={() => setResume(null)}
-              initialResume={resume}
+              resume={resume}
+              onChange={(resume) => setResume(resume)}
             />
+
+            <div className="flex justify-center items-center space-x-2 pb-2">
+              <Checkbox
+                id="autofill"
+                checked={autofill}
+                onCheckedChange={(checked) => setAutofill(checked as boolean)}
+              />
+              <Label htmlFor="autofill" className="text-sm font-normal">
+                Autofill Profile details from resume
+              </Label>
+            </div>
 
             <Button
               type="submit"
               className="w-full rounded-full"
-              disabled={uploadResume.isPending || updateProfile.isPending}
+              disabled={isLoading}
             >
-              {uploadResume.isPending || updateProfile.isPending ? (
-                <Loader className="w-4 h-4 mr-2" />
-              ) : null}
+              {isLoading ? <Loader className="w-4 h-4 mr-2" /> : null}
               Next Step
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </form>
         </CardContent>
       </Card>
-    </div>
+    </Layout>
   );
 }

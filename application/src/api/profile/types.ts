@@ -11,6 +11,17 @@ export interface Experience {
   description?: string;
 }
 
+export interface Education {
+  id?: string;
+  institution: string;
+  degree: string;
+  field_of_study?: string;
+  start_date?: Date;
+  end_date?: Date;
+  grade?: string;
+  year_of_passing?: string;
+}
+
 export type ProfileStatus = "INCOMPLETE" | "PROCESSING" | "PARTIAL" | "COMPLETE";
 
 export interface Profile {
@@ -21,9 +32,9 @@ export interface Profile {
   phoneNo?: string;
   status: ProfileStatus;
   credits: number;
-  education?: any;
+  education?: Education[];
   skills?: Skill[];
-  experiences?: Experience[];
+  experience?: Experience[];
 }
 
 export interface ProfileStats {

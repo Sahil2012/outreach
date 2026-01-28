@@ -1,3 +1,5 @@
+import { ThreadStatus } from "@/api/threads/types";
+
 export interface Project {
   id?: string;
   title: string;

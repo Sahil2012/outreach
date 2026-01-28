@@ -18,13 +18,13 @@ const SkillSchema = z.object({
 
 export const ProfileSchema = z.object({
     summary: z.string().optional(),
-    education: z.object(JSONSchema).optional(),
+    education: z.array(z.object(JSONSchema)).optional(),
     email: z.string().optional(),
     firstName: z.string().optional(),
     lastName: z.string().optional(),
     phoneNo: z.string().optional(),
     status: z.enum([ProfileCompletenessStatus.INCOMPLETE, ProfileCompletenessStatus.PARTIAL, ProfileCompletenessStatus.COMPLETE]).optional(),
-    credits: z.number(),
+    credits: z.number().optional(),
     experience: z.array(ExperienceSchema).optional(),
     skills: z.array(SkillSchema).optional(),
 });

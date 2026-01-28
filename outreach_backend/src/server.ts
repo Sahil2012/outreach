@@ -16,6 +16,7 @@ const app = express();
 // Use Middlewares
 app.use(clerkMiddleware({ debug: process.env.NODE_ENV === "development" }));
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 // TODO : update cors 
 app.use(

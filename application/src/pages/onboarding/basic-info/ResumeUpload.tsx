@@ -1,41 +1,30 @@
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Trash2, Upload } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Trash2, Upload } from "lucide-react";
 
 interface ResumeUploadProps {
-  onUpload: (file: File) => void;
-  onRemove: () => void;
-  initialResume?: File | null;
+  resume: File | null;
+  onChange: (resume: File | null) => void;
 }
 
-export function ResumeUpload({ onUpload, onRemove, initialResume }: Readonly<ResumeUploadProps>) {
-  const [resume, setResume] = useState<File | null>(initialResume || null);
-
-  useEffect(() => {
-    if (initialResume) {
-      setResume(initialResume);
-    }
-  }, [initialResume]);
-
+export function ResumeUpload({ resume, onChange }: ResumeUploadProps) {
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setResume(file);
-    onUpload(file);
+    onChange(file);
   };
 
   const handleRemoveResume = async () => {
     if (!resume) return;
-    setResume(null);
-    onRemove();
+    onChange(null);
   };
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 mb-3">
       <Label>Resume</Label>
-      <div className={`border-2 border-dashed border-border/60 rounded-3xl p-8 flex flex-col items-center justify-center text-center transition-colors relative ${resume ? '' : 'hover:bg-muted/30 cursor-pointer'}`}>
-
+      <div
+        className={`border-2 border-dashed border-border/60 rounded-3xl p-8 flex flex-col items-center justify-center text-center transition-colors relative ${resume ? "" : "hover:bg-muted/30 cursor-pointer"}`}
+      >
         {(() => {
           if (resume) {
             return (
@@ -45,8 +34,12 @@ export function ResumeUpload({ onUpload, onRemove, initialResume }: Readonly<Res
                     <Upload className="h-5 w-5 text-primary" />
                   </div>
                   <div className="flex-1 min-w-0 text-left">
-                    <p className="text-sm font-medium truncate">{resume.name}</p>
-                    <p className="text-xs text-muted-foreground">{(resume.size / 1024 / 1024).toFixed(2)} MB</p>
+                    <p className="text-sm font-medium truncate">
+                      {resume.name}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {(resume.size / 1024 / 1024).toFixed(2)} MB
+                    </p>
                   </div>
                   <Button
                     type="button"
@@ -72,8 +65,12 @@ export function ResumeUpload({ onUpload, onRemove, initialResume }: Readonly<Res
               />
               <Upload className="h-8 w-8 text-muted-foreground mb-3" />
               <div className="space-y-1">
-                <p className="text-sm font-medium">Click to upload or drag and drop</p>
-                <p className="text-xs text-muted-foreground">PDF, DOC up to 10MB</p>
+                <p className="text-sm font-medium">
+                  Click to upload or drag and drop
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  PDF, DOC up to 10MB
+                </p>
               </div>
             </>
           );

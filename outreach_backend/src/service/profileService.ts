@@ -25,23 +25,17 @@ export const getUserProfile = async (authUserId: string) => {
 };
 
 export const updateProfile = async (authUserId: string, profile: ProfileRequest) => {
-
   const {
     summary,
     education,
     skills,
     experience,
-    status,
     firstName,
     lastName,
+    status
   } = profile;
 
   try {
-    if (status && !Object.values(ProfileCompletenessStatus).includes(status as ProfileCompletenessStatus)) {
-      logger.error(`Invalid status: ${status}`);
-      throw new BadRequestError(`Invalid status: ${status}`, ErrorCode.INVALID_PROFILE_STATUS);
-    }
-
     logger.info(`Updating user profile for user ${authUserId} with profile ${JSON.stringify(profile)}`);
     return await prisma.userProfileData.update({
       where: { authUserId },
@@ -50,7 +44,7 @@ export const updateProfile = async (authUserId: string, profile: ProfileRequest)
         education: education ?? undefined,
         firstName,
         lastName,
-        status: status ? (status as ProfileCompletenessStatus) : undefined,
+        status: status === "COMPLETE" ? "COMPLETE" : undefined,
         experiences: experience
           ? {
             deleteMany: {},

@@ -1,3 +1,9 @@
+import { ThreadsMeta } from "@/api/threads/types";
+import CompanyDetails from "@/components/function/data-grid/cells/CompanyDetails";
+import EmployeeDetails from "@/components/function/data-grid/cells/EmployeeDetails";
+import LastUpdated from "@/components/function/data-grid/cells/LastUpdated";
+import ThreadActions from "@/components/function/data-grid/cells/ThreadActions";
+import ThreadStatusBadge from "@/components/function/ThreadStatusBadge";
 import {
   Table,
   TableBody,
@@ -6,44 +12,35 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import {
-  MoreHorizontal,
-  Building2,
-  User,
-  Loader2,
-  Send,
-  Trash2,
-} from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useNavigate } from "react-router";
-import { formatDistanceToNow } from "date-fns";
-import ThreadStatusBadge from "@/components/function/ThreadStatusBadge";
-import { ThreadMetaItem, ThreadsMeta } from "@/api/threads/types";
 
 interface DraftsTableProps {
-  data: ThreadsMeta["threads"];
+  threads: ThreadsMeta["threads"];
   isLoading: boolean;
-  onMarkAsSent: (id: number, threadId: number) => void;
-  onDelete: (id: number) => void;
-  isMarkingSent: boolean;
-  isDeleting: boolean;
 }
 
-export const DraftsTable = ({
-  data,
-  isLoading,
-  onMarkAsSent,
-  onDelete,
-  isMarkingSent,
-  isDeleting,
-}: DraftsTableProps) => {
+export const DraftsTable = ({ threads, isLoading }: DraftsTableProps) => {
   const navigate = useNavigate();
+
+  const tableCells = [
+    {
+      Comp: EmployeeDetails,
+    },
+    {
+      Comp: CompanyDetails,
+    },
+    {
+      Comp: ThreadStatusBadge,
+    },
+    {
+      Comp: LastUpdated,
+    },
+    {
+      Comp: ThreadActions,
+      className: "text-center pr-6",
+    },
+  ];
 
   if (isLoading) {
     return (
@@ -52,10 +49,6 @@ export const DraftsTable = ({
       </div>
     );
   }
-
-  const handleRowClick = (item: ThreadMetaItem) => {
-    navigate(`/outreach/preview/${item.messages[0].id}`);
-  };
 
   return (
     <Table>
@@ -69,7 +62,7 @@ export const DraftsTable = ({
         </TableRow>
       </TableHeader>
       <TableBody>
-        {data.length === 0 ? (
+        {threads.length === 0 ? (
           <TableRow>
             <TableCell
               colSpan={5}
@@ -79,83 +72,19 @@ export const DraftsTable = ({
             </TableCell>
           </TableRow>
         ) : (
-          data.map((item) => (
+          threads.map((thread) => (
             <TableRow
-              key={item.id}
+              key={thread.id}
               className="group border-border/40 hover:bg-muted/30 cursor-pointer"
-              onClick={() => handleRowClick(item)}
+              onClick={() =>
+                navigate(`/outreach/preview/${thread.messages[0].id}`)
+              }
             >
-              <TableCell className="pl-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                    <User className="w-4 h-4" />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="font-medium text-sm">
-                      {item.employee.name}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {item.employee.email}
-                    </span>
-                  </div>
-                </div>
-              </TableCell>
-              <TableCell>
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Building2 className="w-4 h-4" />
-                  <span className="text-sm">{item.jobs?.[0].company}</span>
-                </div>
-              </TableCell>
-              <TableCell>
-                <ThreadStatusBadge status={item.status} />
-              </TableCell>
-              <TableCell>
-                <span className="text-sm text-muted-foreground">
-                  {item.lastUpdated
-                    ? formatDistanceToNow(new Date(item.lastUpdated), {
-                        addSuffix: true,
-                      })
-                    : "-"}
-                </span>
-              </TableCell>
-              <TableCell className="text-center pr-6">
-                <button
-                  onClick={(e) => e.stopPropagation()}
-                  onKeyDown={(e) => e.stopPropagation()}
-                  tabIndex={0}
-                  className="cursor-default"
-                  disabled={isMarkingSent || isDeleting}
-                >
-                  <DropdownMenu>
-                    <DropdownMenuTrigger>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 rounded-full transition-opacity"
-                      >
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem
-                        onClick={() =>
-                          onMarkAsSent(item.messages[0].id, item.id)
-                        }
-                      >
-                        <Send className="mr-2 h-4 w-4" />
-                        Mark as Sent
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => onDelete(item.messages[0].id)}
-                        className="text-destructive focus:text-destructive focus:bg-destructive/10"
-                      >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </button>
-              </TableCell>
+              {tableCells.map((cell) => (
+                <TableCell className={cn(cell.className)}>
+                  <cell.Comp thread={thread} />
+                </TableCell>
+              ))}
             </TableRow>
           ))
         )}

@@ -20,7 +20,6 @@ export const getProfile = async (
     const { userId } = getAuth(req);
 
     const profile = await getUserProfile(userId!);
-
     if (!profile) {
       logger.info("Profile not found for user", { userId });
       return next(new NotFoundError("Profile not found for user", ErrorCode.RESOURCE_NOT_FOUND, { userId }));
@@ -47,7 +46,7 @@ export const updateProfile = async (
     const updatedProfile = await updateProfileService(clerkUserId!, req.body);
 
     logger.info("Profile updated successfully", { userId: clerkUserId });
-    res.json({ message: "Profile updated", data: updatedProfile });
+    res.json(updatedProfile);
   } catch (err: any) {
     logger.error("Error updating profile", err);
     next(err);

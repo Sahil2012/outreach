@@ -68,7 +68,7 @@ export default function ProfilePage() {
       // const profileProjects = profile.projects || [];
       const profileProjects: any[] = [];
       const profileEducation = profile.education || [];
-      const profileExperiences: Experience[] = profile.experiences || [];
+      const profileExperiences: Experience[] = profile.experience || [];
 
       setSkills(profileSkills);
       setProjects(profileProjects);
@@ -107,7 +107,7 @@ export default function ProfilePage() {
         skills,
         // projects,
         education,
-        experiences,
+        experience: experiences,
       });
       toast.success("Profile updated successfully!");
 

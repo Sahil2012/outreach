@@ -31,11 +31,12 @@ function DateInput({
   onChange,
   placeholder,
 }: Readonly<{
-  value?: Date;
+  value?: string;
   onChange: (date?: Date) => void;
   placeholder?: string;
 }>) {
   const [open, setOpen] = useState(false);
+  const date = value ? new Date(value) : undefined;
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger>
@@ -46,8 +47,8 @@ function DateInput({
             !value && "text-muted-foreground",
           )}
         >
-          {value ? (
-            format(value, "PPP")
+          {date ? (
+            format(date, "PPP")
           ) : (
             <span>{placeholder || "Pick a date"}</span>
           )}
@@ -57,7 +58,7 @@ function DateInput({
       <PopoverContent className="w-auto p-0" align="start">
         <Calendar
           mode="single"
-          selected={value}
+          selected={date}
           onSelect={(date) => {
             onChange(date);
             setOpen(false);
@@ -204,7 +205,7 @@ export function ExperienceSection({
                   onChange={(date) =>
                     setCurrentExperience({
                       ...currentExperience,
-                      startDate: date?.toLocaleString(),
+                      startDate: date?.toString(),
                     })
                   }
                   placeholder="Start Date"
@@ -214,7 +215,7 @@ export function ExperienceSection({
                   onChange={(date) =>
                     setCurrentExperience({
                       ...currentExperience,
-                      endDate: date?.toLocaleDateString(),
+                      endDate: date?.toString(),
                     })
                   }
                   placeholder="End Date"

@@ -20,7 +20,6 @@ import SendEmailPage from "@/pages/outreach/send-email";
 import DraftsPage from "@/pages/drafts";
 import NotFound from "@/pages/not-found";
 import { useLocation } from "react-router";
-import { useState } from "react";
 import SettingsPage from "./pages/settings";
 import ProfilePage from "./pages/profile";
 import GlobalError from "./components/function/global-error";
@@ -30,7 +29,6 @@ function ProtectedRoute() {
   const { user, isLoaded: isUserLoaded } = useUser();
   const { data: profile, isLoading, error } = useProfile();
   const location = useLocation();
-  const [firstLoad, setFirstLoad] = useState(true);
 
   if (error) {
     const err = new Error("Failed to fetch profile. Please try again later");
@@ -52,33 +50,24 @@ function ProtectedRoute() {
     return <Navigate to="/login" />;
   }
 
-  const navigateToOnboarding = () => {
-    if (profile.resumeUrl) {
-      return <Navigate to="/onboarding/professional-info" />;
-    } else {
-      return <Navigate to="/onboarding/basic-info" />;
-    }
-  };
-
-  // If app is loaded for the first time, evaluate which onboarding step to show
-  if (firstLoad) {
-    setFirstLoad(false);
-    navigateToOnboarding();
-  }
-
+  // If user is not onboarded then, redirect to onboarding pages
   if (
-    (profile.status === "INCOMPLETE" || profile.status === "PARTIAL") &&
-    (firstLoad || !location.pathname.startsWith("/onboarding"))
-  ) {
-    return navigateToOnboarding();
-  }
+    profile.status === "INCOMPLETE" &&
+    !location.pathname.startsWith("/onboarding/basic-info")
+  )
+    return <Navigate to="/onboarding/basic-info" replace />;
+  if (
+    (profile.status === "PARTIAL" || profile.status === "PROCESSING") &&
+    !location.pathname.startsWith("/onboarding")
+  )
+    return <Navigate to="/onboarding/professional-info" />;
 
   // If user is onboarded and tries to access onboarding, redirect to dashboard
   if (
     profile.status === "COMPLETE" &&
     location.pathname.startsWith("/onboarding")
   ) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/dashboard" />;
   }
 
   return <>{<Outlet />}</>;
