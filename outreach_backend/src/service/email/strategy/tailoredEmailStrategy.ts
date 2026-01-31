@@ -1,9 +1,9 @@
 import { getCandidateProfile } from "../../extractCandidateProfile.js";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { referralEmailPrompt } from "../../../utils/prompts/referralPromptTemplate.js";
-import { StructuredOutputParser } from "langchain/output_parsers";
+import { StructuredOutputParser } from "@langchain/core/output_parsers";
 import { emailSchema } from "../../../schema/schema.js";
-import callLLM from "../../../apis/geminichat.js";
+import callLLM from "../../../apis/llmClient.js";
 import { TailoredEmailRequest } from "../../../types/GenerateMailRequest.js";
 import prisma from "../../../apis/prismaClient.js";
 import { logger } from "../../../utils/logger.js";

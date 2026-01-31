@@ -11,7 +11,7 @@ export const useResume = () => {
       formData.append('resume', file);
       formData.append('autofill', 'true');
 
-      const response = await api.post('/profile/upload/resume', formData, {
+      const response = await api.put('/profile/resume', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

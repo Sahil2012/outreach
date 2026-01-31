@@ -24,7 +24,11 @@ export const validate = (schemas: RequestValidationSchema) => {
             next();
         } catch (error: any) {
             if (error instanceof ZodError) {
-                return next(new BadRequestError("Validation failed", ErrorCode.VALIDATION_FAILED, { issues: error.errors }));
+                const errorMessages = error.errors.map((issue) => {
+                    const path = issue.path.length > 0 ? issue.path.join('.') : 'Input';
+                    return `${path} : ${issue.message}`
+                }).join(', ');
+                return next(new BadRequestError(errorMessages, ErrorCode.VALIDATION_FAILED, { issues: error.errors }));
             }
             next(error);
         }

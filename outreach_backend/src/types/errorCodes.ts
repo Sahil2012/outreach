@@ -63,6 +63,9 @@ export enum ErrorCode {
     INVALID_PROFILE_STATUS = "INVALID_PROFILE_STATUS",
     NO_FILE_UPLOADED = "NO_FILE_UPLOADED",
     FILE_PROCESSING_FAILED = "FILE_PROCESSING_FAILED",
+
+    // 429
+    RATE_LIMIT_EXCEEDED = "RATE_LIMIT_EXCEEDED",
 }
 
 
@@ -130,4 +133,7 @@ export const ErrorCodeMetadata: Record<ErrorCode, { httpStatus: number; defaultM
     [ErrorCode.INVALID_PROFILE_STATUS]: { httpStatus: 400, defaultMessage: "Invalid profile status" },
     [ErrorCode.NO_FILE_UPLOADED]: { httpStatus: 400, defaultMessage: "No file uploaded" },
     [ErrorCode.FILE_PROCESSING_FAILED]: { httpStatus: 400, defaultMessage: "File processing failed" },
+
+    // 429
+    [ErrorCode.RATE_LIMIT_EXCEEDED]: { httpStatus: 429, defaultMessage: "Rate limit exceeded" },
 };
