@@ -41,15 +41,15 @@ export const ThreadMetaParamsSchema = z.object({
     status: z.preprocess(
         (val) => (typeof val === "string" ? val.split(",").map(s => s.trim()) : val),
         z.array(z.nativeEnum(ThreadStatus).or(z.literal("FOLLOW_UP"))).optional()
-    ),
+    ).optional(),
     search: z.preprocess(
         (val) => (typeof val === "string" ? val.split(",").map(s => s.trim()) : val),
         z.array(z.string()).optional()
-    ),
+    ).optional(),
     messageStatus: z.preprocess(
         (val) => (typeof val === "string" ? val.split(",").map(s => s.trim()) : val),
         z.array(z.nativeEnum(MessageStatus)).optional()
-    )
+    ).optional()
 });
 
 const ThreadMetaSchema = z.object({

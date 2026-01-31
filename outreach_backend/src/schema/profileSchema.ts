@@ -6,8 +6,8 @@ import { JSONSchema } from "zod/v4/core";
 const ExperienceSchema = z.object({
     company: z.string(),
     role: z.string(),
-    startDate: z.string().datetime().optional(),
-    endDate: z.string().datetime().optional(),
+    startDate: z.string().datetime().transform((date) => new Date(date)).optional(),
+    endDate: z.string().datetime().transform((date) => new Date(date)).optional(),
     description: z.string().optional(),
 });
 

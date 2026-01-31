@@ -205,7 +205,7 @@ export function ExperienceSection({
                   onChange={(date) =>
                     setCurrentExperience({
                       ...currentExperience,
-                      startDate: date?.toString(),
+                      startDate: date?.toISOString(),
                     })
                   }
                   placeholder="Start Date"
@@ -215,7 +215,7 @@ export function ExperienceSection({
                   onChange={(date) =>
                     setCurrentExperience({
                       ...currentExperience,
-                      endDate: date?.toString(),
+                      endDate: date?.toISOString(),
                     })
                   }
                   placeholder="End Date"
