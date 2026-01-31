@@ -35,6 +35,7 @@
     "pdf-parse": "^1.1.1",
     "pdf-resume-parser": "^1.0.5",
     "pdfjs-dist": "^5.4.296",
+    "rate-limiter-flexible": "^9.0.1",
     "resume-parser": "^1.1.0",
     "simple-resume-parser": "^1.1.8",
     "svix": "^1.84.1",

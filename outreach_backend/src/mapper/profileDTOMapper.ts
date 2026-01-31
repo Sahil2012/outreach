@@ -17,7 +17,7 @@ export const toProfileDTO = (profile: any): ProfileRequest | null => {
       role: exp.role,
       company: exp.companyName,
       startDate: exp.startDate?.toISOString(),
-      endDate: exp.endDate ? exp.endDate.toISOString() : null,
+      endDate: exp.endDate?.toISOString(),
       description: exp.description
     })),
   };

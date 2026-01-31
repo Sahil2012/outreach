@@ -1,5 +1,4 @@
 import { Prisma } from "@prisma/client";
-import { log } from "console";
 import prisma from "../apis/prismaClient.js";
 import { GenerateMailRequest } from "../types/GenerateMailRequest.js";
 import { emailStrategy } from "./email/context.js";
