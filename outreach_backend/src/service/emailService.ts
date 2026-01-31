@@ -84,7 +84,7 @@ export async function generateAndSaveEmail(
     emailContent.subject
   );
   responseData.threadId = draft.id;
-  responseData.messageId = draft.messageId;
+  responseData.id = draft.messageId;
 
   return responseData;
 }

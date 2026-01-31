@@ -9,7 +9,7 @@ export class MessageClient {
   }
 
   updateMessage(message: Partial<Message>): Promise<Message> {
-    return this.client.patch(`/message/${message.id}`, message).then(r => r.data);
+    return this.client.patch(`/messages/${message.id}`, message).then(r => r.data);
   }
 
   createMessage(generateMessageReq: GenerateMessageReq): Promise<Message> {
@@ -25,6 +25,6 @@ export class MessageClient {
   }
 
   sendMessage(threadId: number, id: number, attachResume: boolean): Promise<void> {
-    return this.client.post(`/message/${id}/send`, { threadId, attachResume }).then(r => r.data);
+    return this.client.post(`/messages/${id}/send`, { threadId, attachResume }).then(r => r.data);
   }
 }

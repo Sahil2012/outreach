@@ -20,6 +20,7 @@ export const useThread = (id: number) => {
 export const useThreads = (params: ThreadsParams) => {
   const apiClient = useAPIClient();
   const threadClient = new ThreadClient(apiClient);
+  params.status = params.status === "ALL" ? undefined : params.status;
 
   return useQuery({
     queryKey: threadKeys.list(params),
