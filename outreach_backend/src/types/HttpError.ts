@@ -1,4 +1,4 @@
-import { ErrorCode, ErrorCodeMetadata } from "./errorCodes.js";
+import { ErrorCode } from "./errorCodes.js";
 
 export class HttpError extends Error {
     status: number;
@@ -78,6 +78,18 @@ export class ExternalServiceError extends HttpError {
 export class ServiceUnavailableError extends HttpError {
     constructor(message: string, errorCode: ErrorCode = ErrorCode.SERVICE_UNAVAILABLE, details?: any) {
         super(503, message, errorCode, details);
+    }
+}
+
+export class TooManyRequestsError extends HttpError {
+    constructor(message: string, errorCode: ErrorCode = ErrorCode.INSUFFICIENT_CREDITS, details?: any) {
+        super(429, message, errorCode, details);
+    }
+}
+
+export class RateLimitExceededError extends HttpError {
+    constructor(message: string, errorCode: ErrorCode = ErrorCode.RATE_LIMIT_EXCEEDED, details?: any) {
+        super(429, message, errorCode, details);
     }
 }
 
