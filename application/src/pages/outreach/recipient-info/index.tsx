@@ -1,143 +1,112 @@
-import React, { useEffect, useState } from "react";
-import { isAxiosError } from "axios";
+import { GenerateMessageReq, MessageType } from "@/api/messages/types";
+import GenerateMessage from "@/components/function/generate-message-button";
 import { Button } from "@/components/ui/button";
-import { RecipientInfo } from "@/lib/types";
-import { ArrowLeft, ArrowRight } from "lucide-react";
-import { useLocation, useNavigate, useSearchParams } from "react-router";
+import { ArrowLeft } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
+import { templates } from "../select-template";
 import { RecipientForm } from "./RecipientForm";
-import { Loader } from "@/components/ui/loader";
-import { templates } from "../template-selection";
-import { CreditInfo } from "@/components/function/CreditInfo";
-import { useMessageActions } from "@/api/messages/hooks/useMessageActions";
-import { MessageType } from "@/api/messages/types";
+
+export interface FormData {
+  employeeName?: string;
+  employeeEmail?: string;
+  companyName?: string;
+  role?: string;
+  jobIds?: string[];
+  jobDescription?: string;
+}
+
+export type FormDataErrors = Partial<Record<keyof FormData, string>>;
 
 const RecipientInfoPage: React.FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const [searchParams] = useSearchParams();
-  // TODO: change templateId to type
-  const templateId = searchParams.get("templateId");
+  const templateType = searchParams.get("template");
 
-  const [recipientInfo, setRecipientInfo] = useState<RecipientInfo>({
-    employeeName: "",
-    employeeEmail: "",
-    companyName: "",
-    role: "",
-    jobIds: [],
-    jobDescription: "",
-  });
+  const [formData, setFormData] = useState<FormData>({});
+  const [errors, setErrors] = useState<FormDataErrors>({});
 
-  const { generateMessage } = useMessageActions();
-
-  const [errors, setErrors] = useState<
-    Partial<Record<keyof RecipientInfo, string>>
-  >({});
-
-  useEffect(() => {
-    const { company, employee } = location.state || {};
-    if (company) {
-      setRecipientInfo((prev) => ({
-        ...prev,
-        companyName: company.name,
-      }));
-    }
-    if (employee) {
-      setRecipientInfo((prev) => ({
-        ...prev,
-        employeeName: employee.name,
-        employeeEmail: employee.email || "",
-      }));
-    }
-  }, [location.state]);
+  // useEffect(() => {
+  //   const { company, employee } = location.state || {};
+  //   if (company) {
+  //     setRecipientInfo((prev) => ({
+  //       ...prev,
+  //       companyName: company.name,
+  //     }));
+  //   }
+  //   if (employee) {
+  //     setRecipientInfo((prev) => ({
+  //       ...prev,
+  //       employeeName: employee.name,
+  //       employeeEmail: employee.email || "",
+  //     }));
+  //   }
+  // }, [location.state]);
 
   const validateForm = () => {
-    const newErrors: Partial<Record<keyof RecipientInfo, string>> = {};
-    if (!recipientInfo.employeeName)
+    const newErrors: FormDataErrors = {};
+    if (!formData.employeeName)
       newErrors.employeeName = "Employee name is required";
-    if (!recipientInfo.employeeEmail)
+    if (!formData.employeeEmail)
       newErrors.employeeEmail = "Employee email is required";
-    if (!recipientInfo.companyName)
+    if (!formData.companyName)
       newErrors.companyName = "Company name is required";
-    if (templateId !== "COLD" && !recipientInfo.jobIds.length)
+
+    if (templateType !== "COLD" && !formData.jobIds?.length)
       newErrors.jobIds = "At least one job is required for tailored messages";
-    // Job description is only required for non-COLD templates
-    if (templateId !== "COLD" && !recipientInfo.jobDescription)
+    if (templateType !== "COLD" && !formData.jobDescription)
       newErrors.jobDescription = "Job description is required";
 
     setErrors(newErrors);
     return newErrors;
   };
 
-  const handleGenerate = async () => {
-    const fnErrors = validateForm();
-    if (Object.keys(fnErrors).length > 0) {
-      toast.error(Object.values(fnErrors)[0]);
+  const handleGenerate = () => {
+    const errors = validateForm();
+    if (Object.keys(errors).length > 0) {
+      toast.error(Object.values(errors)[0]);
       return;
     }
 
-    if (!templateId) {
-      toast.error("Template ID is missing. Please start over.");
-      return;
+    let messageReq: GenerateMessageReq = {
+      type: MessageType.COLD,
+      companyName: formData.companyName!,
+      contactEmail: formData.employeeEmail!,
+      contactName: formData.employeeName!,
+      role: formData.role!,
+    };
+
+    if (templateType === "TAILORED") {
+      messageReq = {
+        ...messageReq,
+        type: MessageType.TAILORED,
+        jobs: formData.jobIds!,
+        jobDescription: formData.jobDescription || "",
+      };
     }
 
-    try {
-      if (templateId === "TAILORED") {
-        const res = await generateMessage.mutateAsync({
-          type: MessageType.TAILORED,
-          companyName: recipientInfo.companyName,
-          contactEmail: recipientInfo.employeeEmail,
-          contactName: recipientInfo.employeeName,
-          role: recipientInfo.role,
-          jobs: recipientInfo.jobIds,
-          jobDescription: recipientInfo.jobDescription || "",
-        });
-        navigate(`/outreach/preview/${res?.id}`, { state: res });
-      }
-      if (templateId === "COLD") {
-        const res = await generateMessage.mutateAsync({
-          type: MessageType.COLD,
-          companyName: recipientInfo.companyName,
-          contactEmail: recipientInfo.employeeEmail,
-          contactName: recipientInfo.employeeName,
-          role: recipientInfo.role,
-        });
-        navigate(`/outreach/preview/${res?.id}`, { state: res });
-      }
-    } catch (error: Error | unknown) {
-      if (isAxiosError(error)) {
-        if (error.response?.status === 429) {
-          toast.error("You have reached the limit. Please try again later.");
-          return;
-        }
-        if (error.response?.status === 500) {
-          toast.error("Server error. Please try again in 5 minutes.");
-          return;
-        }
-      }
-      console.error("Error generating mail:", error);
-      toast.error("Failed to generate email. Please try again.");
-    }
+    return messageReq;
   };
 
   useEffect(() => {
-    if (!templateId || !templates.some((t) => t.id === templateId)) {
+    if (!templateType || !templates.some((t) => t.id === templateType)) {
       toast.error("Template ID is missing. Please start over.");
       navigate("/outreach/templates");
     }
-  }, [navigate, templateId]);
+  }, [navigate, templateType]);
 
-  if (!templateId || !templates.some((t) => t.id === templateId)) {
+  if (!templateType || !templates.some((t) => t.id === templateType)) {
     return null;
   }
 
   return (
     <div className="animate-fadeIn space-y-6">
       <RecipientForm
-        info={recipientInfo}
-        onChange={setRecipientInfo}
+        formData={formData}
+        onChange={setFormData}
         errors={errors}
-        templateId={templateId}
+        templateType={templateType}
       />
 
       <div className="flex items-end justify-between pt-4">
@@ -145,25 +114,11 @@ const RecipientInfoPage: React.FC = () => {
           variant="outline"
           size="lg"
           onClick={() => navigate("/outreach/templates")}
-          disabled={generateMessage.isPending}
         >
           <ArrowLeft className="w-4 h-4 mr-1 -ml-1" />
           Back
         </Button>
-        <div className="flex flex-col gap-1.5">
-          <CreditInfo className="mt-4" />
-          <Button
-            size="lg"
-            onClick={handleGenerate}
-            disabled={generateMessage.isPending}
-          >
-            {generateMessage.isPending ? <Loader className="mr-2" /> : null}
-            {generateMessage.isPending ? "Generating..." : "Generate Email"}
-            {!generateMessage.isPending && (
-              <ArrowRight className="w-4 h-4 ml-1 -mr-1" />
-            )}
-          </Button>
-        </div>
+        <GenerateMessage onGenerate={handleGenerate} />
       </div>
     </div>
   );

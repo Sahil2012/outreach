@@ -1,136 +1,22 @@
-import React, { useState } from "react";
-import { useParams, useNavigate } from "react-router";
-import { Loader } from "@/components/ui/loader";
-import { DetailsAndActions } from "./DetailsAndActions";
-import { EmailThread } from "./EmailThread";
-import { toast } from "sonner";
-import { useReverification, useUser } from "@clerk/clerk-react";
-import {
-  isClerkRuntimeError,
-  isReverificationCancelledError,
-} from "@clerk/clerk-react/errors";
-import { ReverificationDialog } from "./ReverificationDialog";
 import { useThread } from "@/api/threads/hooks/useThreadData";
-import { useThreadActions } from "@/api/threads/hooks/useThreadActions";
-import { useMessageActions } from "@/api/messages/hooks/useMessageActions";
-import { MessageType } from "@/api/messages/types";
+import { Loader } from "@/components/ui/loader";
+import React from "react";
+import { useNavigate, useParams } from "react-router";
+import { DetailsAndActions } from "./details-and-actions";
+import { EmailThread } from "./EmailThread";
+
+export interface PropsWithId {
+  id: number;
+}
 
 const OutreachDetailPage: React.FC = () => {
-  const [isGmailAuthLoading, setIsGmailAuthLoading] = useState(false);
-  const [showReverificationDialog, setShowReverificationDialog] =
-    useState(false);
-  const [reverificationHandlers, setReverificationHandlers] = useState<{
-    complete: () => void;
-    cancel: () => void;
-  } | null>(null);
-
   const { id } = useParams<{ id: string }>();
+  const parsedId = Number(id);
   const navigate = useNavigate();
-  const { user } = useUser();
 
-  const idNumber = Number(id);
-  // const {
-  //   data,
-  //   isLoading,
-  //   error,
-  //   updateStatus,
-  //   toggleAutomated,
-  //   isUpdatingStatus,
-  //   isTogglingAutomated,
-  //   generateFollowUp,
-  //   isGeneratingFollowUp,
-  // } = useOutreachDetail(idNumber);
-  const { data, isLoading, error } = useThread(idNumber);
-  const { updateStatus, toggleAutomated } = useThreadActions();
-  const { generateMessage } = useMessageActions();
+  const { data, isLoading, error } = useThread(parsedId);
 
-  const isConnectedToGoogle = user?.externalAccounts.some(
-    (account) => account.provider === "google",
-  );
-
-  const hasGmailScope = user?.externalAccounts.some(
-    (account) =>
-      account.provider === "google" &&
-      account.approvedScopes?.includes(
-        "https://www.googleapis.com/auth/gmail.modify",
-      ),
-  );
-
-  let googleReauthorizationNeeded = false;
-  let threadNotFound = false;
-  let insufficientPermissions = false;
-  if (!data?.sync?.status) {
-    if (
-      data?.sync?.code?.includes("refresh_token_not_found") ||
-      data?.sync?.code?.includes("insufficient_permissions") ||
-      data?.sync?.code?.includes("thread_not_found_in_external_source")
-    ) {
-      googleReauthorizationNeeded = true;
-      if (data?.sync?.code?.includes("insufficient_permissions")) {
-        insufficientPermissions = true;
-      }
-    } else {
-      threadNotFound = true;
-    }
-  }
-
-  const connectToGmail = useReverification(
-    async () => {
-      let res;
-      if (!isConnectedToGoogle) {
-        res = await user?.createExternalAccount({
-          strategy: "oauth_google",
-          redirectUrl: globalThis.location.href,
-          additionalScopes: ["https://www.googleapis.com/auth/gmail.modify"],
-          oidcPrompt: "consent",
-          // @ts-ignore
-          access_type: "offline",
-        });
-      } else {
-        const googleAccount = user?.externalAccounts.find(
-          (acc) => acc.provider === "google",
-        );
-        res = await googleAccount?.reauthorize({
-          redirectUrl: globalThis.location.href,
-          additionalScopes: ["https://www.googleapis.com/auth/gmail.modify"],
-          oidcPrompt: "consent",
-          // @ts-ignore
-          access_type: "offline",
-        });
-      }
-
-      if (res?.verification?.externalVerificationRedirectURL) {
-        globalThis.location.href =
-          res.verification.externalVerificationRedirectURL.href;
-      }
-    },
-    {
-      onNeedsReverification: ({ complete, cancel }) => {
-        setReverificationHandlers({ complete, cancel });
-        setShowReverificationDialog(true);
-      },
-    },
-  );
-
-  const handleConnectGmail = async () => {
-    setIsGmailAuthLoading(true);
-    try {
-      await connectToGmail();
-    } catch (error) {
-      if (isClerkRuntimeError(error) && isReverificationCancelledError(error)) {
-        console.error("User cancelled reverification");
-        toast.error("Please verify to connect to Gmail.");
-      } else {
-        console.error("Gmail Auth Error:", error);
-        console.log("Gmail Auth error details: ", (error as any).errors);
-        toast.error("Could not connect to Gmail.");
-      }
-    } finally {
-      setIsGmailAuthLoading(false);
-    }
-  };
-
-  if (!id || isNaN(idNumber)) {
+  if (!id || isNaN(parsedId)) {
     navigate("/dashboard");
     return null;
   }
@@ -143,7 +29,7 @@ const OutreachDetailPage: React.FC = () => {
     );
   }
 
-  if (error || threadNotFound || !data) {
+  if (error || !data) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
         <div className="text-destructive font-medium">
@@ -159,96 +45,15 @@ const OutreachDetailPage: React.FC = () => {
     );
   }
 
-  const handleGenerateFollowUp = async () => {
-    try {
-      const res = await generateMessage.mutateAsync({
-        type: MessageType.FOLLOW_UP,
-        threadId: idNumber,
-      });
-      toast.success("Follow-up generated successfully!");
-      navigate(`/outreach/preview/${res?.id}`, { state: res });
-    } catch {
-      toast.error("Failed to generate follow-up.");
-    }
-  };
-
-  const handleMarkAbsconded = async () => {
-    try {
-      await updateStatus.mutateAsync({ id: idNumber, status: "CLOSED" });
-      toast.success("Marked as absconded.");
-    } catch {
-      toast.error("Failed to update status.");
-    }
-  };
-
-  const handleMarkReferred = async () => {
-    try {
-      await updateStatus.mutateAsync({ id: idNumber, status: "REFERRED" });
-      toast.success("Marked as referred!");
-    } catch {
-      console.error("Failed to update status.");
-      toast.error("Failed to update status.");
-    }
-  };
-
-  const handleToggleAutomated = async (checked: boolean) => {
-    try {
-      await toggleAutomated.mutateAsync({ id: idNumber, isAutomated: checked });
-      toast.success(
-        `Automated follow-ups ${checked ? "enabled" : "disabled"}.`,
-      );
-    } catch {
-      console.error("Failed to update settings.");
-      toast.error("Failed to update settings.");
-    }
-  };
-
   return (
-    <>
-      <div className="animate-fadeIn p-6 h-[calc(100vh-80px)]">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-full">
-          {/* Left Side: Details & Actions */}
-          <div className="lg:col-span-4 h-full overflow-hidden">
-            <DetailsAndActions
-              data={data}
-              isGeneratingFollowUp={generateMessage.isPending}
-              isUpdating={updateStatus.isPending || toggleAutomated.isPending}
-              onGenerateFollowUp={handleGenerateFollowUp}
-              onMarkAbsconded={handleMarkAbsconded}
-              onMarkReferred={handleMarkReferred}
-              onToggleAutomated={handleToggleAutomated}
-              isGmailConnected={
-                (isConnectedToGoogle &&
-                  hasGmailScope &&
-                  !googleReauthorizationNeeded) ||
-                false
-              }
-              onBack={() => navigate("/dashboard")}
-              onConnectGmail={handleConnectGmail}
-              isGmailAuthLoading={isGmailAuthLoading}
-              insufficientPermissions={insufficientPermissions}
-            />
-          </div>
-          {/* Right Side: Thread */}
-          <div className="lg:col-span-8 h-full overflow-hidden bg-muted/10">
-            <EmailThread thread={data.messages || []} />
-          </div>
-        </div>
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-[calc(100vh-80px)] p-6 animate-fadeIn ">
+      <div className="lg:col-span-4 h-full overflow-hidden">
+        <DetailsAndActions id={parsedId} />
       </div>
-
-      {/* Reverification Dialog */}
-      <ReverificationDialog
-        open={showReverificationDialog}
-        onComplete={() => {
-          reverificationHandlers?.complete();
-          setShowReverificationDialog(false);
-        }}
-        onCancel={() => {
-          reverificationHandlers?.cancel();
-          setShowReverificationDialog(false);
-        }}
-      />
-    </>
+      <div className="lg:col-span-8 h-full overflow-hidden bg-muted/10">
+        <EmailThread id={parsedId} />
+      </div>
+    </div>
   );
 };
 

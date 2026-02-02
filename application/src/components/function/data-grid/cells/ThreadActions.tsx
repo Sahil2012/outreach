@@ -15,6 +15,7 @@ import { PropsWithThread } from "../types";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { AiMagicIcon } from "@hugeicons/core-free-icons";
 import { Spinner } from "@/components/ui/spinner";
+import { useNavigate } from "react-router";
 
 const isFollowUpPossible = (thread: ThreadMetaItem) => {
   return (
@@ -27,16 +28,20 @@ const isFollowUpPossible = (thread: ThreadMetaItem) => {
 const ThreadActions = ({ thread }: PropsWithThread) => {
   const { generateMessage, markAsSent, deleteDraft } = useMessageActions();
   const { updateStatus } = useThreadActions();
+  const navigate = useNavigate();
 
   const actions = [
     {
       id: "generate-follow-up",
       shouldShow: isFollowUpPossible(thread),
       onClick: () => {
-        generateMessage.mutate({
-          type: MessageType.FOLLOW_UP,
-          threadId: thread.id,
-        });
+        generateMessage.mutate(
+          {
+            type: MessageType.FOLLOW_UP,
+            threadId: thread.id,
+          },
+          { onSuccess: (res) => navigate(`/outreach/preview/${res.id}`) },
+        );
       },
       content: (
         <>

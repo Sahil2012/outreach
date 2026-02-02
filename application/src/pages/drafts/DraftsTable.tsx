@@ -3,7 +3,7 @@ import CompanyDetails from "@/components/function/data-grid/cells/CompanyDetails
 import EmployeeDetails from "@/components/function/data-grid/cells/EmployeeDetails";
 import LastUpdated from "@/components/function/data-grid/cells/LastUpdated";
 import ThreadActions from "@/components/function/data-grid/cells/ThreadActions";
-import ThreadStatusBadge from "@/components/function/ThreadStatusBadge";
+import ThreadStatusBadge from "@/components/function/status-badges/ThreadStatusBadge";
 import {
   Table,
   TableBody,

@@ -13,7 +13,7 @@ import MainLayout from "@/components/layout/MainLayout";
 import DashboardPage from "@/pages/dashboard";
 import OutreachWizard from "@/pages/outreach";
 import OutreachDetailPage from "@/pages/outreach/detail";
-import TemplateSelectionPage from "@/pages/outreach/template-selection";
+import SelectTemplatePage from "@/pages/outreach/select-template";
 import RecipientInfoPage from "@/pages/outreach/recipient-info";
 import EmailPreviewPage from "@/pages/outreach/email-preview";
 import SendEmailPage from "@/pages/outreach/send-email";
@@ -53,7 +53,7 @@ function ProtectedRoute() {
   // If user is not onboarded then, redirect to onboarding pages
   if (
     profile.status === "INCOMPLETE" &&
-    !location.pathname.startsWith("/onboarding/basic-info")
+    !location.pathname.startsWith("/onboarding")
   )
     return <Navigate to="/onboarding/basic-info" replace />;
   if (
@@ -175,7 +175,7 @@ const routes = createBrowserRouter([
                       },
                       {
                         path: "templates",
-                        element: <TemplateSelectionPage />,
+                        element: <SelectTemplatePage />,
                       },
                       {
                         path: "recipient-info",

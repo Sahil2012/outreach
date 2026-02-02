@@ -55,7 +55,7 @@ export interface RecipientInfo {
   companyName: string;
   role: string;
   jobIds: string[];
-  jobDescription?: string;
+  jobDescription: string;
 }
 
 export interface MessageResponse {

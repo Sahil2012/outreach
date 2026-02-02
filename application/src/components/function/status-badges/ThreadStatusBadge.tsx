@@ -1,5 +1,5 @@
 import { Thread, ThreadMetaItem } from "@/api/threads/types";
-import { Badge } from "../ui/badge";
+import { Badge } from "@/components/ui/badge";
 
 const ThreadStatusBadge = ({ thread }: { thread: Thread | ThreadMetaItem }) => {
   const variants: Record<Thread["status"], string> = {

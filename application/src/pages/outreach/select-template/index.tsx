@@ -2,9 +2,14 @@ import React, { useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router";
-import { Template } from "@/lib/types";
 import { toast } from "sonner";
 import { TemplateCard } from "./TemplateCard";
+
+export interface Template {
+  id: string;
+  name: string;
+  content: string;
+}
 
 export const templates = [
   {
@@ -19,10 +24,8 @@ export const templates = [
   },
 ];
 
-const TemplateSelectionPage: React.FC = () => {
-  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(
-    null
-  );
+const SelectTemplatePage: React.FC = () => {
+  const [selectedTemplate, setSelectedTemplate] = useState<Template>();
   const navigate = useNavigate();
 
   const handleSelectTemplate = (template: Template) => {
@@ -34,7 +37,7 @@ const TemplateSelectionPage: React.FC = () => {
       toast.error("Please select a template.");
       return;
     }
-    navigate(`/outreach/recipient-info?templateId=${selectedTemplate.id}`);
+    navigate(`/outreach/recipient-info?template=${selectedTemplate.id}`);
   };
 
   return (
@@ -60,4 +63,4 @@ const TemplateSelectionPage: React.FC = () => {
   );
 };
 
-export default TemplateSelectionPage;
+export default SelectTemplatePage;

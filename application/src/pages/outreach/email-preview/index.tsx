@@ -1,89 +1,54 @@
-import React, { useEffect, useState } from "react";
+import { useMessageActions } from "@/api/messages/hooks/useMessageActions";
+import { useMessage } from "@/api/messages/hooks/useMessageData";
 import { Button } from "@/components/ui/button";
 import { Loader } from "@/components/ui/loader";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { useNavigate, useParams, useLocation } from "react-router";
-import { GenerateEmailResponse } from "@/lib/types";
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router";
 import { EmailEditor } from "./EmailEditor";
-import { toast } from "sonner";
-import { useMessage } from "@/api/messages/hooks/useMessageData";
-import { useMessageActions } from "@/api/messages/hooks/useMessageActions";
 
 const EmailPreviewPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  // Parse messageId from URL if available
   const parsedId = Number(id);
-
   const navigate = useNavigate();
-  const location = useLocation();
-  const state = location.state as GenerateEmailResponse | undefined;
+  const { state } = useLocation();
 
-  // const {
-  //   draft,
-  //   isLoadingDraft,
-  //   draftError,
-  //   isPolling,
-  //   startPolling,
-  //   stopPolling,
-  //   updateDraft,
-  //   updateMessage,
-  //   isUpdating
-  // } = useOutreach(parsedId, { skipFetch: !!state });
-  const {
-    data: draft,
-    isLoading: isLoadingDraft,
-    error: draftError,
-  } = useMessage(parsedId);
+  const { data: draft, isLoading, error } = useMessage(parsedId);
   const { updateDraft } = useMessageActions();
 
-  const [localEmail, setLocalEmail] = useState<{
-    subject?: string;
-    body?: string;
-  }>({
-    subject: state?.subject || draft?.subject,
-    body: state?.body || draft?.body,
-  });
-  const [messageId] = useState<number | undefined>(
-    state?.messageId || parsedId,
-  );
+  const [subject, setSubject] = useState("");
+  const [body, setBody] = useState("");
 
-  // Handle Polling & Initialization
   useEffect(() => {
-    // If we have state passed from navigation, use it immediately
-    console.log(state);
-    console.log(localEmail);
+    setSubject(draft?.subject || "");
+    setBody(draft?.body || "");
+  }, [draft]);
 
-    if (state) {
-      if (!localEmail) {
-        setLocalEmail({
-          subject: state.subject,
-          body: state.body,
-        });
-      }
-      return; // Skip polling logic if we have state
-    }
-  }, [state]);
-
-  const handleContinue = async () => {
-    if (!id || !localEmail) return;
-    try {
-      if (messageId) {
-        await updateDraft.mutateAsync({
-          id: parsedId,
-          subject: localEmail.subject || "",
-          body: localEmail.body || "",
-        });
-      }
-      navigate(`/outreach/send/${id}`);
-    } catch (error) {
-      console.error("Failed to update email", error);
-      toast.error("Failed to save email. Please try again.");
+  const handleBack = () => {
+    if (state.type) {
+      navigate(`/outreach/recipient-info?template=${state.type}`);
+    } else {
+      navigate(`/outreach/templates`);
     }
   };
 
-  if (!id) return <div>Invalid Draft ID</div>;
+  const handleContinue = async () => {
+    if (!parsedId || isNaN(parsedId)) return;
 
-  if (isLoadingDraft && !draft && !localEmail) {
+    updateDraft.mutate({
+      id: parsedId,
+      subject: subject,
+      body: body,
+    });
+    navigate(`/outreach/send/${id}`);
+  };
+
+  if (!id) {
+    handleBack();
+    return null;
+  }
+
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <Loader size="lg" />
@@ -91,51 +56,28 @@ const EmailPreviewPage: React.FC = () => {
     );
   }
 
-  if (draftError) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
-        <div className="text-destructive font-medium">
-          Failed to load draft.
-        </div>
-        <Button variant="outline" onClick={() => window.location.reload()}>
-          Retry
-        </Button>
-      </div>
+  if (error) {
+    const err = new Error(
+      "We were unable to fetch draft at the moment. Please try again later",
     );
+    err.name = "Unexpected error occured";
+    throw err;
   }
-
-  // Still generating - TODO: Not required now. Remove
-  // if (draft && !draft.isMailGenerated) {
-  //   return (
-  //     <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
-  //       <Loader size="lg" />
-  //       <p className="text-muted-foreground animate-pulse">
-  //         Generating your email...
-  //       </p>
-  //     </div>
-  //   );
-  // }
 
   return (
     <div className="animate-fadeIn space-y-6">
       <EmailEditor
-        subject={localEmail.subject || ""}
-        body={localEmail.body || ""}
-        onSubjectChange={(val) =>
-          setLocalEmail((prev) => ({ ...prev, subject: val }))
-        }
-        onBodyChange={(val) =>
-          setLocalEmail((prev) => ({ ...prev, body: val }))
-        }
+        subject={subject || ""}
+        body={body || ""}
+        onSubjectChange={(val) => setSubject(val)}
+        onBodyChange={(val) => setBody(val)}
       />
 
       <div className="flex justify-between pt-4">
         <Button
           variant="outline"
           size="lg"
-          onClick={() =>
-            navigate(`/outreach/recipient-info?templateId=${draft?.type}`)
-          }
+          onClick={handleBack}
           disabled={updateDraft.isPending}
         >
           <ArrowLeft className="w-4 h-4 mr-1 -ml-1" />
@@ -146,9 +88,12 @@ const EmailPreviewPage: React.FC = () => {
           onClick={handleContinue}
           disabled={updateDraft.isPending}
         >
-          {updateDraft.isPending ? <Loader className="mr-2" /> : null}
           Continue
-          <ArrowRight className="w-4 h-4 ml-1 -mr-1" />
+          {updateDraft.isPending ? (
+            <Loader className="mr-2" />
+          ) : (
+            <ArrowRight className="w-4 h-4 ml-1 -mr-1" />
+          )}
         </Button>
       </div>
     </div>

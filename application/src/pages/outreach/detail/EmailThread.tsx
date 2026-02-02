@@ -1,22 +1,19 @@
-import React from "react";
 import { formatDistanceToNow } from "date-fns";
 import DOMPurify from "dompurify";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useUser } from "@clerk/clerk-react";
-import MessageStateBadge from "@/components/function/MessageStateBadge";
+import MessageStateBadge from "@/components/function/status-badges/MessageStatusBadge";
 import { useNavigate } from "react-router";
 import { cn } from "@/lib/utils";
-import { Message } from "@/api/messages/types";
+import { useThread } from "@/api/threads/hooks/useThreadData";
+import { PropsWithId } from ".";
 
-interface EmailThreadProps {
-  thread: Message[];
-}
-
-export const EmailThread: React.FC<EmailThreadProps> = ({ thread }) => {
+export const EmailThread = ({ id }: PropsWithId) => {
+  const { data: thread } = useThread(id);
   const { user } = useUser();
   const navigate = useNavigate();
 
-  if (!thread || thread.length === 0) {
+  if (!thread || thread.messages.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-8 rounded-lg border border-dashed">
         <p>No messages in this thread yet.</p>
@@ -26,7 +23,7 @@ export const EmailThread: React.FC<EmailThreadProps> = ({ thread }) => {
 
   return (
     <div className="space-y-6 h-full overflow-y-auto">
-      {thread.map((email) => {
+      {thread.messages.map((email) => {
         const isMe = email.fromUser;
         const avatarFallback = "";
         const isDraft = email.status === "DRAFT";
@@ -53,6 +50,7 @@ export const EmailThread: React.FC<EmailThreadProps> = ({ thread }) => {
               <div className="flex items-start justify-between border-b pb-4">
                 <div className="flex items-center gap-4">
                   <Avatar className="h-10 w-10 border border-background">
+                    <AvatarImage src={user?.imageUrl} />
                     <AvatarFallback
                       className={cn({
                         "bg-primary text-primary-foreground": isMe,

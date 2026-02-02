@@ -1,5 +1,5 @@
 import { ThreadsMeta } from "@/api/threads/types";
-import ThreadStatusBadge from "@/components/function/ThreadStatusBadge";
+import ThreadStatusBadge from "@/components/function/status-badges/ThreadStatusBadge";
 import {
   Table,
   TableBody,

@@ -1,4 +1,4 @@
-import MessageStateBadge from "@/components/function/MessageStateBadge";
+import MessageStateBadge from "@/components/function/status-badges/MessageStatusBadge";
 import { User } from "lucide-react";
 import { PropsWithThread } from "../types";
 

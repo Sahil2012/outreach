@@ -1,6 +1,10 @@
-import { Badge } from "../ui/badge";
+import { Badge } from "@/components/ui/badge";
 
-const MessageStateBadge = ({ state }: { state: "DRAFT" | "SENT" | undefined }) => {
+const MessageStateBadge = ({
+  state,
+}: {
+  state: "DRAFT" | "SENT" | undefined;
+}) => {
   if (!state) {
     return null;
   }

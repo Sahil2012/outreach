@@ -12,6 +12,11 @@ import { useProfileActions } from "@/api/profile/hooks/useProfileActions";
 import { Experience, Skill } from "@/api/profile/types";
 import Layout from "../Layout";
 
+// TODO:
+// 1. On click of edit on any data, edit form should open there itself and not at the bottom
+// 2. Properly validate with the correct type. Use zod schema.
+// 3. Add "I currently work here in experiences"
+
 export default function ProfessionalInfoPage() {
   const navigate = useNavigate();
 
@@ -56,7 +61,7 @@ export default function ProfessionalInfoPage() {
     );
   };
 
-  if (isPolling) {
+  if (profile?.status === "PROCESSING" && isPolling) {
     return (
       <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">

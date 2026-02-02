@@ -1,8 +1,9 @@
-import { useQuery } from "@tanstack/react-query"
-import { profileKeys } from "../queryKeys"
-import { useAPIClient } from "@/api/useAPIClient"
+import { useQuery } from "@tanstack/react-query";
+import { profileKeys } from "../queryKeys";
+import { useAPIClient } from "@/api/useAPIClient";
 import { ProfileClient } from "../client";
 import { Dispatch, SetStateAction, useState } from "react";
+import { toast } from "sonner";
 
 const POLL_INTERVAL = 10 * 1000;
 
@@ -18,12 +19,14 @@ export const useProfile = (props?: UseProfileProps) => {
   const [isPolling, setIsPolling] = useState(props?.pollCount === 0);
 
   return {
-    isPolling, ...useQuery({
+    isPolling,
+    ...useQuery({
       queryKey: profileKeys.detail,
       queryFn: () => {
+        console.log("fetching data");
         const res = profileClient.getProfile();
-        if ((props?.pollCount || 0) < (props?.maxPoll || 0)) {
-          props?.setPollCount?.(prev => prev + 1);
+        if (props) {
+          props?.setPollCount?.((prev) => prev + 1);
         }
         return res;
       },
@@ -32,7 +35,8 @@ export const useProfile = (props?: UseProfileProps) => {
         const newData = query.state.data;
 
         if (
-          props?.pollCount &&
+          props &&
+          props.pollCount >= 0 &&
           props.pollCount < props.maxPoll &&
           newData?.status === "PROCESSING"
         ) {
@@ -40,12 +44,15 @@ export const useProfile = (props?: UseProfileProps) => {
           return POLL_INTERVAL;
         }
 
-        setIsPolling(false);
+        if (isPolling && props && props.pollCount >= props.maxPoll) {
+          toast.error("We were unable to process your resume at the moment ");
+          setIsPolling(false);
+        }
         return false;
-      }
-    })
-  }
-}
+      },
+    }),
+  };
+};
 
 export const useProfileStats = () => {
   const client = useAPIClient();
@@ -57,5 +64,5 @@ export const useProfileStats = () => {
       return profileClient.getProfileStats();
     },
     staleTime: 5 * 60 * 1000,
-  })
-}
+  });
+};
