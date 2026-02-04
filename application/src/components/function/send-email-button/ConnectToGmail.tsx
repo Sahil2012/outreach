@@ -8,8 +8,8 @@ import {
   isClerkRuntimeError,
   isReverificationCancelledError,
 } from "@clerk/clerk-react/errors";
-import { ReverificationDialog } from "../ReverificationDialog";
 import { useGoogleActions } from "@/api/google/hooks/useGoogleActions";
+import { ReverificationDialog } from "../reverification-dialog";
 
 const ConnectToGmailButton = (buttonProps: ButtonProps) => {
   const [searchParams] = useSearchParams();

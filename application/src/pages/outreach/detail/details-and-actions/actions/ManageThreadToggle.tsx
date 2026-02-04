@@ -1,7 +1,7 @@
 import { useThread } from "@/api/threads/hooks/useThreadData";
-import AutomatedToggle from "@/components/function/AutomatedToggle";
+import AutomatedToggle from "@/components/function/commons/AutomatedToggle";
 import { Label } from "@/components/ui/label";
-import { PropsWithId } from "../..";
+import { PropsWithId } from "@/lib/types/commons";
 
 const ManageThreadToggle = ({ id }: PropsWithId) => {
   const { data: thread } = useThread(id);

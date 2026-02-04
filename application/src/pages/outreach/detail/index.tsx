@@ -5,10 +5,6 @@ import { useNavigate, useParams } from "react-router";
 import { DetailsAndActions } from "./details-and-actions";
 import { EmailThread } from "./EmailThread";
 
-export interface PropsWithId {
-  id: number;
-}
-
 const OutreachDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const parsedId = Number(id);

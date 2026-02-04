@@ -6,7 +6,7 @@ import MessageStateBadge from "@/components/function/status-badges/MessageStatus
 import { useNavigate } from "react-router";
 import { cn } from "@/lib/utils";
 import { useThread } from "@/api/threads/hooks/useThreadData";
-import { PropsWithId } from ".";
+import { PropsWithId } from "@/lib/types/commons";
 
 export const EmailThread = ({ id }: PropsWithId) => {
   const { data: thread } = useThread(id);

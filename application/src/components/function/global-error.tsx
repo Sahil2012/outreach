@@ -36,7 +36,7 @@ const GlobalError = () => {
           <Button
             onClick={() => globalThis.location.reload()}
             size="lg"
-            className="w-full sm:w-auto min-w-[140px] shadow-md hover:shadow-lg transition-all"
+            className="w-full sm:w-auto shadow-md hover:shadow-lg transition-all"
           >
             <RotateCcw className="mr-1 -ml-1 h-4 w-4" />
             Try Again
@@ -45,7 +45,7 @@ const GlobalError = () => {
             onClick={() => navigate("/")}
             variant="outline"
             size="lg"
-            className="w-full sm:w-auto min-w-[140px] bg-background/50 hover:bg-accent hover:text-accent-foreground backdrop-blur-sm transition-all"
+            className="w-full sm:w-auto bg-background/50 hover:bg-accent hover:text-accent-foreground backdrop-blur-sm transition-all"
           >
             <Home className="mr-1 -ml-1 h-4 w-4" />
             Back to Home

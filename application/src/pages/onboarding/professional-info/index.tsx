@@ -5,7 +5,7 @@ import { CheckCircle } from "lucide-react";
 import { SkillsSection } from "./SkillsSection";
 import { ExperienceSection } from "./ExperienceSection";
 import { EducationSection } from "./EducationSection";
-import { ProjectsSection } from "./ProjectsSection";
+// import { ProjectsSection } from "./ProjectsSection";
 import { useNavigate } from "react-router";
 import { useProfile } from "@/api/profile/hooks/useProfileData";
 import { useProfileActions } from "@/api/profile/hooks/useProfileActions";
@@ -31,7 +31,7 @@ export default function ProfessionalInfoPage() {
   const { updateProfile } = useProfileActions();
 
   const [skills, setSkills] = useState<Skill[]>([]);
-  const [projects, setProjects] = useState<any[]>([]);
+  // const [projects, setProjects] = useState<any[]>([]);
   const [education, setEducation] = useState<any[]>([]);
   const [experiences, setExperiences] = useState<Experience[]>([]);
 
@@ -88,8 +88,8 @@ export default function ProfessionalInfoPage() {
           experiences={experiences}
           setExperiences={setExperiences}
         />
-        <ProjectsSection projects={projects} setProjects={setProjects} />
-        <EducationSection education={education} setEducation={setEducation} />
+        {/* <ProjectsSection projects={projects} setProjects={setProjects} /> */}
+        <EducationSection educations={education} setEducations={setEducation} />
       </div>
 
       <div className="flex gap-4 pt-4">

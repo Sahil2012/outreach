@@ -1,4 +1,4 @@
-import AutomatedToggle from "@/components/function/AutomatedToggle";
+import AutomatedToggle from "@/components/function/commons/AutomatedToggle";
 import { PropsWithThread } from "../types";
 
 const ToggleAutomated = ({ thread }: PropsWithThread) => {

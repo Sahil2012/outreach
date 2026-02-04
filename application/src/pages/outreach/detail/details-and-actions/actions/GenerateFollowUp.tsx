@@ -1,7 +1,7 @@
 import { useThread } from "@/api/threads/hooks/useThreadData";
-import { PropsWithId } from "../..";
 import GenerateMessage from "@/components/function/generate-message-button";
 import { GenerateMessageReq, MessageType } from "@/api/messages/types";
+import { PropsWithId } from "@/lib/types/commons";
 
 const GenerateFollowUp = ({ id }: PropsWithId) => {
   const { data: thread } = useThread(id);

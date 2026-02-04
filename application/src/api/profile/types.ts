@@ -7,7 +7,7 @@ export interface Experience {
   role: string;
   company: string;
   startDate?: string;
-  endDate?: string;
+  endDate?: string | null;
   description?: string;
 }
 
@@ -16,13 +16,17 @@ export interface Education {
   institution: string;
   degree: string;
   field_of_study?: string;
-  start_date?: Date;
-  end_date?: Date;
+  start_date?: string;
+  end_date?: string | null;
   grade?: string;
   year_of_passing?: string;
 }
 
-export type ProfileStatus = "INCOMPLETE" | "PROCESSING" | "PARTIAL" | "COMPLETE";
+export type ProfileStatus =
+  | "INCOMPLETE"
+  | "PROCESSING"
+  | "PARTIAL"
+  | "COMPLETE";
 
 export interface Profile {
   firstName?: string;

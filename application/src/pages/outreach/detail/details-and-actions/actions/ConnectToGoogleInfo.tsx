@@ -1,8 +1,8 @@
 import { useGoogle } from "@/api/google/hooks/useGoogleData";
 import { useThread } from "@/api/threads/hooks/useThreadData";
 import ConnectToGmailButton from "@/components/function/send-email-button/ConnectToGmail";
-import { PropsWithId } from "../..";
 import { Thread } from "@/api/threads/types";
+import { PropsWithId } from "@/lib/types/commons";
 
 const checkGoogleSync = (thread: Thread) => {
   const googleSync = thread?.sync;

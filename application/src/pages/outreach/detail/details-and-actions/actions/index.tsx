@@ -1,4 +1,4 @@
-import { PropsWithId } from "../..";
+import { PropsWithId } from "@/lib/types/commons";
 import ConnectToGoogleInfo from "./ConnectToGoogleInfo";
 import GenerateFollowUp from "./GenerateFollowUp";
 import ManageThreadToggle from "./ManageThreadToggle";

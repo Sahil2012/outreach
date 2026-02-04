@@ -1,8 +1,8 @@
 import { useThreadActions } from "@/api/threads/hooks/useThreadActions";
 import { Button } from "@/components/ui/button";
 import { UserX } from "lucide-react";
-import { PropsWithId } from "../..";
 import { useThread } from "@/api/threads/hooks/useThreadData";
+import { PropsWithId } from "@/lib/types/commons";
 
 const MarkAsAbsconded = ({ id }: PropsWithId) => {
   const { data: thread } = useThread(id);

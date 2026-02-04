@@ -1,17 +1,21 @@
+import { useProfile } from "@/api/profile/hooks/useProfileData";
 import { Education } from "@/api/profile/types";
+import SaveProfileButton from "@/components/function/commons/SaveProfileButton";
 import EducationEditor from "@/components/function/professional-info-editors/education-editor";
 import { Card, CardContent } from "@/components/ui/card";
 import { GraduationCap } from "lucide-react";
+import { useState } from "react";
 
-interface EducationSectionProps {
-  educations: Education[];
-  setEducations: (education: Education[]) => void;
-}
+export function EducationSection() {
+  const { data: profile } = useProfile();
+  const [educations, setEducations] = useState<Education[]>(
+    profile?.education || [],
+  );
 
-export function EducationSection({
-  educations,
-  setEducations,
-}: EducationSectionProps) {
+  const hasChanges = () => {
+    return JSON.stringify(profile?.education) !== JSON.stringify(educations);
+  };
+
   return (
     <Card>
       <CardContent className="py-6 space-y-6">
@@ -26,6 +30,13 @@ export function EducationSection({
           value={educations}
           onChange={(edu) => setEducations(edu)}
         />
+
+        <div className="flex justify-end mt-5">
+          <SaveProfileButton
+            profile={{ education: educations }}
+            hasChanges={hasChanges}
+          />
+        </div>
       </CardContent>
     </Card>
   );
