@@ -5,10 +5,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
-import { useAuthActions } from "@/hooks/auth/useAuthActions";
 import ReverificationForm from "./reverification-form";
+import { useReverificationActions } from "@/hooks/auth/useReverificationActions";
 
 interface ReverificationDialogProps {
   open: boolean;
@@ -16,25 +16,27 @@ interface ReverificationDialogProps {
   onCancel: () => void;
 }
 
-export const ReverificationDialog: React.FC<ReverificationDialogProps> = ({
+export const ReverificationDialog = ({
   open,
   onComplete,
   onCancel,
-}) => {
-  const { verification } = useAuthActions();
+}: ReverificationDialogProps) => {
+  const { sendCode, verify } = useReverificationActions();
   const [code, setCode] = useState("");
+  const [emailForCode, setEmailForCode] = useState("");
 
   // Start verification when dialog opens
   useEffect(() => {
-    if (open && !verification.isSendingCode && !verification.isVerifying) {
-      verification.start();
+    if (open && !sendCode.isPending && !verify.isPending) {
+      sendCode.mutate(undefined, {
+        onSuccess: ({ emailForCode }) => setEmailForCode(emailForCode),
+      });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, verification.isSendingCode, verification.isVerifying]);
+  }, [open, sendCode, verify]);
 
   const handleCancel = () => {
     setCode("");
-    verification.cancel();
+    sendCode.reset();
     onCancel();
   };
 
@@ -44,8 +46,8 @@ export const ReverificationDialog: React.FC<ReverificationDialogProps> = ({
         <DialogHeader>
           <DialogTitle>Verify Your Identity</DialogTitle>
           <DialogDescription>
-            {verification.userEmailForCode
-              ? `We sent a verification code to ${verification.userEmailForCode}`
+            {emailForCode
+              ? `We sent a verification code to ${emailForCode}`
               : "We sent a verification code to your email. Please enter it below to continue."}
           </DialogDescription>
         </DialogHeader>

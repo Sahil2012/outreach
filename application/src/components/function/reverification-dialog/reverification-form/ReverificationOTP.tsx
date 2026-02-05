@@ -1,4 +1,3 @@
-import { useAuthActions } from "@/hooks/auth/useAuthActions";
 import {
   InputOTP,
   InputOTPGroup,
@@ -8,17 +7,20 @@ import {
 interface ReverificationOTPProps {
   code: string;
   onChange: (number: string) => void;
+  isLoading: boolean;
 }
 
-const ReverificationOTP = ({ code, onChange }: ReverificationOTPProps) => {
-  const { verification } = useAuthActions();
-
+const ReverificationOTP = ({
+  code,
+  onChange,
+  isLoading,
+}: ReverificationOTPProps) => {
   return (
     <InputOTP
       maxLength={6}
       value={code}
       onChange={(value) => onChange(value)}
-      disabled={verification.isVerifying || verification.isSendingCode}
+      disabled={isLoading}
     >
       <InputOTPGroup>
         <InputOTPSlot index={0} />

@@ -1,4 +1,3 @@
-import { useAuthActions } from "@/hooks/auth/useAuthActions";
 import { useUser } from "@clerk/clerk-react";
 import { AlertCircle } from "lucide-react";
 import { FormEvent, useState } from "react";
@@ -6,10 +5,11 @@ import ConfirmNewPassword from "./ConfirmNewPassword";
 import CurrentPassword from "./CurrentPassword";
 import NewPassword from "./NewPassword";
 import UpdatePasswordButton from "./UpdatePasswordButton";
+import { usePasswordActions } from "@/hooks/auth/usePasswordActions";
 
 const ChangePassword = () => {
   const { user } = useUser();
-  const { updatePassword } = useAuthActions();
+  const { updatePassword } = usePasswordActions();
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -17,15 +17,19 @@ const ChangePassword = () => {
 
   const handleFormSubmission = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    updatePassword.update({
-      newPassword,
-      currentPassword,
-      onSuccess: () => {
-        setNewPassword("");
-        setConfirmNewPassword("");
-        setCurrentPassword("");
+    updatePassword.mutate(
+      {
+        newPassword,
+        currentPassword,
       },
-    });
+      {
+        onSuccess: () => {
+          setNewPassword("");
+          setConfirmNewPassword("");
+          setCurrentPassword("");
+        },
+      },
+    );
   };
 
   return (
@@ -55,7 +59,10 @@ const ChangePassword = () => {
           />
         </div>
         <div className="flex justify-end">
-          <UpdatePasswordButton disabled={newPassword !== confirmNewPassword} />
+          <UpdatePasswordButton
+            disabled={newPassword !== confirmNewPassword}
+            isLoading={updatePassword.isPending}
+          />
         </div>
       </form>
     </>

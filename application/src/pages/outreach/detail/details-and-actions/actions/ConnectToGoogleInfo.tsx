@@ -1,5 +1,5 @@
 import ConnectToGmailButton from "@/components/function/send-email-button/ConnectToGmail";
-import { useGoogle } from "@/hooks/google/useGoogleData";
+import { useGoogle } from "@/hooks/auth/useGoogleData";
 import { useThread } from "@/hooks/threads/useThreadData";
 import { PropsWithId } from "@/lib/types/commonTypes";
 import { Thread } from "@/lib/types/threadsTypes";

@@ -1,4 +1,4 @@
-import { useGoogle } from "@/hooks/google/useGoogleData";
+import { useGoogle } from "@/hooks/auth/useGoogleData";
 import { Mail } from "lucide-react";
 import ConnectToGmailButton from "./ConnectToGmail";
 import SendEmail from "./SendEmail";

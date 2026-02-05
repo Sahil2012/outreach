@@ -1,6 +1,6 @@
-import { useAuthActions } from "@/hooks/auth/useAuthActions";
 import { Button } from "@/components/ui/button";
 import { Loader } from "@/components/ui/loader";
+import { useReverificationActions } from "@/hooks/auth/useReverificationActions";
 import { AlertCircle } from "lucide-react";
 import React from "react";
 import ReverificationOTP from "./ReverificationOTP";
@@ -18,27 +18,35 @@ const ReverificationForm = ({
   onComplete,
   onCancel,
 }: ReverificationFormProps) => {
-  const { verification } = useAuthActions();
+  const { sendCode, verify } = useReverificationActions();
 
   const handleVerify = async (e?: React.FormEvent) => {
     e?.preventDefault();
-    verification.verify(code, () => {
-      onChangeCode("");
-      onComplete();
-    });
+    verify.mutate(
+      { code },
+      {
+        onSuccess: () => {
+          onChangeCode("");
+          onComplete();
+        },
+      },
+    );
   };
 
   const handleResend = async () => {
     onChangeCode("");
-    verification.resendCode();
+    verify.reset();
+    sendCode.mutate();
   };
+
+  const isLoading = sendCode.isPending || verify.isPending;
 
   return (
     <form onSubmit={handleVerify} className="space-y-6">
-      {verification.error && (
+      {(sendCode.error || verify.error) && (
         <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md flex items-center gap-2">
           <AlertCircle className="w-4 h-4 shrink-0" />
-          {verification.error.message}
+          {sendCode.error?.message || verify.error?.message || ""}
         </div>
       )}
 
@@ -46,19 +54,16 @@ const ReverificationForm = ({
         <ReverificationOTP
           code={code}
           onChange={(code) => onChangeCode(code)}
+          isLoading={isLoading}
         />
       </div>
       <div className="flex flex-col gap-3">
         <Button
           type="submit"
           className="w-full h-10 font-medium"
-          disabled={
-            verification.isVerifying ||
-            verification.isSendingCode ||
-            code.length !== 6
-          }
+          disabled={isLoading || code.length !== 6}
         >
-          {verification.isVerifying && <Loader className="w-4 h-4 mr-2" />}
+          {sendCode.isPending && <Loader className="w-4 h-4 mr-2" />}
           Verify
         </Button>
 
@@ -67,7 +72,7 @@ const ReverificationForm = ({
             type="button"
             variant="link"
             onClick={onCancel}
-            disabled={verification.isVerifying || verification.isSendingCode}
+            disabled={isLoading}
             className="text-muted-foreground p-0 h-auto"
           >
             Cancel
@@ -76,10 +81,10 @@ const ReverificationForm = ({
             type="button"
             variant="link"
             onClick={handleResend}
-            disabled={verification.isVerifying || verification.isSendingCode}
+            disabled={isLoading}
             className="text-primary p-0 h-auto font-semibold"
           >
-            {verification.isSendingCode && <Loader className="w-3 h-3 mr-1" />}
+            {sendCode.isPending && <Loader className="w-3 h-3 mr-1" />}
             Resend code
           </Button>
         </div>
