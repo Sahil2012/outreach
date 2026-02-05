@@ -1,14 +1,10 @@
+import { useGoogleActions } from "@/api/google/hooks/useGoogleActions";
 import { Button, ButtonProps } from "@/components/ui/button";
 import { Loader } from "lucide-react";
 import { useEffect, useState } from "react";
 import { SiGmail } from "react-icons/si";
 import { useSearchParams } from "react-router";
 import { toast } from "sonner";
-import {
-  isClerkRuntimeError,
-  isReverificationCancelledError,
-} from "@clerk/clerk-react/errors";
-import { useGoogleActions } from "@/api/google/hooks/useGoogleActions";
 import { ReverificationDialog } from "../reverification-dialog";
 
 const ConnectToGmailButton = (buttonProps: ButtonProps) => {
@@ -30,27 +26,12 @@ const ConnectToGmailButton = (buttonProps: ButtonProps) => {
     }
   }, [searchParams]);
 
-  const handleConnectToGmail = async () => {
-    try {
-      await connectToGmail.connect();
-    } catch (error) {
-      if (isClerkRuntimeError(error) && isReverificationCancelledError(error)) {
-        console.error("User cancelled reverification");
-        toast.error("Please verify to connect to Gmail.");
-      } else {
-        console.error("Gmail Auth Error:", error);
-        console.log("Gmail Auth error details: ", (error as any).errors);
-        toast.error("Could not connect to Gmail.");
-      }
-    }
-  };
-
   return (
     <>
       <Button
         size="lg"
         className="w-full text-white border-0"
-        onClick={handleConnectToGmail}
+        onClick={() => connectToGmail.connect()}
         disabled={connectToGmail.isLoading}
         {...buttonProps}
       >
@@ -65,11 +46,11 @@ const ConnectToGmailButton = (buttonProps: ButtonProps) => {
       <ReverificationDialog
         open={showDialog}
         onComplete={() => {
-          connectToGmail.complete();
+          connectToGmail.completeReverification();
           setShowDialog(false);
         }}
         onCancel={() => {
-          connectToGmail.cancel();
+          connectToGmail.cancelReverification();
           setShowDialog(false);
         }}
       />

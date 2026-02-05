@@ -46,8 +46,14 @@ export const useGoogleActions = () => {
     {
       onNeedsReverification: (calls) => {
         setIsVerificationNeeded(true);
-        complete.current = calls.complete;
-        cancel.current = calls.cancel;
+        complete.current = () => {
+          setIsVerificationNeeded(false);
+          calls.complete();
+        };
+        cancel.current = () => {
+          setIsVerificationNeeded(false);
+          calls.cancel();
+        };
       },
     },
   );
@@ -95,8 +101,8 @@ export const useGoogleActions = () => {
       connect: connectToGmail,
       isLoading: isConnectingToGmail,
       isVerificationNeeded,
-      complete: complete.current,
-      cancel: cancel.current,
+      completeReverification: complete.current,
+      cancelReverification: cancel.current,
     },
     reauthorizeWithGoogle: {
       reauthorize,
