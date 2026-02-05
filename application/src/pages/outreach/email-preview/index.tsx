@@ -1,11 +1,11 @@
-import { useMessageActions } from "@/api/messages/hooks/useMessageActions";
-import { useMessage } from "@/api/messages/hooks/useMessageData";
 import { Button } from "@/components/ui/button";
 import { Loader } from "@/components/ui/loader";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router";
 import { EmailEditor } from "./EmailEditor";
+import { useMessage } from "@/hooks/messages/useMessageData";
+import { useMessageActions } from "@/hooks/messages/useMessageActions";
 
 const EmailPreviewPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();

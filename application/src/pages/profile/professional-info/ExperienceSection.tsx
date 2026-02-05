@@ -1,8 +1,8 @@
-import { useProfile } from "@/api/profile/hooks/useProfileData";
-import { Experience } from "@/api/profile/types";
 import SaveProfileButton from "@/components/function/commons/SaveProfileButton";
 import ExperienceEditor from "@/components/function/professional-info-editors/experience-editor";
 import { Card, CardContent } from "@/components/ui/card";
+import { useProfile } from "@/hooks/profile/useProfileData";
+import { Experience } from "@/lib/types/profileTypes";
 import { Briefcase } from "lucide-react";
 import { useState } from "react";
 

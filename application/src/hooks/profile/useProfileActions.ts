@@ -1,9 +1,9 @@
-import { useAPIClient } from "@/api/useAPIClient";
+import { useAPIClient } from "@/hooks/useAPIClient";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ProfileClient } from "../client";
-import { Profile } from "../types";
+import { ProfileService } from "@/services/profileService";
+import { Profile } from "@/lib/types/profileTypes";
 import { toast } from "sonner";
-import { profileKeys } from "../queryKeys";
+import { profileKeys } from "./profileQueryKeys";
 
 interface UploadResumeVariables {
   resume: File;
@@ -12,7 +12,7 @@ interface UploadResumeVariables {
 
 export const useProfileActions = () => {
   const client = useAPIClient();
-  const profileClient = new ProfileClient(client);
+  const profileClient = new ProfileService(client);
   const queryClient = useQueryClient();
 
   const uploadResume = useMutation({

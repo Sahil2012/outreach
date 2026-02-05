@@ -1,8 +1,8 @@
-import { THREAD_STATUS_VALUES } from "@/api/threads/consts";
-import { useThreads } from "@/api/threads/hooks/useThreadData";
-import { ThreadStatus } from "@/api/threads/types";
 import DataGrid from "@/components/function/data-grid";
-import { useDebounce } from "@/lib/hooks/useDebounce";
+import { useThreads } from "@/hooks/threads/useThreadData";
+import { useDebounce } from "@/hooks/useDebounce";
+import { THREAD_STATUS_VALUES } from "@/lib/consts/threadsConts";
+import { ThreadStatus } from "@/lib/types/threadsTypes";
 import { useState } from "react";
 import Header from "./Header";
 import OutreachTable from "./OutreachTable";

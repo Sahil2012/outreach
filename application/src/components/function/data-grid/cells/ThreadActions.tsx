@@ -5,16 +5,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Send, Trash2 } from "lucide-react";
-import { ThreadMetaItem } from "@/api/threads/types";
-import { useMessageActions } from "@/api/messages/hooks/useMessageActions";
-import { MessageType } from "@/api/messages/types";
-import { useThreadActions } from "@/api/threads/hooks/useThreadActions";
-import { cn } from "@/lib/utils";
-import { PropsWithThread } from "../types";
-import { HugeiconsIcon } from "@hugeicons/react";
-import { AiMagicIcon } from "@hugeicons/core-free-icons";
 import { Spinner } from "@/components/ui/spinner";
+import { useMessageActions } from "@/hooks/messages/useMessageActions";
+import { useThreadActions } from "@/hooks/threads/useThreadActions";
+import { PropsWithThread } from "@/lib/types/commonTypes";
+import { MessageType } from "@/lib/types/messagesTypes";
+import { ThreadMetaItem } from "@/lib/types/threadsTypes";
+import { cn } from "@/lib/utils";
+import { AiMagicIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { MoreHorizontal, Send, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router";
 
 const isFollowUpPossible = (thread: ThreadMetaItem) => {

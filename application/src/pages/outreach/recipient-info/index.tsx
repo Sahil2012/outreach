@@ -1,6 +1,6 @@
-import { GenerateMessageReq, MessageType } from "@/api/messages/types";
 import GenerateMessage from "@/components/function/generate-message-button";
 import { Button } from "@/components/ui/button";
+import { GenerateMessageReq, MessageType } from "@/lib/types/messagesTypes";
 import { ArrowLeft } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";

@@ -1,5 +1,5 @@
-import { Message, MessageStatus } from "../messages/types";
-import { THREAD_STATUS_VALUES } from "./consts"
+import { Message, MessageStatus } from "./messagesTypes";
+import { THREAD_STATUS_VALUES } from "../consts/threadsConts";
 
 export interface ThreadsParams {
   page: number;
@@ -35,10 +35,12 @@ export interface Thread {
   sync: {
     status: boolean;
     code?: string;
-  }
+  };
 }
 
-export type ThreadMetaItem = Omit<Thread, "messages" | "sync"> & { messages: Array<Pick<Message, "id" | "status">> }
+export type ThreadMetaItem = Omit<Thread, "messages" | "sync"> & {
+  messages: Array<Pick<Message, "id" | "status">>;
+};
 export interface ThreadsMeta {
   threads: ThreadMetaItem[];
   total: number;
@@ -46,4 +48,4 @@ export interface ThreadsMeta {
   pageSize: number;
 }
 
-export type ThreadStatus = typeof THREAD_STATUS_VALUES[number]
+export type ThreadStatus = (typeof THREAD_STATUS_VALUES)[number];

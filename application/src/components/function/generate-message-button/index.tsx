@@ -1,10 +1,10 @@
 import { Button } from "@/components/ui/button";
-import { CreditInfo } from "./CreditInfo";
-import { useMessageActions } from "@/api/messages/hooks/useMessageActions";
 import { Loader } from "@/components/ui/loader";
+import { useMessageActions } from "@/hooks/messages/useMessageActions";
+import { GenerateMessageReq } from "@/lib/types/messagesTypes";
 import { ArrowRight } from "lucide-react";
-import { GenerateMessageReq } from "@/api/messages/types";
 import { useNavigate } from "react-router";
+import { CreditInfo } from "./CreditInfo";
 
 interface GenerateMessageProps {
   onGenerate: () => GenerateMessageReq | undefined;

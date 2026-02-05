@@ -1,6 +1,6 @@
-import { useProfile } from "@/api/profile/hooks/useProfileData";
 import { Button } from "@/components/ui/button";
 import { Loader } from "@/components/ui/loader";
+import { useProfile } from "@/hooks/profile/useProfileData";
 import { AlertTriangle, Coins, Wallet } from "lucide-react";
 import { toast } from "sonner";
 

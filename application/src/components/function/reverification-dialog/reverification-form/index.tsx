@@ -1,4 +1,4 @@
-import { useAuthActions } from "@/api/auth/hooks/useAuthActions";
+import { useAuthActions } from "@/hooks/auth/useAuthActions";
 import { Button } from "@/components/ui/button";
 import { Loader } from "@/components/ui/loader";
 import { AlertCircle } from "lucide-react";

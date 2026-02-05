@@ -1,15 +1,15 @@
-import { useState, useLayoutEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader } from "@/components/ui/loader";
 import { CheckCircle } from "lucide-react";
-import { SkillsSection } from "./SkillsSection";
-import { ExperienceSection } from "./ExperienceSection";
+import { useLayoutEffect, useState } from "react";
 import { EducationSection } from "./EducationSection";
+import { ExperienceSection } from "./ExperienceSection";
+import { SkillsSection } from "./SkillsSection";
 // import { ProjectsSection } from "./ProjectsSection";
+import { useProfileActions } from "@/hooks/profile/useProfileActions";
+import { useProfile } from "@/hooks/profile/useProfileData";
+import { Experience, Skill } from "@/lib/types/profileTypes";
 import { useNavigate } from "react-router";
-import { useProfile } from "@/api/profile/hooks/useProfileData";
-import { useProfileActions } from "@/api/profile/hooks/useProfileActions";
-import { Experience, Skill } from "@/api/profile/types";
 import Layout from "../Layout";
 
 // TODO:

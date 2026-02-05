@@ -1,5 +1,5 @@
 import AutomatedToggle from "@/components/function/commons/AutomatedToggle";
-import { PropsWithThread } from "../types";
+import { PropsWithThread } from "@/lib/types/commonTypes";
 
 const ToggleAutomated = ({ thread }: PropsWithThread) => {
   return (
@@ -9,7 +9,7 @@ const ToggleAutomated = ({ thread }: PropsWithThread) => {
       tabIndex={0}
       className="cursor-default"
     >
-      <AutomatedToggle data={thread} threadId={thread.id} />
+      <AutomatedToggle isAutomated={thread.isAutomated} threadId={thread.id} />
     </button>
   );
 };

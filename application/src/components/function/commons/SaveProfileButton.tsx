@@ -1,5 +1,5 @@
-import { useProfileActions } from "@/api/profile/hooks/useProfileActions";
-import { Profile } from "@/api/profile/types";
+import { useProfileActions } from "@/hooks/profile/useProfileActions";
+import { Profile } from "@/lib/types/profileTypes";
 import { Button, ButtonProps } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Save } from "lucide-react";

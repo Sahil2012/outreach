@@ -1,5 +1,5 @@
-import { useMessage } from "@/api/messages/hooks/useMessageData";
 import { Loader } from "@/components/ui/loader";
+import { useMessage } from "@/hooks/messages/useMessageData";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { toast } from "sonner";

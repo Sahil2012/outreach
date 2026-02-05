@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { profileKeys } from "../queryKeys";
-import { useAPIClient } from "@/api/useAPIClient";
-import { ProfileClient } from "../client";
+import { profileKeys } from "./profileQueryKeys";
+import { useAPIClient } from "@/hooks/useAPIClient";
+import { ProfileService } from "@/services/profileService";
 import { Dispatch, SetStateAction, useState } from "react";
 import { toast } from "sonner";
 
@@ -15,7 +15,7 @@ interface UseProfileProps {
 
 export const useProfile = (props?: UseProfileProps) => {
   const client = useAPIClient();
-  const profileClient = new ProfileClient(client);
+  const profileClient = new ProfileService(client);
   const [isPolling, setIsPolling] = useState(props?.pollCount === 0);
 
   return {
@@ -56,7 +56,7 @@ export const useProfile = (props?: UseProfileProps) => {
 
 export const useProfileStats = () => {
   const client = useAPIClient();
-  const profileClient = new ProfileClient(client);
+  const profileClient = new ProfileService(client);
 
   return useQuery({
     queryKey: profileKeys.stats,

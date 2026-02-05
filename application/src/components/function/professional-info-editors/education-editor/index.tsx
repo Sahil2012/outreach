@@ -1,9 +1,9 @@
-import { Education } from "@/api/profile/types";
+import { Education } from "@/lib/types/profileTypes";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import EducationCard from "./education-card";
-import { PropsWithValueOnChange } from "@/lib/types/commons";
+import { PropsWithValueOnChange } from "@/lib/types/commonTypes";
 
 const EducationEditor = ({
   value,

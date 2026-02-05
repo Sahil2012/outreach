@@ -1,6 +1,6 @@
-import { useThread } from "@/api/threads/hooks/useThreadData";
 import ThreadStatusBadge from "@/components/function/status-badges/ThreadStatusBadge";
-import { PropsWithId } from "@/lib/types/commons";
+import { useThread } from "@/hooks/threads/useThreadData";
+import { PropsWithId } from "@/lib/types/commonTypes";
 import { formatDistanceToNow } from "date-fns";
 
 const Details = ({ id }: PropsWithId) => {

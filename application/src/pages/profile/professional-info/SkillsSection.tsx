@@ -1,8 +1,8 @@
-import { useProfile } from "@/api/profile/hooks/useProfileData";
-import { Skill } from "@/api/profile/types";
 import SaveProfileButton from "@/components/function/commons/SaveProfileButton";
 import { SkillsEditor } from "@/components/function/professional-info-editors/skills-editor";
 import { Card, CardContent } from "@/components/ui/card";
+import { useProfile } from "@/hooks/profile/useProfileData";
+import { Skill } from "@/lib/types/profileTypes";
 import { Code2 } from "lucide-react";
 import { useState } from "react";
 

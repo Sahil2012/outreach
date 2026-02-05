@@ -1,4 +1,4 @@
-import { ThreadStatus } from "./types";
+import { ThreadStatus } from "../types/threadsTypes";
 
 export const THREAD_STATUS_VALUES = ['PENDING', 'FIRST_FOLLOW_UP', 'SECOND_FOLLOW_UP', 'THIRD_FOLLOW_UP', 'CLOSED', 'SENT', 'REFERRED', 'DELETED'] as const;
 

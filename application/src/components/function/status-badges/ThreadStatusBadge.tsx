@@ -1,4 +1,4 @@
-import { Thread, ThreadMetaItem } from "@/api/threads/types";
+import { Thread, ThreadMetaItem } from "@/lib/types/threadsTypes";
 import { Badge } from "@/components/ui/badge";
 
 const ThreadStatusBadge = ({ thread }: { thread: Thread | ThreadMetaItem }) => {

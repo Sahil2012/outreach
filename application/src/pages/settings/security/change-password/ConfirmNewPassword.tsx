@@ -1,6 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { PropsWithValueOnChange } from "@/lib/types/commons";
+import { PropsWithValueOnChange } from "@/lib/types/commonTypes";
 
 const ConfirmNewPassword = ({
   value,

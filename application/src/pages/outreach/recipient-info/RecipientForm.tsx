@@ -1,4 +1,3 @@
-import { RecipientInfo } from "@/lib/types";
 import React, { FC } from "react";
 import { FormData, FormDataErrors } from ".";
 import CompanyName from "./form-components/CompanyName";
@@ -7,6 +6,15 @@ import EmployeeName from "./form-components/EmployeeName";
 import JobDescription from "./form-components/JobDescription";
 import JobIds from "./form-components/JobIds";
 import Role from "./form-components/Role";
+
+export interface RecipientInfo {
+  employeeName: string;
+  employeeEmail: string;
+  companyName: string;
+  role: string;
+  jobIds: string[];
+  jobDescription: string;
+}
 
 export interface FormComponentProps<T> {
   value?: T;

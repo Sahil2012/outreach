@@ -38,13 +38,12 @@ export const useAuthActions = () => {
     isVerifying: false,
   };
   const [verification, setVerification] = useState(initialVerification);
-  // const initialUpdatePassword: UpdatePasswordState = {
-  //   isLoading: false,
-  //   isVerificationNeeded: false,
-  // };
+  const initialUpdatePassword: UpdatePasswordState = {
+    isLoading: false,
+    isVerificationNeeded: false,
+  };
   const [updatePasswordState, setUpdatePasswordState] = useState(
-    { isLoading: false, isVerificationNeeded: false },
-    // initialUpdatePassword,
+    initialUpdatePassword,
   );
   const [reverificationNeeded, setReverificationNeeded] = useState(false);
 
@@ -207,7 +206,6 @@ export const useAuthActions = () => {
       }
 
       onSuccess?.();
-      console.log("after success");
       setUpdatePasswordState((prev) => ({
         ...prev,
         error: undefined,
@@ -215,13 +213,11 @@ export const useAuthActions = () => {
     },
     {
       onNeedsReverification: (calls) => {
-        console.log("on need verification");
         setReverificationNeeded(true);
         setUpdatePasswordState((prev) => ({
           ...prev,
           isVerificationNeeded: true,
           completeReverification: () => {
-            console.log("completed");
             setUpdatePasswordState((prev) => ({
               ...prev,
               isVerificationNeeded: false,
@@ -230,7 +226,6 @@ export const useAuthActions = () => {
             calls.complete();
           },
           cancelReverification: () => {
-            console.log("completed");
             setUpdatePasswordState((prev) => ({
               ...prev,
               isVerificationNeeded: false,
@@ -263,7 +258,6 @@ export const useAuthActions = () => {
       if (isClerkRuntimeError(error) && isReverificationCancelledError(error)) {
         console.error("User cancelled reverification");
         toast.error("Please verify to update your password.");
-        console.log("in catch if");
         setUpdatePasswordState((prev) => ({
           ...prev,
           error: new Error("User cancelled reverification"),
@@ -272,7 +266,6 @@ export const useAuthActions = () => {
         console.error("Update password Error:", error);
         console.log("Update password error details: ", (error as any).errors);
         toast.error("Could not update password.");
-        console.log("in catch else");
         setUpdatePasswordState((prev) => ({
           ...prev,
           error: new Error(
@@ -281,15 +274,12 @@ export const useAuthActions = () => {
         }));
       }
     } finally {
-      console.log("in finally");
       setUpdatePasswordState((prev) => ({
         ...prev,
         isLoading: false,
       }));
     }
   };
-
-  console.log("verification needed", reverificationNeeded);
 
   return {
     verification: {

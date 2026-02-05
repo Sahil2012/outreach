@@ -1,4 +1,11 @@
-import { ThreadsMeta } from "@/api/threads/types";
+import CompanyDetails from "@/components/function/data-grid/cells/CompanyDetails";
+import EmployeeDetails from "@/components/function/data-grid/cells/EmployeeDetails";
+import LastUpdated from "@/components/function/data-grid/cells/LastUpdated";
+import NeedsAttention, {
+  needsAttention,
+} from "@/components/function/data-grid/cells/NeedsAttention";
+import ThreadActions from "@/components/function/data-grid/cells/ThreadActions";
+import ToggleAutomated from "@/components/function/data-grid/cells/ToggleAutomated";
 import ThreadStatusBadge from "@/components/function/status-badges/ThreadStatusBadge";
 import {
   Table,
@@ -8,17 +15,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ThreadsMeta } from "@/lib/types/threadsTypes";
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 import { useNavigate } from "react-router";
-import CompanyDetails from "@/components/function/data-grid/cells/CompanyDetails";
-import EmployeeDetails from "@/components/function/data-grid/cells/EmployeeDetails";
-import LastUpdated from "@/components/function/data-grid/cells/LastUpdated";
-import NeedsAttention, {
-  needsAttention,
-} from "@/components/function/data-grid/cells/NeedsAttention";
-import ThreadActions from "@/components/function/data-grid/cells/ThreadActions";
-import ToggleAutomated from "@/components/function/data-grid/cells/ToggleAutomated";
 
 interface OutreachTableProps {
   threads: ThreadsMeta["threads"];

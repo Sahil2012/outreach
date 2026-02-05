@@ -1,5 +1,5 @@
 import { Input } from "@/components/ui/input";
-import { PropsWithValueOnChange } from "@/lib/types/commons";
+import { PropsWithValueOnChange } from "@/lib/types/commonTypes";
 
 const DegreeInput = ({ value, onChange }: PropsWithValueOnChange<string>) => {
   return (

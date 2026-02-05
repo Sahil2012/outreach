@@ -1,5 +1,5 @@
-import { useThread } from "@/api/threads/hooks/useThreadData";
 import { Loader } from "@/components/ui/loader";
+import { useThread } from "@/hooks/threads/useThreadData";
 import React from "react";
 import { useNavigate, useParams } from "react-router";
 import { DetailsAndActions } from "./details-and-actions";

@@ -1,10 +1,10 @@
-import { useAPIClient } from "@/api/useAPIClient";
+import { useAPIClient } from "@/hooks/useAPIClient";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ThreadClient } from "../client";
-import { Thread, ThreadsMeta, ThreadStatus } from "../types";
+import { ThreadService } from "@/services/threadService";
+import { Thread, ThreadsMeta, ThreadStatus } from "@/lib/types/threadsTypes";
 import { toast } from "sonner";
-import { HUMAN_READABLE_STATUS } from "../consts";
-import { threadKeys } from "../queryKeys";
+import { HUMAN_READABLE_STATUS } from "@/lib/consts/threadsConts";
+import { threadKeys } from "./threadsQueryKeys";
 
 interface UpdateStatusVariables {
   id: number;
@@ -18,7 +18,7 @@ interface ToggleAutomatedVariables {
 
 export const useThreadActions = () => {
   const apiClient = useAPIClient();
-  const threadClient = new ThreadClient(apiClient);
+  const threadClient = new ThreadService(apiClient);
   const queryClient = useQueryClient();
 
   const updateStatus = useMutation({

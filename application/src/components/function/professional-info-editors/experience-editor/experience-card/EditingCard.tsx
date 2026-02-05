@@ -1,4 +1,4 @@
-import { Experience } from "@/api/profile/types";
+import { Experience } from "@/lib/types/profileTypes";
 import CompanyInput from "@/components/function/commons/CompanyInput";
 import DescriptionInput from "@/components/function/commons/DescriptionInput";
 import EndDateInput from "@/components/function/commons/EndDateInput";

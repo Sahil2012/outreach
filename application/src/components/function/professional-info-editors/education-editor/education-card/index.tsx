@@ -1,4 +1,4 @@
-import { Education } from "@/api/profile/types";
+import { Education } from "@/lib/types/profileTypes";
 import DisplayCard from "./DisplayCard";
 import EditingCard from "./EditingCard";
 

@@ -1,5 +1,5 @@
+import { PropsWithThread } from "@/lib/types/commonTypes";
 import { formatDistanceToNow } from "date-fns";
-import { PropsWithThread } from "../types";
 
 const LastUpdated = ({ thread }: PropsWithThread) => {
   return (

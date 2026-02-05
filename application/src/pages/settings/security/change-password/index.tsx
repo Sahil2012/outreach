@@ -1,4 +1,4 @@
-import { useAuthActions } from "@/api/auth/hooks/useAuthActions";
+import { useAuthActions } from "@/hooks/auth/useAuthActions";
 import { useUser } from "@clerk/clerk-react";
 import { AlertCircle } from "lucide-react";
 import { FormEvent, useState } from "react";

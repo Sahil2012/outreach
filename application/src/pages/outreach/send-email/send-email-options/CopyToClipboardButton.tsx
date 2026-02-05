@@ -1,5 +1,5 @@
-import { useMessage } from "@/api/messages/hooks/useMessageData";
 import { Button } from "@/components/ui/button";
+import { useMessage } from "@/hooks/messages/useMessageData";
 import { Check, Copy } from "lucide-react";
 import { useState } from "react";
 

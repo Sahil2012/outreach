@@ -1,8 +1,8 @@
-import { useProfile } from "@/api/profile/hooks/useProfileData";
-import { Education } from "@/api/profile/types";
 import SaveProfileButton from "@/components/function/commons/SaveProfileButton";
 import EducationEditor from "@/components/function/professional-info-editors/education-editor";
 import { Card, CardContent } from "@/components/ui/card";
+import { useProfile } from "@/hooks/profile/useProfileData";
+import { Education } from "@/lib/types/profileTypes";
 import { GraduationCap } from "lucide-react";
 import { useState } from "react";
 
@@ -20,7 +20,7 @@ export function EducationSection() {
     <Card>
       <CardContent className="py-6 space-y-6">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <div className="flex it∏ems-center gap-2">
             <GraduationCap className="w-5 h-5 text-primary" />
             <h3 className="font-semibold text-lg">Education</h3>
           </div>

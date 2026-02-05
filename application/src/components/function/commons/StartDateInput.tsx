@@ -1,5 +1,5 @@
 import DateInput from "@/components/function/DateInput";
-import { PropsWithValueOnChange } from "@/lib/types/commons";
+import { PropsWithValueOnChange } from "@/lib/types/commonTypes";
 
 const StartDateInput = ({
   value,

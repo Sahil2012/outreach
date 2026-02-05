@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Mail, MessageCircle, Clock, UserX } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useProfileStats } from "@/api/profile/hooks/useProfileData";
+import { useProfileStats } from "@/hooks/profile/useProfileData";
 
 export const StatsGrid = () => {
   const { data: stats, isLoading } = useProfileStats();

@@ -1,5 +1,5 @@
 import { Switch } from "@/components/ui/switch";
-import { useThreadActions } from "@/api/threads/hooks/useThreadActions";
+import { useThreadActions } from "@/hooks/threads/useThreadActions";
 
 interface AutomatedToggleProps {
   threadId: number;

@@ -1,5 +1,5 @@
-import { useGoogleActions } from "@/api/google/hooks/useGoogleActions";
 import { Button, ButtonProps } from "@/components/ui/button";
+import { useGoogleActions } from "@/hooks/google/useGoogleActions";
 import { Loader } from "lucide-react";
 import { useEffect, useState } from "react";
 import { SiGmail } from "react-icons/si";

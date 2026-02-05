@@ -1,10 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { PropsWithId } from "@/lib/types/commonTypes";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router";
 import Details from "./Details";
 import Actions from "./actions";
-import { PropsWithId } from "@/lib/types/commons";
 
 export const DetailsAndActions = ({ id }: PropsWithId) => {
   const navigate = useNavigate();

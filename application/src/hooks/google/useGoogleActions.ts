@@ -1,5 +1,5 @@
 import { useReverification, useUser } from "@clerk/clerk-react";
-import { useGoogle } from "@/api/google/hooks/useGoogleData";
+import { useGoogle } from "@/hooks/google/useGoogleData";
 import { useRef, useState } from "react";
 import {
   isClerkRuntimeError,

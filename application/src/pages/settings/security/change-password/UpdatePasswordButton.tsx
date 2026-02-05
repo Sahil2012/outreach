@@ -1,4 +1,4 @@
-import { useAuthActions } from "@/api/auth/hooks/useAuthActions";
+import { useAuthActions } from "@/hooks/auth/useAuthActions";
 import { ReverificationDialog } from "@/components/function/reverification-dialog";
 import { Button } from "@/components/ui/button";
 import { Loader } from "@/components/ui/loader";

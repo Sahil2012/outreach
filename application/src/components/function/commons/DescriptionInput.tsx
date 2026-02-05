@@ -1,5 +1,5 @@
 import { Textarea } from "@/components/ui/textarea";
-import { PropsWithValueOnChange } from "@/lib/types/commons";
+import { PropsWithValueOnChange } from "@/lib/types/commonTypes";
 
 const DescriptionInput = ({
   value,

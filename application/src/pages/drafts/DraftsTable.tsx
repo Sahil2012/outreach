@@ -1,4 +1,3 @@
-import { ThreadsMeta } from "@/api/threads/types";
 import CompanyDetails from "@/components/function/data-grid/cells/CompanyDetails";
 import EmployeeDetails from "@/components/function/data-grid/cells/EmployeeDetails";
 import LastUpdated from "@/components/function/data-grid/cells/LastUpdated";
@@ -12,6 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ThreadsMeta } from "@/lib/types/threadsTypes";
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 import { useNavigate } from "react-router";

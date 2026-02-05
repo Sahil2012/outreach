@@ -1,11 +1,11 @@
-import { useAPIClient } from "@/api/useAPIClient";
+import { useAPIClient } from "@/hooks/useAPIClient";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { MessageClient } from "../client";
-import { GenerateMessageReq, Message } from "../types";
+import { MessageService } from "@/services/messageService";
+import { GenerateMessageReq, Message } from "@/lib/types/messagesTypes";
 import { toast } from "sonner";
 import { isAxiosError } from "axios";
-import { messageKeys } from "../queryKeys";
-import { useGoogleActions } from "@/api/google/hooks/useGoogleActions";
+import { messageKeys } from "./messagesQueryKeys";
+import { useGoogleActions } from "@/hooks/google/useGoogleActions";
 
 interface SendMessageVariables {
   id: number;
@@ -29,7 +29,7 @@ interface UpdateDraftVariables {
 
 export const useMessageActions = () => {
   const client = useAPIClient();
-  const messageClient = new MessageClient(client);
+  const messageClient = new MessageService(client);
   const queryClient = useQueryClient();
 
   const { reauthorizeWithGoogle } = useGoogleActions();

@@ -1,6 +1,6 @@
-import { Skill } from "@/api/profile/types";
+import { Skill } from "@/lib/types/profileTypes";
 import { Badge } from "@/components/ui/badge";
-import { PropsWithValueOnChange } from "@/lib/types/commons";
+import { PropsWithValueOnChange } from "@/lib/types/commonTypes";
 import { X } from "lucide-react";
 import AddSkill from "./AddSkill";
 

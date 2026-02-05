@@ -1,6 +1,6 @@
-import { useMessageActions } from "@/api/messages/hooks/useMessageActions";
-import { useMessage } from "@/api/messages/hooks/useMessageData";
 import { Button } from "@/components/ui/button";
+import { useMessageActions } from "@/hooks/messages/useMessageActions";
+import { useMessage } from "@/hooks/messages/useMessageData";
 import { Loader, Send } from "lucide-react";
 import { toast } from "sonner";
 import { SendEmailButtonProps } from ".";

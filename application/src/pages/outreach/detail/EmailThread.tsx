@@ -1,12 +1,12 @@
+import MessageStateBadge from "@/components/function/status-badges/MessageStatusBadge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useThread } from "@/hooks/threads/useThreadData";
+import { PropsWithId } from "@/lib/types/commonTypes";
+import { cn } from "@/lib/utils";
+import { useUser } from "@clerk/clerk-react";
 import { formatDistanceToNow } from "date-fns";
 import DOMPurify from "dompurify";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useUser } from "@clerk/clerk-react";
-import MessageStateBadge from "@/components/function/status-badges/MessageStatusBadge";
 import { useNavigate } from "react-router";
-import { cn } from "@/lib/utils";
-import { useThread } from "@/api/threads/hooks/useThreadData";
-import { PropsWithId } from "@/lib/types/commons";
 
 export const EmailThread = ({ id }: PropsWithId) => {
   const { data: thread } = useThread(id);

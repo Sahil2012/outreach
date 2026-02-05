@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/dialog";
 import React, { useEffect, useState } from "react";
 
-import { useAuthActions } from "@/api/auth/hooks/useAuthActions";
+import { useAuthActions } from "@/hooks/auth/useAuthActions";
 import ReverificationForm from "./reverification-form";
 
 interface ReverificationDialogProps {

@@ -1,5 +1,5 @@
-import { Loader } from "../../components/ui/loader";
-import { useProfile } from "@/api/profile/hooks/useProfileData";
+import { Loader } from "@/components/ui/loader";
+import { useProfile } from "@/hooks/profile/useProfileData";
 import ProfessionalInfo from "./professional-info";
 import PersonalInfo from "./profile-info";
 

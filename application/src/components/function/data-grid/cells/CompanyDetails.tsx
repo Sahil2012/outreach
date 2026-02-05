@@ -1,5 +1,5 @@
+import { PropsWithThread } from "@/lib/types/commonTypes";
 import { Building2 } from "lucide-react";
-import { PropsWithThread } from "../types";
 
 const CompanyDetails = ({ thread }: PropsWithThread) => {
   return (

@@ -1,8 +1,7 @@
-import React from "react";
-import { Progress } from "../../components/ui/progress";
+import { Progress } from "@/components/ui/progress";
 import { Outlet, useLocation } from "react-router";
 
-const OutreachWizard: React.FC = () => {
+const OutreachWizard = () => {
   const location = useLocation();
 
   const getStep = () => {
@@ -19,13 +18,26 @@ const OutreachWizard: React.FC = () => {
   const getStepInfo = () => {
     switch (step) {
       case 1:
-        return { title: "Choose Your Template", subtitle: "Start with a pre-built template." };
+        return {
+          title: "Choose Your Template",
+          subtitle: "Start with a pre-built template.",
+        };
       case 2:
-        return { title: "Recipient Information", subtitle: "Add details about the recipient and the position you're applying for." };
+        return {
+          title: "Recipient Information",
+          subtitle:
+            "Add details about the recipient and the position you're applying for.",
+        };
       case 3:
-        return { title: "Preview Your Email", subtitle: "Review and edit your email before sending." };
+        return {
+          title: "Preview Your Email",
+          subtitle: "Review and edit your email before sending.",
+        };
       case 4:
-        return { title: "Send Your Email", subtitle: "Finalize and send your outreach email." };
+        return {
+          title: "Send Your Email",
+          subtitle: "Finalize and send your outreach email.",
+        };
       default:
         return { title: "", subtitle: "" };
     }
@@ -39,7 +51,9 @@ const OutreachWizard: React.FC = () => {
       <div className="max-w-4xl mx-auto space-y-8">
         <div className="space-y-4">
           <div className="space-y-2">
-            <h1 className="text-3xl font-bold tracking-tight text-foreground">{title}</h1>
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">
+              {title}
+            </h1>
             <p className="text-muted-foreground text-lg">{subtitle}</p>
           </div>
           <Progress value={progress} className="h-2" />

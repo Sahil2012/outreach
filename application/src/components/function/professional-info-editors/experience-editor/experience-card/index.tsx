@@ -1,4 +1,4 @@
-import { Experience } from "@/api/profile/types";
+import { Experience } from "@/lib/types/profileTypes";
 import DisplayCard from "./DisplayCard";
 import EditingCard from "./EditingCard";
 

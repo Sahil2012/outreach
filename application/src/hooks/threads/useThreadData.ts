@@ -1,12 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
-import { threadKeys } from "../queryKeys";
-import { useAPIClient } from "@/api/useAPIClient";
-import { ThreadClient } from "../client";
-import { ThreadsParams } from "../types";
+import { threadKeys } from "./threadsQueryKeys";
+import { useAPIClient } from "@/hooks/useAPIClient";
+import { ThreadService } from "@/services/threadService";
+import { ThreadsParams } from "@/lib/types/threadsTypes";
 
 export const useThread = (id: number) => {
   const apiClient = useAPIClient();
-  const threadClient = new ThreadClient(apiClient);
+  const threadClient = new ThreadService(apiClient);
 
   return useQuery({
     queryKey: threadKeys.detail(id),
@@ -19,8 +19,7 @@ export const useThread = (id: number) => {
 
 export const useThreads = (params: ThreadsParams) => {
   const apiClient = useAPIClient();
-  const threadClient = new ThreadClient(apiClient);
-  params.status = params.status === "ALL" ? undefined : params.status;
+  const threadClient = new ThreadService(apiClient);
 
   if (params.status === "ALL") {
     delete params.status;

@@ -1,6 +1,6 @@
-import { Experience } from "@/api/profile/types";
 import ExperienceEditor from "@/components/function/professional-info-editors/experience-editor";
 import { Card, CardContent } from "@/components/ui/card";
+import { Experience } from "@/lib/types/profileTypes";
 import {
   Briefcase
 } from "lucide-react";

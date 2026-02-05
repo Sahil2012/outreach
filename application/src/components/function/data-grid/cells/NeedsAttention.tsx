@@ -1,6 +1,6 @@
+import { PropsWithThread } from "@/lib/types/commonTypes";
+import { Thread, ThreadMetaItem } from "@/lib/types/threadsTypes";
 import { cn } from "@/lib/utils";
-import { Thread, ThreadMetaItem } from "@/api/threads/types";
-import { PropsWithThread } from "../types";
 
 export const needsAttention = (thread: Thread | ThreadMetaItem) => {
   const now = new Date();

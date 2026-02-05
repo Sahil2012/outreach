@@ -1,4 +1,4 @@
-import { Experience } from "@/api/profile/types";
+import { Experience } from "@/lib/types/profileTypes";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { format } from "date-fns";

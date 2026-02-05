@@ -1,4 +1,4 @@
-import { Skill } from "@/api/profile/types";
+import { Skill } from "@/lib/types/profileTypes";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus } from "lucide-react";

@@ -1,7 +1,7 @@
-import SendEmail from "./SendEmail";
-import ConnectToGmailButton from "./ConnectToGmail";
-import { useGoogle } from "@/api/google/hooks/useGoogleData";
+import { useGoogle } from "@/hooks/google/useGoogleData";
 import { Mail } from "lucide-react";
+import ConnectToGmailButton from "./ConnectToGmail";
+import SendEmail from "./SendEmail";
 
 export interface SendEmailButtonProps {
   id: number;

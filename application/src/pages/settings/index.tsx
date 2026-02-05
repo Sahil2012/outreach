@@ -1,5 +1,5 @@
+import { Loader } from "@/components/ui/loader";
 import { useUser } from "@clerk/clerk-react";
-import { Loader } from "../../components/ui/loader";
 import BillingInfo from "./billing-info";
 import Security from "./security";
 

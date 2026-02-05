@@ -1,8 +1,8 @@
-import { useThread } from "@/api/threads/hooks/useThreadData";
 import { Button } from "@/components/ui/button";
+import { useThreadActions } from "@/hooks/threads/useThreadActions";
+import { useThread } from "@/hooks/threads/useThreadData";
+import { PropsWithId } from "@/lib/types/commonTypes";
 import { MessageCircle } from "lucide-react";
-import { useThreadActions } from "@/api/threads/hooks/useThreadActions";
-import { PropsWithId } from "@/lib/types/commons";
 
 const MarkAsReferred = ({ id }: PropsWithId) => {
   const { data: thread } = useThread(id);

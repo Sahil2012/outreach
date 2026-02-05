@@ -23,7 +23,7 @@ import { useLocation } from "react-router";
 import SettingsPage from "./pages/settings";
 import ProfilePage from "./pages/profile";
 import GlobalError from "./components/function/global-error";
-import { useProfile } from "./api/profile/hooks/useProfileData";
+import { useProfile } from "@/hooks/profile/useProfileData";
 
 function ProtectedRoute() {
   const { user, isLoaded: isUserLoaded } = useUser();

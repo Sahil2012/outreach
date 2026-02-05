@@ -1,6 +1,6 @@
-import { Education } from "@/api/profile/types";
 import EducationEditor from "@/components/function/professional-info-editors/education-editor";
 import { Card, CardContent } from "@/components/ui/card";
+import { Education } from "@/lib/types/profileTypes";
 import { GraduationCap } from "lucide-react";
 
 interface EducationSectionProps {

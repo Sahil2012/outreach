@@ -1,6 +1,6 @@
 import MessageStateBadge from "@/components/function/status-badges/MessageStatusBadge";
+import { PropsWithThread } from "@/lib/types/commonTypes";
 import { User } from "lucide-react";
-import { PropsWithThread } from "../types";
 
 const EmployeeDetails = ({ thread }: PropsWithThread) => {
   return (

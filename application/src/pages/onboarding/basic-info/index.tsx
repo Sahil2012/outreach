@@ -1,16 +1,16 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router";
-import { useUser } from "@clerk/clerk-react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader } from "@/components/ui/loader";
+import { useProfileActions } from "@/hooks/profile/useProfileActions";
+import { useUser } from "@clerk/clerk-react";
 import { ArrowRight } from "lucide-react";
-import { ResumeUpload } from "./ResumeUpload";
-import { useProfileActions } from "@/api/profile/hooks/useProfileActions";
-import { Checkbox } from "@/components/ui/checkbox";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 import Layout from "../Layout";
+import { ResumeUpload } from "./ResumeUpload";
 
 export default function BasicInfoPage() {
   const navigate = useNavigate();

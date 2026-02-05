@@ -1,4 +1,4 @@
-import { useAuthActions } from "@/api/auth/hooks/useAuthActions";
+import { useAuthActions } from "@/hooks/auth/useAuthActions";
 import {
   InputOTP,
   InputOTPGroup,

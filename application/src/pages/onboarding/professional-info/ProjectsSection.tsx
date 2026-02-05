@@ -1,9 +1,9 @@
-import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Briefcase, Plus, Trash2, Check, Pencil } from "lucide-react";
+import { Briefcase, Check, Pencil, Plus, Trash2 } from "lucide-react";
+import { useState } from "react";
 
 interface ProjectsSectionProps {
   projects: any[];

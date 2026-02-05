@@ -1,4 +1,4 @@
-import { Education } from "@/api/profile/types";
+import { Education } from "@/lib/types/profileTypes";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Pencil, Trash2 } from "lucide-react";

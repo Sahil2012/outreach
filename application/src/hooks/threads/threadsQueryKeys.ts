@@ -1,4 +1,4 @@
-import { ThreadsParams } from "./types";
+import { ThreadsParams } from "../../lib/types/threadsTypes";
 
 export const threadKeys = {
   all: ["threads"] as const,

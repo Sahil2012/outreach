@@ -1,9 +1,9 @@
-import { Experience } from "@/api/profile/types";
+import { Experience } from "@/lib/types/profileTypes";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import ExperienceCard from "./experience-card";
-import { PropsWithValueOnChange } from "@/lib/types/commons";
+import { PropsWithValueOnChange } from "@/lib/types/commonTypes";
 
 const ExperienceEditor = ({
   value,

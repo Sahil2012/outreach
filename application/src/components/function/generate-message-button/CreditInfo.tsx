@@ -1,6 +1,6 @@
-import React from "react";
+import { useProfile } from "@/hooks/profile/useProfileData";
 import { Coins } from "lucide-react";
-import { useProfile } from "@/api/profile/hooks/useProfileData";
+import React from "react";
 
 interface CreditInfoProps {
   className?: string;

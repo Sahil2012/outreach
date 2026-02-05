@@ -1,4 +1,4 @@
-import { Education } from "@/api/profile/types";
+import { Education } from "@/lib/types/profileTypes";
 import DegreeInput from "@/components/function/commons/DegreeInput";
 import EndDateInput from "@/components/function/commons/EndDateInput";
 import FieldOfStudyInput from "@/components/function/commons/FieldOfStudyInput";
