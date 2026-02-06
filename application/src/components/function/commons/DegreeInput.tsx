@@ -1,7 +1,7 @@
 import { Input } from "@/components/ui/input";
-import { PropsWithValueOnChange } from "@/lib/types/commonTypes";
+import { FormControlProps } from "@/lib/types/commonTypes";
 
-const DegreeInput = ({ value, onChange }: PropsWithValueOnChange<string>) => {
+const DegreeInput = ({ value, onChange }: FormControlProps<string>) => {
   return (
     <Input
       value={value}

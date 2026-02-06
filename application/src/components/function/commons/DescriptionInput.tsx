@@ -1,10 +1,10 @@
 import { Textarea } from "@/components/ui/textarea";
-import { PropsWithValueOnChange } from "@/lib/types/commonTypes";
+import { FormControlProps } from "@/lib/types/commonTypes";
 
 const DescriptionInput = ({
   value,
   onChange,
-}: PropsWithValueOnChange<string>) => {
+}: FormControlProps<string>) => {
   return (
     <Textarea
       value={value}

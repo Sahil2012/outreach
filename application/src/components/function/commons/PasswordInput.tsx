@@ -2,19 +2,21 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FormControlProps } from "@/lib/types/commonTypes";
 
-const NewPassword = ({ value, onChange }: FormControlProps<string>) => {
+const PasswordInput = ({ value, onChange }: FormControlProps<string>) => {
   return (
     <div className="space-y-2">
-      <Label htmlFor="newPassword">New Password</Label>
+      <Label htmlFor="password" className="text-sm font-medium">
+        Password
+      </Label>
       <Input
-        id="newPassword"
+        id="password"
         type="password"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="Enter new password"
+        required
       />
     </div>
   );
 };
 
-export default NewPassword;
+export default PasswordInput;

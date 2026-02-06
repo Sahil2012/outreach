@@ -1,8 +1,9 @@
 import { ThreadMetaItem } from "./threadsTypes";
 
-export interface PropsWithValueOnChange<T> {
+export interface FormControlProps<T> {
   value: T;
   onChange: (value: T) => void;
+  disabled?: boolean;
 }
 
 export interface PropsWithId {

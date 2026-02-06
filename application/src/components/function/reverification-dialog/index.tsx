@@ -7,8 +7,8 @@ import {
 } from "@/components/ui/dialog";
 import { useEffect, useState } from "react";
 
-import ReverificationForm from "./reverification-form";
 import { useReverificationActions } from "@/hooks/auth/useReverificationActions";
+import ReverificationForm from "./reverification-form";
 
 interface ReverificationDialogProps {
   open: boolean;
@@ -32,7 +32,8 @@ export const ReverificationDialog = ({
         onSuccess: ({ emailForCode }) => setEmailForCode(emailForCode),
       });
     }
-  }, [open, sendCode, verify]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   const handleCancel = () => {
     setCode("");

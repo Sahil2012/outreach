@@ -3,7 +3,7 @@ import { Loader } from "@/components/ui/loader";
 import { useReverificationActions } from "@/hooks/auth/useReverificationActions";
 import { AlertCircle } from "lucide-react";
 import React from "react";
-import ReverificationOTP from "./ReverificationOTP";
+import OTPInput from "../../commons/OTPInput";
 
 interface ReverificationFormProps {
   code: string;
@@ -51,10 +51,10 @@ const ReverificationForm = ({
       )}
 
       <div className="flex justify-center py-2">
-        <ReverificationOTP
-          code={code}
+        <OTPInput
+          value={code}
           onChange={(code) => onChangeCode(code)}
-          isLoading={isLoading}
+          disabled={isLoading}
         />
       </div>
       <div className="flex flex-col gap-3">

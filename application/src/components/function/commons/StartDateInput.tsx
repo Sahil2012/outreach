@@ -1,10 +1,10 @@
 import DateInput from "@/components/function/DateInput";
-import { PropsWithValueOnChange } from "@/lib/types/commonTypes";
+import { FormControlProps } from "@/lib/types/commonTypes";
 
 const StartDateInput = ({
   value,
   onChange,
-}: PropsWithValueOnChange<string | undefined>) => {
+}: FormControlProps<string | undefined>) => {
   return (
     <DateInput
       value={value}

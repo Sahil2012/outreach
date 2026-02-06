@@ -1,10 +1,10 @@
 import { Input } from "@/components/ui/input";
-import { PropsWithValueOnChange } from "@/lib/types/commonTypes";
+import { FormControlProps } from "@/lib/types/commonTypes";
 
 const GradeInput = ({
   value,
   onChange,
-}: PropsWithValueOnChange<string | undefined>) => {
+}: FormControlProps<string | undefined>) => {
   return (
     <Input
       value={value || ""}

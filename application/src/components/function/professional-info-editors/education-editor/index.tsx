@@ -3,12 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import EducationCard from "./education-card";
-import { PropsWithValueOnChange } from "@/lib/types/commonTypes";
+import { FormControlProps } from "@/lib/types/commonTypes";
 
 const EducationEditor = ({
   value,
   onChange,
-}: PropsWithValueOnChange<Education[]>) => {
+}: FormControlProps<Education[]>) => {
   const [isEditing, setIsEditing] = useState<boolean[]>(
     new Array(value.length).fill(false),
   );

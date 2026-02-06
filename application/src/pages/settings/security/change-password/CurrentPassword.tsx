@@ -1,11 +1,11 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { PropsWithValueOnChange } from "@/lib/types/commonTypes";
+import { FormControlProps } from "@/lib/types/commonTypes";
 
 const CurrentPassword = ({
   value,
   onChange,
-}: PropsWithValueOnChange<string>) => {
+}: FormControlProps<string>) => {
   return (
     <div className="space-y-2">
       <Label htmlFor="currentPassword">Current Password</Label>

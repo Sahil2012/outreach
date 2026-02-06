@@ -1,22 +1,14 @@
 import { Button, ButtonProps } from "@/components/ui/button";
-import { useGoogleActions } from "@/hooks/google/useGoogleActions";
+import { useAuthActions } from "@/hooks/auth/useAuthActions";
 import { Loader } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { SiGmail } from "react-icons/si";
 import { useSearchParams } from "react-router";
 import { toast } from "sonner";
-import { ReverificationDialog } from "../reverification-dialog";
 
 const ConnectToGmailButton = (buttonProps: ButtonProps) => {
   const [searchParams] = useSearchParams();
-  const { connectToGmail } = useGoogleActions();
-  const [showDialog, setShowDialog] = useState(false);
-
-  useEffect(() => {
-    if (connectToGmail.isVerificationNeeded) {
-      setShowDialog(true);
-    }
-  }, [connectToGmail.isVerificationNeeded]);
+  const { authorizeGoogleWithEmailScope } = useAuthActions();
 
   // Handle OAuth Redirect processing
   useEffect(() => {
@@ -31,29 +23,19 @@ const ConnectToGmailButton = (buttonProps: ButtonProps) => {
       <Button
         size="lg"
         className="w-full text-white border-0"
-        onClick={() => connectToGmail.connect()}
-        disabled={connectToGmail.isLoading}
+        onClick={() => authorizeGoogleWithEmailScope.mutate()}
+        disabled={authorizeGoogleWithEmailScope.isPending}
         {...buttonProps}
       >
-        {connectToGmail.isLoading ? (
+        {authorizeGoogleWithEmailScope.isPending ? (
           <Loader className="mr-2 text-white" />
         ) : (
           <SiGmail className="mr-2 w-5 h-5" />
         )}
-        {connectToGmail.isLoading ? "Connecting..." : "Connect to Gmail"}
+        {authorizeGoogleWithEmailScope.isPending
+          ? "Connecting..."
+          : "Connect to Gmail"}
       </Button>
-
-      <ReverificationDialog
-        open={showDialog}
-        onComplete={() => {
-          connectToGmail.completeReverification();
-          setShowDialog(false);
-        }}
-        onCancel={() => {
-          connectToGmail.cancelReverification();
-          setShowDialog(false);
-        }}
-      />
     </>
   );
 };

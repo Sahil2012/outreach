@@ -47,7 +47,9 @@ function ProtectedRoute() {
   }
 
   if (!user) {
-    return <Navigate to="/login" />;
+    return (
+      <Navigate to="/login" state={{ appRedirectUrl: window.location.href }} />
+    );
   }
 
   // If user is not onboarded then, redirect to onboarding pages

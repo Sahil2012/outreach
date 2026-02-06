@@ -3,24 +3,15 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
+import { FormControlProps } from "@/lib/types/commonTypes";
 
-interface ReverificationOTPProps {
-  code: string;
-  onChange: (number: string) => void;
-  isLoading: boolean;
-}
-
-const ReverificationOTP = ({
-  code,
-  onChange,
-  isLoading,
-}: ReverificationOTPProps) => {
+const OTPInput = ({ value, onChange, disabled }: FormControlProps<string>) => {
   return (
     <InputOTP
       maxLength={6}
-      value={code}
+      value={value}
       onChange={(value) => onChange(value)}
-      disabled={isLoading}
+      disabled={disabled}
     >
       <InputOTPGroup>
         <InputOTPSlot index={0} />
@@ -34,4 +25,4 @@ const ReverificationOTP = ({
   );
 };
 
-export default ReverificationOTP;
+export default OTPInput;

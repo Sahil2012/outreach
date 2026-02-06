@@ -5,7 +5,7 @@ import { GenerateMessageReq, Message } from "@/lib/types/messagesTypes";
 import { toast } from "sonner";
 import { isAxiosError } from "axios";
 import { messageKeys } from "./messagesQueryKeys";
-import { useGoogleActions } from "@/hooks/google/useGoogleActions";
+import { useAuthActions } from "../auth/useAuthActions";
 
 interface SendMessageVariables {
   id: number;
@@ -32,7 +32,7 @@ export const useMessageActions = () => {
   const messageClient = new MessageService(client);
   const queryClient = useQueryClient();
 
-  const { reauthorizeWithGoogle } = useGoogleActions();
+  const { authorizeGoogleWithEmailScope } = useAuthActions();
 
   const generateMessage = useMutation({
     mutationFn: (message: GenerateMessageReq) => {
@@ -82,7 +82,7 @@ export const useMessageActions = () => {
           err?.response?.data?.error?.code === "oauth_missing_refresh_token")
       ) {
         toast.error("Failed to send email. Please reauthroize with Google.");
-        reauthorizeWithGoogle.reauthorize();
+        authorizeGoogleWithEmailScope.mutate();
       } else {
         toast.error(
           "We are unable to send your message at this moment. Please try again later.",

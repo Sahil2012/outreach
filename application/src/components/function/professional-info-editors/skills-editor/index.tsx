@@ -1,13 +1,13 @@
 import { Skill } from "@/lib/types/profileTypes";
 import { Badge } from "@/components/ui/badge";
-import { PropsWithValueOnChange } from "@/lib/types/commonTypes";
+import { FormControlProps } from "@/lib/types/commonTypes";
 import { X } from "lucide-react";
 import AddSkill from "./AddSkill";
 
 export function SkillsEditor({
   value,
   onChange,
-}: PropsWithValueOnChange<Skill[]>) {
+}: FormControlProps<Skill[]>) {
   const handleAddSkill = (skill: Skill) => {
     if (skill.name.trim() && !value.some((s) => s.name === skill.name.trim())) {
       onChange([...value, { name: skill.name.trim() }]);
